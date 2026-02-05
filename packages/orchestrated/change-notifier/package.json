@@ -1,0 +1,28 @@
+{
+  "name": "@lazyapps/demo-orchestrated-change-notifier",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "start": "node --require ./tracing.cjs --watch index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.46.0",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@lazyapps/bootstrap": "workspace:^",
+    "@lazyapps/change-notifier-socket-io": "workspace:^",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.50.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.53.0",
+    "@opentelemetry/resources": "^1.26.0",
+    "@opentelemetry/sdk-node": "^0.53.0",
+    "@opentelemetry/semantic-conventions": "^1.27.0"
+  },
+  "type": "module"
+}
