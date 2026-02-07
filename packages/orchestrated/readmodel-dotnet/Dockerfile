@@ -4,7 +4,7 @@ WORKDIR /src
 
 COPY . ./
 
-WORKDIR /src/packages/demo/orchestrated/readmodel-dotnet
+WORKDIR /src/packages/orchestrated/readmodel-dotnet
 
 EXPOSE 8080
 

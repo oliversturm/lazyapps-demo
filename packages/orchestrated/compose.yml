@@ -32,8 +32,8 @@ services:
 
   command-processor:
     build:
-      dockerfile: ./packages/demo/orchestrated/command-processor/Dockerfile
-      context: ../../..
+      dockerfile: ./packages/orchestrated/command-processor/Dockerfile
+      context: ../..
     depends_on:
       - mongo
       - rabbit
@@ -44,7 +44,7 @@ services:
       watch:
         - action: sync
           path: ./command-processor
-          target: /src/packages/demo/orchestrated/command-processor
+          target: /src/packages/orchestrated/command-processor
     environment:
       EXPRESS_PORT: '80'
       MONGO_URL: 'mongodb://mongo:27017'
@@ -54,8 +54,8 @@ services:
 
   readmodel-customers:
     build:
-      dockerfile: ./packages/demo/orchestrated/readmodel-customers/Dockerfile
-      context: ../../..
+      dockerfile: ./packages/orchestrated/readmodel-customers/Dockerfile
+      context: ../..
     depends_on:
       - mongo
       - rabbit
@@ -65,7 +65,7 @@ services:
       watch:
         - action: sync
           path: ./readmodel-customers
-          target: /src/packages/demo/orchestrated/readmodel-customers
+          target: /src/packages/orchestrated/readmodel-customers
     environment:
       EXPRESS_PORT: '80'
       MONGO_URL: 'mongodb://mongo:27017'
@@ -77,8 +77,8 @@ services:
 
   readmodel-orders:
     build:
-      dockerfile: ./packages/demo/orchestrated/readmodel-orders/Dockerfile
-      context: ../../..
+      dockerfile: ./packages/orchestrated/readmodel-orders/Dockerfile
+      context: ../..
     depends_on:
       - mongo
       - rabbit
@@ -88,7 +88,7 @@ services:
       watch:
         - action: sync
           path: ./readmodel-orders
-          target: /src/packages/demo/orchestrated/readmodel-orders
+          target: /src/packages/orchestrated/readmodel-orders
     environment:
       EXPRESS_PORT: '80'
       MONGO_URL: 'mongodb://mongo:27017'
@@ -100,8 +100,8 @@ services:
 
   readmodel-dotnet:
     build:
-      dockerfile: ./packages/demo/orchestrated/readmodel-dotnet/Dockerfile
-      context: ../../..
+      dockerfile: ./packages/orchestrated/readmodel-dotnet/Dockerfile
+      context: ../..
     depends_on:
       - rabbit
     environment:
@@ -111,27 +111,27 @@ services:
       watch:
         - action: sync
           path: ./readmodel-dotnet
-          target: /src/packages/demo/orchestrated/readmodel-dotnet
+          target: /src/packages/orchestrated/readmodel-dotnet
 
   change-notifier:
     build:
-      dockerfile: ./packages/demo/orchestrated/change-notifier/Dockerfile
-      context: ../../..
+      dockerfile: ./packages/orchestrated/change-notifier/Dockerfile
+      context: ../..
     depends_on:
       - dashboard
     develop:
       watch:
         - action: sync
           path: ./change-notifier
-          target: /src/packages/demo/orchestrated/change-notifier
+          target: /src/packages/orchestrated/change-notifier
     environment:
       EXPRESS_PORT: '80'
       LOG_LEVEL: 'trace'
 
   frontend-react:
     build:
-      dockerfile: ./packages/demo/orchestrated/frontend-react/Dockerfile
-      context: ../../..
+      dockerfile: ./packages/orchestrated/frontend-react/Dockerfile
+      context: ../..
     depends_on:
       - command-processor
       - readmodel-customers
@@ -141,7 +141,7 @@ services:
       watch:
         - action: sync
           path: ./frontend-react/src
-          target: /src/packages/demo/orchestrated/frontend-react/src
+          target: /src/packages/orchestrated/frontend-react/src
     environment:
       VITE_RM_CUSTOMERS_URL: 'http://rm-customers.localhost'
       VITE_RM_ORDERS_URL: 'http://rm-orders.localhost'
@@ -150,8 +150,8 @@ services:
 
   frontend-svelte:
     build:
-      dockerfile: ./packages/demo/orchestrated/frontend-svelte/Dockerfile
-      context: ../../..
+      dockerfile: ./packages/orchestrated/frontend-svelte/Dockerfile
+      context: ../..
     depends_on:
       - command-processor
       - readmodel-customers
@@ -161,7 +161,7 @@ services:
       watch:
         - action: sync
           path: ./frontend-svelte/src
-          target: /src/packages/demo/orchestrated/frontend-svelte/src
+          target: /src/packages/orchestrated/frontend-svelte/src
     environment:
       VITE_RM_CUSTOMERS_URL: 'http://rm-customers.localhost'
       VITE_RM_ORDERS_URL: 'http://rm-orders.localhost'

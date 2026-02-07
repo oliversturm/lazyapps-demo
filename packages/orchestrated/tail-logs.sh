@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker compose logs -f | node ../../log-highlight/index.js
+docker compose logs -f | pnpm exec log-highlight

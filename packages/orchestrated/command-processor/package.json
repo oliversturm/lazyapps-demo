@@ -15,11 +15,11 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@lazyapps/aggregatestore-inmemory": "workspace:^",
-    "@lazyapps/bootstrap": "workspace:^",
-    "@lazyapps/eventbus-rabbitmq": "workspace:^",
-    "@lazyapps/eventstore-mongodb": "workspace:^",
-    "@lazyapps/express": "workspace:^",
+    "@lazyapps/aggregatestore-inmemory": "^0.1.0",
+    "@lazyapps/bootstrap": "^0.1.0",
+    "@lazyapps/eventbus-rabbitmq": "^0.1.0",
+    "@lazyapps/eventstore-mongodb": "^0.1.0",
+    "@lazyapps/express": "^0.1.0",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.50.0",
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.53.0",
