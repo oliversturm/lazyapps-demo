@@ -1,0 +1,8 @@
+FROM node:lts
+RUN npm install -g pnpm
+WORKDIR /src
+COPY . .
+RUN pnpm i
+WORKDIR /src/packages/monolith
+EXPOSE 5173 53008
+CMD ["node", "index.js"]

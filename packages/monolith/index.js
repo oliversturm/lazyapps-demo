@@ -44,7 +44,7 @@ start({
   readModels: {
     listener: readModelListenerMqEmitter({ mqName: 'queries' }),
     storage: readModelStorageMongo({
-      url: 'mongodb://127.0.0.1:27017',
+      url: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',
       database: 'monolith-readmodels',
     }),
     eventBus: readModelEventBusMqEmitter({ mqName: 'events' }),
@@ -81,6 +81,8 @@ start({
   },
   svelte: {
     port: 5173,
+    host: process.env.SVELTE_HOST || 'localhost',
+    allowedHosts: process.env.SVELTE_HOST === '0.0.0.0' ? true : undefined,
     mqCommandsPort,
     mqQueriesPort,
     // future plan: add a way to specify the

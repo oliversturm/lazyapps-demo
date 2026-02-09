@@ -15,7 +15,7 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@lazyapps/bootstrap": "^0.1.0",
+    "@lazyapps/bootstrap": "^0.1.2",
     "@lazyapps/change-notification-sender-fetch": "^0.1.0",
     "@lazyapps/command-sender-fetch": "^0.1.0",
     "@lazyapps/eventbus-rabbitmq": "^0.1.0",

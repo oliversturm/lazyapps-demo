@@ -6,7 +6,7 @@
   import { nanoid } from 'nanoid';
 
   const endpointName = 'customers';
-  const socketIoEndpoint = 'http://127.0.0.1:53008';
+  const socketIoEndpoint = import.meta.env.VITE_CHANGENOTIFIER_URL || 'http://127.0.0.1:53008';
 
   export let data;
   $: store = readModelStore(

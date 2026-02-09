@@ -21,8 +21,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@lazyapps/bootstrap':
-        specifier: ^0.1.0
-        version: 0.1.0(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.0
         version: 0.1.0
@@ -109,8 +109,8 @@ importers:
   packages/orchestrated/change-notifier:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.1.0
-        version: 0.1.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notifier-socket-io':
         specifier: ^0.1.1
         version: 0.1.1
@@ -146,8 +146,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@lazyapps/bootstrap':
-        specifier: ^0.1.0
-        version: 0.1.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/eventbus-rabbitmq':
         specifier: ^0.1.0
         version: 0.1.0
@@ -299,8 +299,8 @@ importers:
   packages/orchestrated/readmodel-customers:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.1.0
-        version: 0.1.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.0
         version: 0.1.0
@@ -348,8 +348,8 @@ importers:
   packages/orchestrated/readmodel-orders:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.1.0
-        version: 0.1.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.0
         version: 0.1.0
@@ -905,8 +905,8 @@ packages:
     resolution: {integrity: sha512-Psv1xkbsGEONe3VpHY9Cv2Six4JU77joGbLk0CL+86OLKQp9mZ0CssiVWzwARrolHhmkZng6QAFmj7CUGC2bZg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/bootstrap@0.1.0':
-    resolution: {integrity: sha512-Tt0ZLRt9mK7IZN3cyEcE1xplfIlAfcdAPRxbEz7wr8oSHtxZ+LT8pPDCcTMPIbhmE1vC2o5kkuVV4ttNUnmYaA==}
+  '@lazyapps/bootstrap@0.1.2':
+    resolution: {integrity: sha512-btYAcpUQLxiPp11iZfrxh0Z5S+MNy+DafTFSMFp23NT3Vy6xHpwdrRbkxhHFPVZatA/W4E4Z4EvjF6j8KCWvPQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
     peerDependencies:
       '@sveltejs/kit': '>=2.0.0'
@@ -4814,7 +4814,7 @@ snapshots:
     dependencies:
       '@lazyapps/logger': 0.1.0
 
-  '@lazyapps/bootstrap@0.1.0(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.1.2(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
     dependencies:
       '@lazyapps/command-processor': 0.1.0
       '@lazyapps/logger': 0.1.0
@@ -4830,7 +4830,7 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/bootstrap@0.1.0(vite@5.4.21(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.1.2(vite@5.4.21(@types/node@25.2.1))':
     dependencies:
       '@lazyapps/command-processor': 0.1.0
       '@lazyapps/logger': 0.1.0

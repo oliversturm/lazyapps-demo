@@ -4,7 +4,8 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "pnpm-update": "pnpm --recursive update --latest"
+    "pnpm-update": "pnpm --recursive update --latest",
+    "test:e2e": "./tests/e2e/run.sh"
   },
   "repository": {
     "type": "git",
