@@ -8,18 +8,11 @@ import { configureStore } from '@reduxjs/toolkit';
 import { connectRoutes } from 'redux-first-router';
 import { createBrowserHistory as createHistory } from 'rudy-history';
 import { SystemProvider } from './components/SystemContext';
-import { activateChangeNotifier } from './changeNotifier';
 
-import customersViewSlice, {
-  notifyChanged as customersViewNotifyChanged,
-} from './state/customersView.slice';
+import customersViewSlice from './state/customersView.slice';
 import customerViewSlice from './state/customerView.slice';
-import ordersViewSlice, {
-  notifyChanged as ordersViewNotifyChanged,
-} from './state/ordersView.slice';
-import orderConfirmationRequestsViewSlice, {
-  notifyChanged as orderConfirmationRequestsViewNotifyChanged,
-} from './state/orderConfirmationRequestsView.slice';
+import ordersViewSlice from './state/ordersView.slice';
+import orderConfirmationRequestsViewSlice from './state/orderConfirmationRequestsView.slice';
 
 import navigationSlice, {
   customersView,
@@ -71,28 +64,6 @@ const commandEndpoint =
 const changeNotifierEndpoint =
   import.meta.env.VITE_CHANGENOTIFIER_URL || 'http://127.0.0.1:3006';
 
-const changeNotificationMap = [
-  {
-    endpointName: 'customers',
-    readModelName: 'overview',
-    resolverName: 'all',
-    actionCreator: customersViewNotifyChanged,
-  },
-  {
-    endpointName: 'orders',
-    readModelName: 'overview',
-    resolverName: 'all',
-    actionCreator: ordersViewNotifyChanged,
-  },
-  {
-    endpointName: 'orders',
-    readModelName: 'confirmationRequests',
-    resolverName: 'all',
-    actionCreator: orderConfirmationRequestsViewNotifyChanged,
-  },
-];
-activateChangeNotifier(changeNotifierEndpoint, changeNotificationMap, store);
-
 const aggregates = {
   customer: {
     createCustomer: 'CREATE',
@@ -118,6 +89,7 @@ root.render(
     <SystemProvider
       readModelEndpoints={readModelEndpoints}
       commandEndpoint={commandEndpoint}
+      changeNotifierEndpoint={changeNotifierEndpoint}
       aggregates={aggregates}
     >
       <ReduxProvider store={store}>

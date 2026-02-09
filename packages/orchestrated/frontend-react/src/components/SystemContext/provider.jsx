@@ -8,11 +8,13 @@ const SystemContext = React.createContext();
 const SystemProvider = ({
   readModelEndpoints = {},
   commandEndpoint,
+  changeNotifierEndpoint,
   aggregates = {},
   children,
 }) => {
   const context = useMemo(
     () => ({
+      changeNotifierEndpoint,
       readModels: Object.keys(readModelEndpoints).reduce(
         (r, v) => ({
           ...r,
@@ -41,7 +43,7 @@ const SystemProvider = ({
         {},
       ),
     }),
-    [aggregates, readModelEndpoints, commandEndpoint],
+    [aggregates, readModelEndpoints, commandEndpoint, changeNotifierEndpoint],
   );
   return (
     <SystemContext.Provider value={context}>{children}</SystemContext.Provider>

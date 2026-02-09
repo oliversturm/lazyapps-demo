@@ -19,44 +19,53 @@ const applyChange = (data, changeInfo) => {
 	}
 };
 
-const wrapData = (data, needsReload = false) => ({
+const wrapData = (data) => ({
 	data,
 	loaded: !!data,
 	isEmpty: data && data.length === 0,
-	singleItem: data?.length === 1 ? data[0] : undefined,
-	needsReload
+	singleItem: data?.length === 1 ? data[0] : undefined
 });
 
 export const readModelStore = (
-	items,
+	queryFn,
 	endpointName,
 	socketIoEndpoint,
 	readModelName,
 	resolverName,
 	correlationId
 ) => {
-	let innerItems = items;
-	const store = readable(wrapData(items), (set) => {
-		if (socketIoEndpoint) {
-			const query = {};
-			if (correlationId) {
-				query.correlationId = correlationId;
-			}
-			const socket = io(socketIoEndpoint, {
-				query
-			});
-			socket.on('connect', () => {
-				socket.emit('register', [{ endpointName, readModelName, resolverName }]);
-			});
-			socket.on('change', (changeInfo) => {
-				if (changeInfo.changeKind === 'all') {
-					set(wrapData(innerItems, true));
-				} else {
-					innerItems = applyChange(innerItems, changeInfo);
-					set(wrapData(innerItems));
-				}
-			});
+	const store = readable(wrapData(null), (set) => {
+		let innerItems = null;
+
+		const query = {};
+		if (correlationId) {
+			query.correlationId = correlationId;
 		}
+		const socket = io(socketIoEndpoint, { query });
+
+		const runQuery = () =>
+			queryFn().then((items) => {
+				innerItems = items;
+				set(wrapData(innerItems));
+			});
+
+		socket.on('connect', () => {
+			socket.emit('register', [{ endpointName, readModelName, resolverName }], () => {
+				runQuery();
+			});
+		});
+
+		socket.on('change', (changeInfo) => {
+			if (!innerItems) return;
+			if (changeInfo.changeKind === 'all') {
+				runQuery();
+			} else {
+				innerItems = applyChange(innerItems, changeInfo);
+				set(wrapData(innerItems));
+			}
+		});
+
+		return () => socket.disconnect();
 	});
 	return store;
 };

@@ -1,5 +1,4 @@
 <script>
-  import { invalidateAll } from '$app/navigation';
   import { v4 as uuid } from 'uuid';
 
   import Button from '$lib/Button.svelte';
@@ -13,21 +12,13 @@
 
   export let data;
   $: store = readModelStore(
-    data.items,
+    data.queryFn,
     endpointName,
     socketIoEndpoint,
     'overview',
     'all',
     data.correlationId
   );
-  $: {
-    if ($store.needsReload) {
-      // this happens if a live change comes to the
-      // store that indicates a complete reload
-      // is necessary
-      invalidateAll();
-    }
-  }
 </script>
 
 <CustomerTable {store} />

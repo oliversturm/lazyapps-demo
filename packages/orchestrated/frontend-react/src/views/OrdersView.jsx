@@ -1,21 +1,11 @@
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import OrderTable from '../components/OrderTable';
-import { useReadModel } from '../components/SystemContext';
 
+import { useReadModelStore } from '../hooks/useReadModelStore';
 import { dataLoaded as ordersViewDataLoaded } from '../state/ordersView.slice';
 
 const OrdersView = () => {
-  const dispatch = useDispatch();
-  const dataLoaded = useCallback(
-    data => {
-      dispatch(ordersViewDataLoaded(data));
-    },
-    [dispatch]
-  );
-
-  const { data, loadRequired } = useSelector(({ ordersView }) => ordersView);
-
   const readModelSpec = useMemo(
     () => ({
       endpoint: 'orders',
@@ -25,7 +15,9 @@ const OrdersView = () => {
     }),
     []
   );
-  useReadModel(readModelSpec, dataLoaded, loadRequired);
+  useReadModelStore(readModelSpec, ordersViewDataLoaded);
+
+  const { data } = useSelector(({ ordersView }) => ordersView);
 
   return <OrderTable data={data} />;
 };

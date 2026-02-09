@@ -28,7 +28,7 @@
     "@lazyapps/aggregatestore-inmemory": "^0.1.0",
     "@lazyapps/bootstrap": "^0.1.0",
     "@lazyapps/change-notification-sender-fetch": "^0.1.0",
-    "@lazyapps/change-notifier-socket-io": "^0.1.0",
+    "@lazyapps/change-notifier-socket-io": "^0.1.1",
     "@lazyapps/eventbus-mqemitter-redis": "^0.1.0",
     "@lazyapps/eventstore-mongodb": "^0.1.0",
     "@lazyapps/express": "^0.1.0",

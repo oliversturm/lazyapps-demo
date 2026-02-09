@@ -2,19 +2,13 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '../components/Button';
 import CustomerTable from '../components/CustomerTable';
-import { useReadModel } from '../components/SystemContext';
 
+import { useReadModelStore } from '../hooks/useReadModelStore';
 import { dataLoaded as customersViewDataLoaded } from '../state/customersView.slice';
 import { customerView, orderView } from '../state/navigation.slice';
 
 const CustomersView = () => {
   const dispatch = useDispatch();
-  const dataLoaded = useCallback(
-    data => {
-      dispatch(customersViewDataLoaded(data));
-    },
-    [dispatch]
-  );
   const onNewCustomer = useCallback(() => {
     dispatch(customerView());
   }, [dispatch]);
@@ -40,7 +34,7 @@ const CustomersView = () => {
     }),
     []
   );
-  useReadModel(readModelSpec, dataLoaded);
+  useReadModelStore(readModelSpec, customersViewDataLoaded);
 
   const { data } = useSelector(({ customersView }) => customersView);
 

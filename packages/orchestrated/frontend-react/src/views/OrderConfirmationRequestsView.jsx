@@ -1,28 +1,17 @@
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import OrderConfirmationRequestsTable from '../components/OrderConfirmationRequestsTable';
-import { useCommands, useReadModel } from '../components/SystemContext';
+import { useCommands } from '../components/SystemContext';
 
+import { useReadModelStore } from '../hooks/useReadModelStore';
 import { dataLoaded as orderConfirmationRequestsViewDataLoaded } from '../state/orderConfirmationRequestsView.slice';
 
 const OrderConfirmationRequestsView = () => {
-  const dispatch = useDispatch();
-  const dataLoaded = useCallback(
-    (data) => {
-      dispatch(orderConfirmationRequestsViewDataLoaded(data));
-    },
-    [dispatch],
-  );
-
   const { confirmOrder } = useCommands();
 
   const onConfirm = useCallback((id) => {
     confirmOrder(id);
   }, []);
-
-  const { data, loadRequired } = useSelector(
-    ({ orderConfirmationRequestsView }) => orderConfirmationRequestsView,
-  );
 
   const readModelSpec = useMemo(
     () => ({
@@ -33,7 +22,11 @@ const OrderConfirmationRequestsView = () => {
     }),
     [],
   );
-  useReadModel(readModelSpec, dataLoaded, loadRequired);
+  useReadModelStore(readModelSpec, orderConfirmationRequestsViewDataLoaded);
+
+  const { data } = useSelector(
+    ({ orderConfirmationRequestsView }) => orderConfirmationRequestsView,
+  );
 
   return <OrderConfirmationRequestsTable data={data} onConfirm={onConfirm} />;
 };

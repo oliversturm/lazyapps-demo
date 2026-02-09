@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@lazyapps/bootstrap": "^0.1.0",
-    "@lazyapps/change-notifier-socket-io": "^0.1.0",
+    "@lazyapps/change-notifier-socket-io": "^0.1.1",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.50.0",
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.53.0",

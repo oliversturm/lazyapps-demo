@@ -23,8 +23,7 @@
           aggregateId: dataId,
           command: data.newObject ? 'CREATE' : 'UPDATE',
           payload: { name: data.name, location: data.location },
-        });
-        goto('/customers');
+        }).then(() => goto('/customers'));
       }
     });
   };

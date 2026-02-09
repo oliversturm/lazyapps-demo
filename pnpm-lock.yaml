@@ -27,8 +27,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0
       '@lazyapps/change-notifier-socket-io':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.1
+        version: 0.1.1
       '@lazyapps/eventbus-mqemitter-redis':
         specifier: ^0.1.0
         version: 0.1.0
@@ -112,8 +112,8 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notifier-socket-io':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.1
+        version: 0.1.1
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -921,8 +921,8 @@ packages:
     resolution: {integrity: sha512-rt0khijvupVeh7KWTqlKJVk5OH8zGTXL88B2oo+sCD4nmoZcqXw4uuQQe0Rpvl1giLLl/V0RlvCWHKCWOdCvEg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/change-notifier-socket-io@0.1.0':
-    resolution: {integrity: sha512-lW90gWsKmvvuVZVYL1SWJPSGOv9lpJmB24FhuQL11mVzx0hWsUUKYE9vPw1fn7AOhcB3SJTnFYilinxGViVYcQ==}
+  '@lazyapps/change-notifier-socket-io@0.1.1':
+    resolution: {integrity: sha512-fkJZU4Rszp0ZY2vpKATlTPoaZH8frmtmT1ZJ11UXLM1S0XcJppXHqlg/44m7BZvc7gQrUiFFPANO/I82djZcsA==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/command-processor@0.1.0':
@@ -4852,7 +4852,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/change-notifier-socket-io@0.1.0':
+  '@lazyapps/change-notifier-socket-io@0.1.1':
     dependencies:
       '@lazyapps/logger': 0.1.0
       body-parser: 1.20.4

@@ -9,10 +9,10 @@ export const ssr = false;
 
 const readModelEndpoint = import.meta.env.VITE_RM_CUSTOMERS_URL || 'http://127.0.0.1:3003'; // customers
 
-export async function load({ fetch }) {
+export function load({ fetch }) {
 	const correlationId = `SVLT-${nanoid()}`;
 	return {
 		correlationId,
-		items: await query(correlationId, fetch)(readModelEndpoint, 'overview', 'all')
+		queryFn: () => query(correlationId, fetch)(readModelEndpoint, 'overview', 'all')
 	};
 }
