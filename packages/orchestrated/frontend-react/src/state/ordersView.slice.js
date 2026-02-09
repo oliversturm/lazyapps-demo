@@ -7,8 +7,9 @@ const slice = createSlice({
   initialState: {},
   reducers: {
     dataLoaded: dataLoadedReducer,
+    dataChanged: dataLoadedReducer,
   },
 });
 
-export const { dataLoaded } = slice.actions;
+export const { dataLoaded, dataChanged } = slice.actions;
 export default slice.reducer;

@@ -4,7 +4,7 @@ import Button from '../components/Button';
 import CustomerTable from '../components/CustomerTable';
 
 import { useReadModelStore } from '../hooks/useReadModelStore';
-import { dataLoaded as customersViewDataLoaded } from '../state/customersView.slice';
+import { dataLoaded as customersViewDataLoaded, dataChanged as customersViewDataChanged } from '../state/customersView.slice';
 import { customerView, orderView } from '../state/navigation.slice';
 
 const CustomersView = () => {
@@ -34,7 +34,7 @@ const CustomersView = () => {
     }),
     []
   );
-  useReadModelStore(readModelSpec, customersViewDataLoaded);
+  useReadModelStore(readModelSpec, customersViewDataLoaded, customersViewDataChanged);
 
   const { data } = useSelector(({ customersView }) => customersView);
 

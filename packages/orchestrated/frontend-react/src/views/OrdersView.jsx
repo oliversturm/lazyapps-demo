@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import OrderTable from '../components/OrderTable';
 
 import { useReadModelStore } from '../hooks/useReadModelStore';
-import { dataLoaded as ordersViewDataLoaded } from '../state/ordersView.slice';
+import { dataLoaded as ordersViewDataLoaded, dataChanged as ordersViewDataChanged } from '../state/ordersView.slice';
 
 const OrdersView = () => {
   const readModelSpec = useMemo(
@@ -15,7 +15,7 @@ const OrdersView = () => {
     }),
     []
   );
-  useReadModelStore(readModelSpec, ordersViewDataLoaded);
+  useReadModelStore(readModelSpec, ordersViewDataLoaded, ordersViewDataChanged);
 
   const { data } = useSelector(({ ordersView }) => ordersView);
 

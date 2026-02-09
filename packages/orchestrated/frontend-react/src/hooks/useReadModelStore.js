@@ -25,7 +25,7 @@ const applyChange = (data, changeInfo) => {
   }
 };
 
-const useReadModelStore = (readModelSpec, dataLoadedAction) => {
+const useReadModelStore = (readModelSpec, dataLoadedAction, dataChangedAction) => {
   const { readModels, changeNotifierEndpoint } = useContext(SystemContext);
   const dispatch = useDispatch();
   const dataRef = useRef(null);
@@ -68,7 +68,7 @@ const useReadModelStore = (readModelSpec, dataLoadedAction) => {
         runQuery();
       } else {
         dataRef.current = applyChange(dataRef.current, changeInfo);
-        dispatch(dataLoadedAction(dataRef.current));
+        dispatch((dataChangedAction || dataLoadedAction)(dataRef.current));
       }
     });
 
@@ -76,6 +76,7 @@ const useReadModelStore = (readModelSpec, dataLoadedAction) => {
   }, [
     readModelSpec,
     dataLoadedAction,
+    dataChangedAction,
     readModels,
     changeNotifierEndpoint,
     dispatch,

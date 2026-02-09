@@ -4,7 +4,7 @@ import OrderConfirmationRequestsTable from '../components/OrderConfirmationReque
 import { useCommands } from '../components/SystemContext';
 
 import { useReadModelStore } from '../hooks/useReadModelStore';
-import { dataLoaded as orderConfirmationRequestsViewDataLoaded } from '../state/orderConfirmationRequestsView.slice';
+import { dataLoaded as orderConfirmationRequestsViewDataLoaded, dataChanged as orderConfirmationRequestsViewDataChanged } from '../state/orderConfirmationRequestsView.slice';
 
 const OrderConfirmationRequestsView = () => {
   const { confirmOrder } = useCommands();
@@ -22,7 +22,7 @@ const OrderConfirmationRequestsView = () => {
     }),
     [],
   );
-  useReadModelStore(readModelSpec, orderConfirmationRequestsViewDataLoaded);
+  useReadModelStore(readModelSpec, orderConfirmationRequestsViewDataLoaded, orderConfirmationRequestsViewDataChanged);
 
   const { data } = useSelector(
     ({ orderConfirmationRequestsView }) => orderConfirmationRequestsView,
