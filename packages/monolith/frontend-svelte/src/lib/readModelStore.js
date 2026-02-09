@@ -37,17 +37,22 @@ export const readModelStore = (
 	const store = readable(wrapData(null), (set) => {
 		let innerItems = null;
 
-		const query = {};
-		if (correlationId) {
-			query.correlationId = correlationId;
-		}
-		const socket = io(socketIoEndpoint, { query });
-
 		const runQuery = () =>
 			queryFn().then((items) => {
 				innerItems = items;
 				set(wrapData(innerItems));
 			});
+
+		if (!socketIoEndpoint) {
+			runQuery();
+			return () => {};
+		}
+
+		const query = {};
+		if (correlationId) {
+			query.correlationId = correlationId;
+		}
+		const socket = io(socketIoEndpoint, { query });
 
 		socket.on('connect', () => {
 			socket.emit('register', [{ endpointName, readModelName, resolverName }], () => {
