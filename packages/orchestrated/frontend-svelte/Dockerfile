@@ -1,15 +1,7 @@
 FROM node:lts
-
-RUN npm install -g pnpm 
-
-WORKDIR /src
-# We assume that the context root is the
-# project folder.
+WORKDIR /app
+COPY package.json ./
+RUN npm install
 COPY . ./
-RUN pnpm i
-
-WORKDIR /src/packages/orchestrated/frontend-svelte
-
 EXPOSE 5173
-
-CMD ["pnpm", "start"]
+CMD ["npx", "vite", "dev", "--host"]

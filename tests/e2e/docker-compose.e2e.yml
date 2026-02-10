@@ -23,9 +23,7 @@ services:
     image: rabbitmq:latest
 
   command-processor:
-    build:
-      dockerfile: packages/orchestrated/command-processor/Dockerfile
-      context: ../..
+    build: ../../packages/orchestrated/command-processor
     depends_on:
       - mongo
       - rabbit
@@ -36,9 +34,7 @@ services:
       LOG_LEVEL: 'warn'
 
   readmodel-customers:
-    build:
-      dockerfile: packages/orchestrated/readmodel-customers/Dockerfile
-      context: ../..
+    build: ../../packages/orchestrated/readmodel-customers
     depends_on:
       - mongo
       - rabbit
@@ -53,9 +49,7 @@ services:
       LOG_LEVEL: 'warn'
 
   readmodel-orders:
-    build:
-      dockerfile: packages/orchestrated/readmodel-orders/Dockerfile
-      context: ../..
+    build: ../../packages/orchestrated/readmodel-orders
     depends_on:
       - mongo
       - rabbit
@@ -70,17 +64,13 @@ services:
       LOG_LEVEL: 'warn'
 
   change-notifier:
-    build:
-      dockerfile: packages/orchestrated/change-notifier/Dockerfile
-      context: ../..
+    build: ../../packages/orchestrated/change-notifier
     environment:
       EXPRESS_PORT: '80'
       LOG_LEVEL: 'warn'
 
   frontend-svelte:
-    build:
-      dockerfile: packages/orchestrated/frontend-svelte/Dockerfile
-      context: ../..
+    build: ../../packages/orchestrated/frontend-svelte
     depends_on:
       - command-processor
       - readmodel-customers
@@ -93,9 +83,7 @@ services:
       VITE_CHANGENOTIFIER_URL: 'http://change-notifier'
 
   frontend-react:
-    build:
-      dockerfile: packages/orchestrated/frontend-react/Dockerfile
-      context: ../..
+    build: ../../packages/orchestrated/frontend-react
     depends_on:
       - command-processor
       - readmodel-customers
