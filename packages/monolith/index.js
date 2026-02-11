@@ -29,6 +29,13 @@ registerSharedMqEmitter('events', mqemitter());
 registerSharedMqEmitter('queries', mqemitter(), mqQueriesPort);
 
 start({
+  observability: {
+    serviceName: 'lazyapps-monolith',
+    otlp: {
+      endpoint:
+        process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317',
+    },
+  },
   correlation: {
     serviceId: 'MONO',
   },

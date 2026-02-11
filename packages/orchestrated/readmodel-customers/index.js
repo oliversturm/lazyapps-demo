@@ -7,6 +7,14 @@ import * as readModels from './readmodels/index.js';
 import { commandSenderFetch } from '@lazyapps/command-sender-fetch';
 
 start({
+  observability: {
+    serviceName: process.env.OTEL_SERVICE_NAME || 'readmodel-customers',
+    otlp: {
+      endpoint:
+        process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317',
+      protocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL || 'grpc',
+    },
+  },
   correlation: {
     serviceId: 'RM/CUS',
   },

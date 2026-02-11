@@ -34,6 +34,7 @@
     "@lazyapps/express": "^0.1.0",
     "@lazyapps/logger": "^0.1.0",
     "@lazyapps/mqemitter": "^0.1.0",
+    "@lazyapps/observability": "^0.1.0",
     "@lazyapps/readmodelstorage-mongodb": "^0.1.0",
     "@sveltejs/adapter-auto": "^2.1.0",
     "@sveltejs/kit": "^1.22.4",
