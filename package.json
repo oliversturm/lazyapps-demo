@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "pnpm-update": "pnpm --recursive update --latest",
-    "test:e2e": "./tests/e2e/run.sh"
+    "test:e2e": "./tests/e2e/run.sh",
+    "use-branch": "node scripts/use-branch-packages.js",
+    "use-released": "node scripts/use-released-packages.js"
   },
   "repository": {
     "type": "git",
