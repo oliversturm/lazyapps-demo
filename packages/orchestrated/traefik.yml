@@ -60,6 +60,18 @@ http:
         - web
       service: frontend-svelte-orchestrated
 
+    grafanaUI:
+      rule: "Host(`grafana.localhost`)"
+      entrypoints:
+        - web
+      service: grafanaUI
+
+    jaegerUI:
+      rule: "Host(`jaeger.localhost`)"
+      entrypoints:
+        - web
+      service: jaegerUI
+
   services:
     dashboardUI:
       loadBalancer:
@@ -110,3 +122,13 @@ http:
       loadBalancer:
         servers:
           - url: "http://frontend-svelte:5173"
+
+    grafanaUI:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+
+    jaegerUI:
+      loadBalancer:
+        servers:
+          - url: "http://jaeger:16686"

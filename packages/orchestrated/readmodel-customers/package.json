@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "start": "node --require ./tracing.cjs --watch index.js"
+    "start": "node --import ./observability-init.js --watch index.js"
   },
   "keywords": [],
   "author": "",
@@ -22,12 +22,7 @@
     "@lazyapps/express": "^0.1.0",
     "@lazyapps/readmodels": "^0.1.0",
     "@lazyapps/readmodelstorage-mongodb": "^0.1.0",
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.50.0",
-    "@opentelemetry/exporter-trace-otlp-grpc": "^0.53.0",
-    "@opentelemetry/resources": "^1.26.0",
-    "@opentelemetry/sdk-node": "^0.53.0",
-    "@opentelemetry/semantic-conventions": "^1.27.0"
+    "@lazyapps/observability": "^0.1.0"
   },
   "type": "module"
 }
