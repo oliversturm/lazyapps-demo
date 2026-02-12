@@ -12,7 +12,11 @@
     "orch:aspire": "docker compose -f packages/orchestrated/compose.yml --profile aspire up",
     "orch:grafana": "OTLP_HOST=grafana OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile grafana up",
     "orch:jaeger": "OTLP_HOST=jaeger OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile jaeger up",
-    "orch:down": "docker compose -f packages/orchestrated/compose.yml --profile aspire --profile grafana --profile jaeger down"
+    "orch:down": "docker compose -f packages/orchestrated/compose.yml --profile aspire --profile grafana --profile jaeger down",
+    "mono:start-services": "pnpm --filter @lazyapps/demo-monolith run start-mongo && pnpm --filter @lazyapps/demo-monolith run start-aspire",
+    "mono:start": "pnpm --filter @lazyapps/demo-monolith run start",
+    "mono:start-highlight": "pnpm --filter @lazyapps/demo-monolith run start-highlight",
+    "mono:stop": "pnpm --filter @lazyapps/demo-monolith run stop-services"
   },
   "repository": {
     "type": "git",
