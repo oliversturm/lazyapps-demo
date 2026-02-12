@@ -4,10 +4,11 @@ import { trace, context } from '@opentelemetry/api';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 
 initialize({
-  serviceName: 'lazyapps-monolith',
+  serviceName: process.env.OTEL_SERVICE_NAME || 'readmodel-customers',
   otlp: {
     endpoint:
       process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317',
+    protocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL || 'grpc',
   },
 });
 

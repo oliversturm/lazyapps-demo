@@ -4,4 +4,4 @@ COPY package.json ./
 RUN npm install
 COPY . ./
 EXPOSE 80
-CMD ["node", "--watch", "index.js"]
+CMD ["node", "--import", "./observability-init.js", "--watch", "index.js"]

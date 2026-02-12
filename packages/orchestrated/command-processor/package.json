@@ -15,12 +15,13 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@lazyapps/aggregatestore-inmemory": "^0.1.0",
-    "@lazyapps/bootstrap": "^0.1.2",
-    "@lazyapps/eventbus-rabbitmq": "^0.1.0",
-    "@lazyapps/eventstore-mongodb": "^0.1.0",
-    "@lazyapps/express": "^0.1.0",
-    "@lazyapps/observability": "^0.1.0"
+    "@lazyapps/aggregatestore-inmemory": "0.1.2-branch-feature-observability-20260212142735",
+    "@lazyapps/bootstrap": "1.0.0-branch-feature-observability-20260212142735",
+    "@lazyapps/eventbus-rabbitmq": "0.1.2-branch-feature-observability-20260212142735",
+    "@lazyapps/eventstore-mongodb": "0.1.3-branch-feature-observability-20260212142735",
+    "@lazyapps/express": "0.1.3-branch-feature-observability-20260212142735",
+    "@lazyapps/logger": "1.0.0-branch-feature-observability-20260212142735",
+    "@lazyapps/observability": "0.2.0-branch-feature-observability-20260212142735"
   },
   "type": "module"
 }
