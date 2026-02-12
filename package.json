@@ -7,7 +7,12 @@
     "pnpm-update": "pnpm --recursive update --latest",
     "test:e2e": "./tests/e2e/run.sh",
     "use-branch": "node scripts/use-branch-packages.js",
-    "use-released": "node scripts/use-released-packages.js"
+    "use-released": "node scripts/use-released-packages.js",
+    "orch:build": "docker compose -f packages/orchestrated/compose.yml build",
+    "orch:aspire": "docker compose -f packages/orchestrated/compose.yml --profile aspire up",
+    "orch:grafana": "OTLP_HOST=grafana OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile grafana up",
+    "orch:jaeger": "OTLP_HOST=jaeger OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile jaeger up",
+    "orch:down": "docker compose -f packages/orchestrated/compose.yml --profile aspire --profile grafana --profile jaeger down"
   },
   "repository": {
     "type": "git",
