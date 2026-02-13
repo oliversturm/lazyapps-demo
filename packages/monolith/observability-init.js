@@ -17,7 +17,9 @@ initialize({
         url.startsWith('/node_modules/') ||
         url.startsWith('/src/') ||
         url.endsWith('.svelte') ||
-        url.includes('__vite')
+						url.includes('__vite') ||
+						url.endsWith('.js') ||
+						url.startsWith('/socket.io/')
       );
     },
   },
