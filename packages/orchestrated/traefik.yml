@@ -72,6 +72,12 @@ http:
         - web
       service: jaegerUI
 
+    signozUI:
+      rule: "Host(`signoz.localhost`)"
+      entrypoints:
+        - web
+      service: signozUI
+
   services:
     dashboardUI:
       loadBalancer:
@@ -132,3 +138,8 @@ http:
       loadBalancer:
         servers:
           - url: "http://jaeger:16686"
+
+    signozUI:
+      loadBalancer:
+        servers:
+          - url: "http://signoz:8080"
