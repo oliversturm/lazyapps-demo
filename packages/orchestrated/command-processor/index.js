@@ -19,14 +19,6 @@ const commandRecordingConfig = process.env.COMMAND_RECORD_PATH
   : null;
 
 start({
-  observability: {
-    serviceName: process.env.OTEL_SERVICE_NAME || 'command-processor',
-    otlp: {
-      endpoint:
-        process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317',
-      protocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL || 'grpc',
-    },
-  },
   correlation: {
     serviceId: 'CMD',
   },

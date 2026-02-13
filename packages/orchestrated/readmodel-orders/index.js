@@ -8,14 +8,6 @@ import { commandSenderFetch } from '@lazyapps/command-sender-fetch';
 import { customizeExpress } from './graphql-server.js';
 
 start({
-  observability: {
-    serviceName: process.env.OTEL_SERVICE_NAME || 'readmodel-orders',
-    otlp: {
-      endpoint:
-        process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317',
-      protocol: process.env.OTEL_EXPORTER_OTLP_PROTOCOL || 'grpc',
-    },
-  },
   correlation: {
     serviceId: 'RM/ORD',
   },

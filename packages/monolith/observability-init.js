@@ -9,6 +9,18 @@ initialize({
     endpoint:
       process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317',
   },
+  httpInstrumentation: {
+    ignoreIncomingRequestHook: (request) => {
+      const url = request.url || '';
+      return (
+        url.startsWith('/@') ||
+        url.startsWith('/node_modules/') ||
+        url.startsWith('/src/') ||
+        url.endsWith('.svelte') ||
+        url.includes('__vite')
+      );
+    },
+  },
 });
 
 configureOtel({
