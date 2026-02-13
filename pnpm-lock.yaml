@@ -18,38 +18,38 @@ importers:
   packages/monolith:
     dependencies:
       '@lazyapps/aggregatestore-inmemory':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/bootstrap':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735(@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735)(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/change-notifier-socket-io':
-        specifier: 0.1.3-branch-feature-observability-20260212142735
-        version: 0.1.3-branch-feature-observability-20260212142735
+        specifier: ^0.1.1
+        version: 0.1.1
       '@lazyapps/eventbus-mqemitter-redis':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/eventstore-mongodb':
-        specifier: 0.1.3-branch-feature-observability-20260212142735
-        version: 0.1.3-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.1
       '@lazyapps/express':
-        specifier: 0.1.3-branch-feature-observability-20260212142735
-        version: 0.1.3-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/logger':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/mqemitter':
-        specifier: 0.2.0-branch-feature-observability-20260212142735
-        version: 0.2.0-branch-feature-observability-20260212142735(mqemitter@5.0.0)
+        specifier: ^0.1.0
+        version: 0.1.0(mqemitter@5.0.0)
       '@lazyapps/observability':
-        specifier: 0.2.0-branch-feature-observability-20260212142735
-        version: 0.2.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@sveltejs/adapter-auto':
         specifier: ^2.1.0
         version: 2.1.1(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))
@@ -112,17 +112,17 @@ importers:
   packages/orchestrated/change-notifier:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735(@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735)(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notifier-socket-io':
-        specifier: 0.1.3-branch-feature-observability-20260212142735
-        version: 0.1.3-branch-feature-observability-20260212142735
+        specifier: ^0.1.1
+        version: 0.1.1
       '@lazyapps/logger':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/observability':
-        specifier: 0.2.0-branch-feature-observability-20260212142735
-        version: 0.2.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -134,26 +134,26 @@ importers:
   packages/orchestrated/command-processor:
     dependencies:
       '@lazyapps/aggregatestore-inmemory':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/bootstrap':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735(@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735)(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/eventbus-rabbitmq':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/eventstore-mongodb':
-        specifier: 0.1.3-branch-feature-observability-20260212142735
-        version: 0.1.3-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.1
       '@lazyapps/express':
-        specifier: 0.1.3-branch-feature-observability-20260212142735
-        version: 0.1.3-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/logger':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/observability':
-        specifier: 0.2.0-branch-feature-observability-20260212142735
-        version: 0.2.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -278,32 +278,32 @@ importers:
   packages/orchestrated/readmodel-customers:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735(@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735)(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/command-sender-fetch':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/eventbus-rabbitmq':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/express':
-        specifier: 0.1.3-branch-feature-observability-20260212142735
-        version: 0.1.3-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/logger':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/observability':
-        specifier: 0.2.0-branch-feature-observability-20260212142735
-        version: 0.2.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/readmodels':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -315,32 +315,32 @@ importers:
   packages/orchestrated/readmodel-orders:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735(@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735)(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.1.2
+        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/command-sender-fetch':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/eventbus-rabbitmq':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/express':
-        specifier: 0.1.3-branch-feature-observability-20260212142735
-        version: 0.1.3-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/logger':
-        specifier: 1.0.0-branch-feature-observability-20260212142735
-        version: 1.0.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/observability':
-        specifier: 0.2.0-branch-feature-observability-20260212142735
-        version: 0.2.0-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/readmodels':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: 0.1.2-branch-feature-observability-20260212142735
-        version: 0.1.2-branch-feature-observability-20260212142735
+        specifier: ^0.1.0
+        version: 0.1.0
       express-graphql:
         specifier: ^0.12.0
         version: 0.12.0(graphql@15.10.1)
@@ -853,55 +853,52 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@lazyapps/aggregatestore-inmemory@0.1.2-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-KGoh4RKZFyxVUwEjLsSnjANnwMnknlR2Uuygj4ep6tt+2PDXMJ9rblHDenDOFGwy5vnu+inb1rUU4a261dnlfg==}
+  '@lazyapps/aggregatestore-inmemory@0.1.0':
+    resolution: {integrity: sha512-Psv1xkbsGEONe3VpHY9Cv2Six4JU77joGbLk0CL+86OLKQp9mZ0CssiVWzwARrolHhmkZng6QAFmj7CUGC2bZg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/bootstrap@1.0.0-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-0MgI0cwfcQN6pGZzxYFucp1pAiyctugCK/b0BVc47DLjnFd01sy/MknyRBEt9wp8jjYcpyQES3IVUsO+fKKXFQ==}
+  '@lazyapps/bootstrap@0.1.2':
+    resolution: {integrity: sha512-btYAcpUQLxiPp11iZfrxh0Z5S+MNy+DafTFSMFp23NT3Vy6xHpwdrRbkxhHFPVZatA/W4E4Z4EvjF6j8KCWvPQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
     peerDependencies:
-      '@lazyapps/observability': 0.2.0-branch-feature-observability-20260212142735
       '@sveltejs/kit': '>=2.0.0'
       vite: '>=5.0.0'
     peerDependenciesMeta:
-      '@lazyapps/observability':
-        optional: true
       '@sveltejs/kit':
         optional: true
       vite:
         optional: true
 
-  '@lazyapps/change-notification-sender-fetch@0.1.2-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-pEYGCxH2JBpNa7KrWuKqIMl5mjQ+/Lq6zQiYAEPafY0Y7O5uxR5aZH1TsvR6HUyv6gFy1x41T9fj19p6L6x2Rg==}
+  '@lazyapps/change-notification-sender-fetch@0.1.0':
+    resolution: {integrity: sha512-rt0khijvupVeh7KWTqlKJVk5OH8zGTXL88B2oo+sCD4nmoZcqXw4uuQQe0Rpvl1giLLl/V0RlvCWHKCWOdCvEg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/change-notifier-socket-io@0.1.3-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-ttPOQQ8wCy7/qiWnJXIBWedB0hjKi1f/kHFzPXXvH0gOo9z0GmrZrzn+eZlwGhbNncSXH2nGnrI1arnl7Q8U8A==}
+  '@lazyapps/change-notifier-socket-io@0.1.1':
+    resolution: {integrity: sha512-fkJZU4Rszp0ZY2vpKATlTPoaZH8frmtmT1ZJ11UXLM1S0XcJppXHqlg/44m7BZvc7gQrUiFFPANO/I82djZcsA==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/command-processor@0.1.2-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-ehCYgx6w55Czyygp/MyP/KNo5LrbCaO7ax4PPYwh6tgB+mf/sYaA1L1S4TsN38U+bu8h7MA+VscwXDsVNi36/w==}
+  '@lazyapps/command-processor@0.1.0':
+    resolution: {integrity: sha512-mz/y9MfQCKxkEM5YNq95/oou0W9QmrT9vL5rO/+i9U8tpWBLKFfnxTiCMi3o2SPphjlTB9HoBPj+xkV1aN50Xw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/command-sender-fetch@0.1.2-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-yS+1UwIo3Hsj7Lhb2hOIVUNNhmxwSZeJKgBXd75Cb2WYqS3P+VmuWp2CXZguhGam2HPhXnclccznjSElbUgQfQ==}
+  '@lazyapps/command-sender-fetch@0.1.0':
+    resolution: {integrity: sha512-Pwyf4tH721qdNzjR4Hnf2SOV6Y9+QvGBpWtSFYdJ65hxgxeUkpl59VBw7AlNMwJgLb/pQVNCjCxW2jDLNPnC7Q==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.2-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-PGrvVa19Q1XtuB3BGqDALHNPpVCbbIg1NfyjW1bNFo9jYU19mfzB8jgIQgL6hxxx0OLeOVNt7Box8hhwLcM6Rg==}
+  '@lazyapps/eventbus-mqemitter-redis@0.1.0':
+    resolution: {integrity: sha512-WbOcnmQaDFkgcqZqXVUn0tHbbDCv3c5v0rHmWgIInHYW9x75YLb2pzSEhJkKcX7K4p/oi0UcZO660EXMnvM6LA==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventbus-rabbitmq@0.1.2-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-hVdOM6ijXWT+pvKx61rHIy22Hgn5WzTvhZ5ZvVGHpLBVesuoWrMRhEs9hLtm9m6GOql3+FS6C6pXVSwTEyNuwg==}
+  '@lazyapps/eventbus-rabbitmq@0.1.0':
+    resolution: {integrity: sha512-cpHKLYOwVOwMycg1gyZBkbbyQdy3DLgrMROxdBpWYvKZY2js5XYjPlhY6bJBrEvWS7YtbKgWZOlNFco3TnwJtg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventstore-mongodb@0.1.3-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-6XkAPqQcWwE9jJZchpRfrqlpy4tgq+907f54eg2nXWyb9K20fCVyyw13N/Z8EqqbfnWCdTQbzxxjubzSQjpKGA==}
+  '@lazyapps/eventstore-mongodb@0.1.1':
+    resolution: {integrity: sha512-1dtxAy/OD8TCaSYkKxGz5oYdtZm1htlBMCHSv7mn5pKueEdZTdyPHl9Stxt5u0026xNbpo6irLvS0/IAgQheqg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/express@0.1.3-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-3uWj/UNtBdvNmD4EGUrR6jYHxOTG4v30mOZt75tO78YsyUNTLvaAIt0LESFyVyTGHub7bGei9KmlmJiAFtWcGQ==}
+  '@lazyapps/express@0.1.0':
+    resolution: {integrity: sha512-zyfiIsnBL6DVtUN9PnAgLiTJpHnGcDyzNyP5TvK6u8iPJC56Dq2oW91be7yZcqX9eb+gOQc+yxcyxeB1j+pViw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/log-highlight@0.1.1':
@@ -909,24 +906,24 @@ packages:
     engines: {node: '>=18.20.3 || >=20.18.0'}
     hasBin: true
 
-  '@lazyapps/logger@1.0.0-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-BjeY4MpLj5vBzV5pnc26NM43nQb+XKKgTyKvYbw098SCabjqogw10texiNbLmbLF9auhuH4PLnIQD/WCzYdJHw==}
+  '@lazyapps/logger@0.1.0':
+    resolution: {integrity: sha512-PmO2D8K0vPFljs3lfft/VVBy0NNjiynuJDy2GUYP12dmfsVhK2qCpzIpP/NR3X61Ye+i0359g1iaAna6TmkF+w==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/mqemitter@0.2.0-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-3Sf/Gq6fXwHEarjz1ukiEqILkvU1L43z8JzH9LXV5pGXIdrE6uAQtJmjbRnm9gfM3OGxwDzN6rEhgIijVKnhRw==}
+  '@lazyapps/mqemitter@0.1.0':
+    resolution: {integrity: sha512-COFXxxeInpurQzZ3penRsajWXteKcHVfCJgHoP3S6mD6yaed7GuIq/ikGc4b/9McLg3wLWIyqmbxpHIDlU4D4Q==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-53BfM0pYa/xoIYTr43BfkGiBniz6/LMyKZVUAPOsfUfl7Vl/QvWEsPTkwyNC3gLeHa4AEDjFg9ulvireBmoYVA==}
+  '@lazyapps/observability@0.1.0':
+    resolution: {integrity: sha512-4xPj14QJN0QG4nVSSj6FaNSHK836oukg9tctUQ8oSEaH/cUYp6mZm8OBE3utBnwuOX8DOATtiCfbLsyOm39OOQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/readmodels@0.1.2-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-SgViVBsd9G4j6yK4RrPqUqxrOBNcffa6aZfN3D3JCpuoXN66XauGHaEYCI9neFjQ4EjpXsAh+ATJrYGwBC+NSA==}
+  '@lazyapps/readmodels@0.1.0':
+    resolution: {integrity: sha512-ke3xPo5CRQ/u7eaNgw3ogjVu9CPvXUerxU1bLtyMLRluZohQcqEh/UtvS1m12YScKSYWCXXlF4FMhXyOCpF9Sg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/readmodelstorage-mongodb@0.1.2-branch-feature-observability-20260212142735':
-    resolution: {integrity: sha512-i4CsfSCqevfOVBZ+Og/VArx/0eP71HWel8dskrOb1B9sZQZFXMrnGhFZaPG/drY4mRtK5C+fUUDGYMhqw7ICnQ==}
+  '@lazyapps/readmodelstorage-mongodb@0.1.0':
+    resolution: {integrity: sha512-XMJfeIPFiA3A6gbn79ryOCf5oj/gdxRmUuHjawQvEw44uqtkLR4JOfGWHNowGjg5UfImyjGFmuYYhyIjjaENzw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@mongodb-js/saslprep@1.4.5':
@@ -966,6 +963,12 @@ packages:
 
   '@opentelemetry/core@2.5.0':
     resolution: {integrity: sha512-ka4H8OM6+DlUhSAZpONu0cPBtPPTQKxbxVzC4CzVx5+K4JnroJVBtDzLAMx4/3CDTJXRvVFhpFjtl4SaiTNoyQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.0.0 <1.10.0'
+
+  '@opentelemetry/core@2.5.1':
+    resolution: {integrity: sha512-Dwlc+3HAZqpgTYq0MUyZABjFkcrKTePwuiFVLjahGD8cx3enqihmpAmdgNFO1R4m/sIe5afjJrA25Prqy4NXlA==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
@@ -1108,6 +1111,12 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
+  '@opentelemetry/resources@2.5.1':
+    resolution: {integrity: sha512-BViBCdE/GuXRlp9k7nS1w6wJvY5fnFX5XvuEtWsTAOQFIO89Eru7lGW3WbfbxtCuZ/GbrJfAziXG0w0dpxL7eQ==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.3.0 <1.10.0'
+
   '@opentelemetry/sdk-logs@0.211.0':
     resolution: {integrity: sha512-O5nPwzgg2JHzo59kpQTPUOTzFi0Nv5LxryG27QoXBciX3zWM3z83g+SNOHhiQVYRWFSxoWn1JM2TGD5iNjOwdA==}
     engines: {node: ^18.19.0 || >=20.6.0}
@@ -1116,6 +1125,12 @@ packages:
 
   '@opentelemetry/sdk-metrics@2.5.0':
     resolution: {integrity: sha512-BeJLtU+f5Gf905cJX9vXFQorAr6TAfK3SPvTFqP+scfIpDQEJfRaGJWta7sJgP+m4dNtBf9y3yvBKVAZZtJQVA==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.9.0 <1.10.0'
+
+  '@opentelemetry/sdk-metrics@2.5.1':
+    resolution: {integrity: sha512-RKMn3QKi8nE71ULUo0g/MBvq1N4icEBo7cQSKnL3URZT16/YH3nSVgWegOjwx7FRBTrjOIkMJkCUn/ZFIEfn4A==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.9.0 <1.10.0'
@@ -4433,19 +4448,16 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@lazyapps/aggregatestore-inmemory@0.1.2-branch-feature-observability-20260212142735':
+  '@lazyapps/aggregatestore-inmemory@0.1.0':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
 
-  '@lazyapps/bootstrap@1.0.0-branch-feature-observability-20260212142735(@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735)(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.1.2(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.1.2-branch-feature-observability-20260212142735
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
-      '@lazyapps/readmodels': 0.1.2-branch-feature-observability-20260212142735
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-logs': 0.211.0
+      '@lazyapps/command-processor': 0.1.0
+      '@lazyapps/logger': 0.1.0
+      '@lazyapps/readmodels': 0.1.0
     optionalDependencies:
-      '@lazyapps/observability': 0.2.0-branch-feature-observability-20260212142735
       '@sveltejs/kit': 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
       vite: 4.5.14(@types/node@25.2.1)
     transitivePeerDependencies:
@@ -4456,15 +4468,12 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/bootstrap@1.0.0-branch-feature-observability-20260212142735(@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735)(vite@5.4.21(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.1.2(vite@5.4.21(@types/node@25.2.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.1.2-branch-feature-observability-20260212142735
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
-      '@lazyapps/readmodels': 0.1.2-branch-feature-observability-20260212142735
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-logs': 0.211.0
+      '@lazyapps/command-processor': 0.1.0
+      '@lazyapps/logger': 0.1.0
+      '@lazyapps/readmodels': 0.1.0
     optionalDependencies:
-      '@lazyapps/observability': 0.2.0-branch-feature-observability-20260212142735
       vite: 5.4.21(@types/node@25.2.1)
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
@@ -4474,22 +4483,21 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/change-notification-sender-fetch@0.1.2-branch-feature-observability-20260212142735':
+  '@lazyapps/change-notification-sender-fetch@0.1.0':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
       isomorphic-fetch: 3.0.0
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/change-notifier-socket-io@0.1.3-branch-feature-observability-20260212142735':
+  '@lazyapps/change-notifier-socket-io@0.1.1':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
       body-parser: 1.20.4
       cookie: 0.5.0
       cookie-parser: 1.4.7
       cors: 2.8.6
       express: 4.22.1
-      express-jwt: 8.5.1
       jsonwebtoken: 9.0.3
       morgan: 1.10.1
       nanoid: 5.1.6
@@ -4500,13 +4508,12 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@lazyapps/command-processor@0.1.2-branch-feature-observability-20260212142735':
+  '@lazyapps/command-processor@0.1.0':
     dependencies:
-      '@lazyapps/aggregatestore-inmemory': 0.1.2-branch-feature-observability-20260212142735
-      '@lazyapps/eventbus-mqemitter-redis': 0.1.2-branch-feature-observability-20260212142735
-      '@lazyapps/eventstore-mongodb': 0.1.3-branch-feature-observability-20260212142735
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
-      '@opentelemetry/api': 1.9.0
+      '@lazyapps/aggregatestore-inmemory': 0.1.0
+      '@lazyapps/eventbus-mqemitter-redis': 0.1.0
+      '@lazyapps/eventstore-mongodb': 0.1.1
+      '@lazyapps/logger': 0.1.0
       nanoid: 5.1.6
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
@@ -4516,30 +4523,30 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/command-sender-fetch@0.1.2-branch-feature-observability-20260212142735':
+  '@lazyapps/command-sender-fetch@0.1.0':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
       isomorphic-fetch: 3.0.0
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.2-branch-feature-observability-20260212142735':
+  '@lazyapps/eventbus-mqemitter-redis@0.1.0':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
       mqemitter-redis: 5.1.0
       p-retry: 6.2.1
     transitivePeerDependencies:
       - supports-color
 
-  '@lazyapps/eventbus-rabbitmq@0.1.2-branch-feature-observability-20260212142735':
+  '@lazyapps/eventbus-rabbitmq@0.1.0':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
       amqplib: 0.10.9
       p-retry: 6.2.1
 
-  '@lazyapps/eventstore-mongodb@0.1.3-branch-feature-observability-20260212142735':
+  '@lazyapps/eventstore-mongodb@0.1.1':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
       mongodb: 5.9.2
       p-retry: 6.2.1
     transitivePeerDependencies:
@@ -4549,9 +4556,9 @@ snapshots:
       - mongodb-client-encryption
       - snappy
 
-  '@lazyapps/express@0.1.3-branch-feature-observability-20260212142735':
+  '@lazyapps/express@0.1.0':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
       body-parser: 1.20.4
       cookie-parser: 1.4.7
       cors: 2.8.6
@@ -4567,25 +4574,23 @@ snapshots:
       chalk: 5.6.2
       colord: 2.9.3
 
-  '@lazyapps/logger@1.0.0-branch-feature-observability-20260212142735':
+  '@lazyapps/logger@0.1.0':
     dependencies:
       chalk: 5.6.2
       loglevel: 1.9.2
       loglevel-plugin-prefix: 0.8.4
 
-  '@lazyapps/mqemitter@0.2.0-branch-feature-observability-20260212142735(mqemitter@5.0.0)':
+  '@lazyapps/mqemitter@0.1.0(mqemitter@5.0.0)':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
-      '@opentelemetry/api': 1.9.0
+      '@lazyapps/logger': 0.1.0
       mqemitter-cs: 1.0.1(mqemitter@5.0.0)
       nanoid: 5.1.6
     transitivePeerDependencies:
       - mqemitter
 
-  '@lazyapps/observability@0.2.0-branch-feature-observability-20260212142735':
+  '@lazyapps/observability@0.1.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/api-logs': 0.211.0
       '@opentelemetry/exporter-logs-otlp-grpc': 0.211.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-metrics-otlp-grpc': 0.211.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-trace-otlp-grpc': 0.211.0(@opentelemetry/api@1.9.0)
@@ -4594,24 +4599,23 @@ snapshots:
       '@opentelemetry/instrumentation-http': 0.211.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-mongodb': 0.64.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-socket.io': 0.57.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 2.5.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-logs': 0.211.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-metrics': 2.5.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-metrics': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-node': 0.211.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
-  '@lazyapps/readmodels@0.1.2-branch-feature-observability-20260212142735':
+  '@lazyapps/readmodels@0.1.0':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
-      '@opentelemetry/api': 1.9.0
+      '@lazyapps/logger': 0.1.0
       lodash: 4.17.23
       promise-queue: 2.2.5
 
-  '@lazyapps/readmodelstorage-mongodb@0.1.2-branch-feature-observability-20260212142735':
+  '@lazyapps/readmodelstorage-mongodb@0.1.0':
     dependencies:
-      '@lazyapps/logger': 1.0.0-branch-feature-observability-20260212142735
+      '@lazyapps/logger': 0.1.0
       mongodb: 5.9.2
       p-retry: 6.2.1
     transitivePeerDependencies:
@@ -4655,6 +4659,11 @@ snapshots:
       '@opentelemetry/api': 1.9.0
 
   '@opentelemetry/core@2.5.0(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/semantic-conventions': 1.39.0
+
+  '@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.39.0
@@ -4767,7 +4776,7 @@ snapshots:
   '@opentelemetry/instrumentation-amqplib@0.58.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.211.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -4776,7 +4785,7 @@ snapshots:
   '@opentelemetry/instrumentation-express@0.59.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.211.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -4857,6 +4866,12 @@ snapshots:
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
 
+  '@opentelemetry/resources@2.5.1(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/semantic-conventions': 1.39.0
+
   '@opentelemetry/sdk-logs@0.211.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -4869,6 +4884,12 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.0(@opentelemetry/api@1.9.0)
+
+  '@opentelemetry/sdk-metrics@2.5.1(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
 
   '@opentelemetry/sdk-node@0.211.0(@opentelemetry/api@1.9.0)':
     dependencies:
