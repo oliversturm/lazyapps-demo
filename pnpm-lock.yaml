@@ -18,38 +18,38 @@ importers:
   packages/monolith:
     dependencies:
       '@lazyapps/aggregatestore-inmemory':
-        specifier: ^0.1.0
-        version: 0.1.0
-      '@lazyapps/bootstrap':
         specifier: ^0.1.2
-        version: 0.1.2(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
+        version: 0.1.2
+      '@lazyapps/bootstrap':
+        specifier: ^0.2.0
+        version: 0.2.0(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/change-notifier-socket-io':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.1.3
+        version: 0.1.3
       '@lazyapps/eventbus-mqemitter-redis':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/eventstore-mongodb':
-        specifier: ^0.1.0
-        version: 0.1.1
+        specifier: ^0.1.3
+        version: 0.1.3
       '@lazyapps/express':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.4
+        version: 0.1.4
       '@lazyapps/logger':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lazyapps/mqemitter':
-        specifier: ^0.1.0
-        version: 0.1.0(mqemitter@5.0.0)
+        specifier: ^0.2.0
+        version: 0.2.0(mqemitter@5.0.0)
       '@lazyapps/observability':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@sveltejs/adapter-auto':
         specifier: ^2.1.0
         version: 2.1.1(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))
@@ -112,17 +112,17 @@ importers:
   packages/orchestrated/change-notifier:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.1.2
-        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.2.0
+        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notifier-socket-io':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.1.3
+        version: 0.1.3
       '@lazyapps/logger':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lazyapps/observability':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -134,26 +134,26 @@ importers:
   packages/orchestrated/command-processor:
     dependencies:
       '@lazyapps/aggregatestore-inmemory':
-        specifier: ^0.1.0
-        version: 0.1.0
-      '@lazyapps/bootstrap':
         specifier: ^0.1.2
-        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
+        version: 0.1.2
+      '@lazyapps/bootstrap':
+        specifier: ^0.2.0
+        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/eventbus-rabbitmq':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/eventstore-mongodb':
-        specifier: ^0.1.0
-        version: 0.1.1
+        specifier: ^0.1.3
+        version: 0.1.3
       '@lazyapps/express':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.4
+        version: 0.1.4
       '@lazyapps/logger':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lazyapps/observability':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -278,32 +278,32 @@ importers:
   packages/orchestrated/readmodel-customers:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.1.2
-        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.2.0
+        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/command-sender-fetch':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/eventbus-rabbitmq':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/express':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.4
+        version: 0.1.4
       '@lazyapps/logger':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lazyapps/observability':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lazyapps/readmodels':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -315,32 +315,32 @@ importers:
   packages/orchestrated/readmodel-orders:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.1.2
-        version: 0.1.2(vite@5.4.21(@types/node@25.2.1))
+        specifier: ^0.2.0
+        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/command-sender-fetch':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/eventbus-rabbitmq':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/express':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.4
+        version: 0.1.4
       '@lazyapps/logger':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lazyapps/observability':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@lazyapps/readmodels':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       express-graphql:
         specifier: ^0.12.0
         version: 0.12.0(graphql@15.10.1)
@@ -853,12 +853,12 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@lazyapps/aggregatestore-inmemory@0.1.0':
-    resolution: {integrity: sha512-Psv1xkbsGEONe3VpHY9Cv2Six4JU77joGbLk0CL+86OLKQp9mZ0CssiVWzwARrolHhmkZng6QAFmj7CUGC2bZg==}
+  '@lazyapps/aggregatestore-inmemory@0.1.2':
+    resolution: {integrity: sha512-T7A8IAAmR65Lb8RY5KfIX9qbE6o/YrMWU2/2KoBP1nIMH/mWXv1NUn2dVKtN+gbJyfFcsewtosvLd3/1Eh8Xmg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/bootstrap@0.1.2':
-    resolution: {integrity: sha512-btYAcpUQLxiPp11iZfrxh0Z5S+MNy+DafTFSMFp23NT3Vy6xHpwdrRbkxhHFPVZatA/W4E4Z4EvjF6j8KCWvPQ==}
+  '@lazyapps/bootstrap@0.2.0':
+    resolution: {integrity: sha512-zgZGtJQ094BEmYfV47xlhmWsAoEeLfZ7GYYWugWaW3hYY3tHPsrmcyt98R9D/9TqaxoIKUutavBUX8tYcJMb5w==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
     peerDependencies:
       '@sveltejs/kit': '>=2.0.0'
@@ -869,36 +869,36 @@ packages:
       vite:
         optional: true
 
-  '@lazyapps/change-notification-sender-fetch@0.1.0':
-    resolution: {integrity: sha512-rt0khijvupVeh7KWTqlKJVk5OH8zGTXL88B2oo+sCD4nmoZcqXw4uuQQe0Rpvl1giLLl/V0RlvCWHKCWOdCvEg==}
+  '@lazyapps/change-notification-sender-fetch@0.1.2':
+    resolution: {integrity: sha512-X+y7F28YpLHOhJj79ID97KgZmg6qQqjKhsNY11AFFh5uGBbK8Uu1CeJqWSEEflJbW9ajOAzxRGdl94S/U/CMRA==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/change-notifier-socket-io@0.1.1':
-    resolution: {integrity: sha512-fkJZU4Rszp0ZY2vpKATlTPoaZH8frmtmT1ZJ11UXLM1S0XcJppXHqlg/44m7BZvc7gQrUiFFPANO/I82djZcsA==}
+  '@lazyapps/change-notifier-socket-io@0.1.3':
+    resolution: {integrity: sha512-QQ6zTWdhPOTd9RabneCu6JmA/8qVkDtju+GCBvr5Ataeo/d2Jzas4pXb8uIZNw1KicMFlTg7dJVbhI0AXxo4vg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/command-processor@0.1.0':
-    resolution: {integrity: sha512-mz/y9MfQCKxkEM5YNq95/oou0W9QmrT9vL5rO/+i9U8tpWBLKFfnxTiCMi3o2SPphjlTB9HoBPj+xkV1aN50Xw==}
+  '@lazyapps/command-processor@0.1.2':
+    resolution: {integrity: sha512-pf/5oVlWxCfYusbzyH+bE5NPhe0yhX/D8HsDnagcyWFYbXO8pKcvI4CTRU6EcsTV05c4tLie+zmQZKqdB2YS8g==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/command-sender-fetch@0.1.0':
-    resolution: {integrity: sha512-Pwyf4tH721qdNzjR4Hnf2SOV6Y9+QvGBpWtSFYdJ65hxgxeUkpl59VBw7AlNMwJgLb/pQVNCjCxW2jDLNPnC7Q==}
+  '@lazyapps/command-sender-fetch@0.1.2':
+    resolution: {integrity: sha512-U6rMhQfR3ObZ5pxRKhf4gaFy76gy+pXP0eYecLDOvNz6W+hxgV/jwMoiN+dFbYBaHuk/Anm9K1kyzphUp/u/Ng==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.0':
-    resolution: {integrity: sha512-WbOcnmQaDFkgcqZqXVUn0tHbbDCv3c5v0rHmWgIInHYW9x75YLb2pzSEhJkKcX7K4p/oi0UcZO660EXMnvM6LA==}
+  '@lazyapps/eventbus-mqemitter-redis@0.1.2':
+    resolution: {integrity: sha512-bhqp5mpZsXgR18zQULTRNP2qbHd3O/cjJ6e9l2QvQqRH0kXm4qgRegPujVUk0l0c3gZRfyRV0XMKT/pEM0TZfQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventbus-rabbitmq@0.1.0':
-    resolution: {integrity: sha512-cpHKLYOwVOwMycg1gyZBkbbyQdy3DLgrMROxdBpWYvKZY2js5XYjPlhY6bJBrEvWS7YtbKgWZOlNFco3TnwJtg==}
+  '@lazyapps/eventbus-rabbitmq@0.1.2':
+    resolution: {integrity: sha512-6qbFrU4wdvk+5O8dfy9gQb9Falz1LdXZMlmtUWQebNlHJZBrdKGdq7kfBIpgpqjnyMKIs0UNh3+D9LTL9SI0wg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventstore-mongodb@0.1.1':
-    resolution: {integrity: sha512-1dtxAy/OD8TCaSYkKxGz5oYdtZm1htlBMCHSv7mn5pKueEdZTdyPHl9Stxt5u0026xNbpo6irLvS0/IAgQheqg==}
+  '@lazyapps/eventstore-mongodb@0.1.3':
+    resolution: {integrity: sha512-GwdzKTaMsoGjgOmILijGExlQbeZ4PnGFrjZ3nsvc1Gk5OXO327HQOZN/tnx2mVZUQgvNRA9CT5YCCbQPZVCAgw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/express@0.1.0':
-    resolution: {integrity: sha512-zyfiIsnBL6DVtUN9PnAgLiTJpHnGcDyzNyP5TvK6u8iPJC56Dq2oW91be7yZcqX9eb+gOQc+yxcyxeB1j+pViw==}
+  '@lazyapps/express@0.1.4':
+    resolution: {integrity: sha512-bU2hwqItX3O0mT1hI3CHRaBArOa9WCjymhZnowLoukZ8ia4ajVPkNUFk6qdDByuGLAjYVWVGFP1rcuKmeoaXDg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/log-highlight@0.1.1':
@@ -906,24 +906,24 @@ packages:
     engines: {node: '>=18.20.3 || >=20.18.0'}
     hasBin: true
 
-  '@lazyapps/logger@0.1.0':
-    resolution: {integrity: sha512-PmO2D8K0vPFljs3lfft/VVBy0NNjiynuJDy2GUYP12dmfsVhK2qCpzIpP/NR3X61Ye+i0359g1iaAna6TmkF+w==}
+  '@lazyapps/logger@0.2.0':
+    resolution: {integrity: sha512-HwF//sp1kMfYQn0DR1jPbdPm10SRiRQ3a/rBic2pCy4xTdwXr182fwYH1Tur88Lk8IN8hraOyz52psxjc22q6A==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/mqemitter@0.1.0':
-    resolution: {integrity: sha512-COFXxxeInpurQzZ3penRsajWXteKcHVfCJgHoP3S6mD6yaed7GuIq/ikGc4b/9McLg3wLWIyqmbxpHIDlU4D4Q==}
+  '@lazyapps/mqemitter@0.2.0':
+    resolution: {integrity: sha512-g4Qtq4Mej4qCXL50lHTEt0/P6oVafJsSnURV/i4gXLqnbEQc3J2/EH8zhDM8y3CRJDVgdGPEFy9N9wHYrMxWHw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/observability@0.1.0':
-    resolution: {integrity: sha512-4xPj14QJN0QG4nVSSj6FaNSHK836oukg9tctUQ8oSEaH/cUYp6mZm8OBE3utBnwuOX8DOATtiCfbLsyOm39OOQ==}
+  '@lazyapps/observability@0.2.0':
+    resolution: {integrity: sha512-Xa7KaYbtTLoSqo2HQtkruuLQRU14kq/hXSNRETbTD917q7qIk+OtYTojP9r53fcjgacl/Aagox52cBievAWJsQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/readmodels@0.1.0':
-    resolution: {integrity: sha512-ke3xPo5CRQ/u7eaNgw3ogjVu9CPvXUerxU1bLtyMLRluZohQcqEh/UtvS1m12YScKSYWCXXlF4FMhXyOCpF9Sg==}
+  '@lazyapps/readmodels@0.1.2':
+    resolution: {integrity: sha512-52SvjIIZQyMplLoKuZxJMzib8d0flRbvT/B4jlr5z8Mkd0ghV2zT8xWclq5i6DIME+aYuC7Qn1ABfmPZzfj/KQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/readmodelstorage-mongodb@0.1.0':
-    resolution: {integrity: sha512-XMJfeIPFiA3A6gbn79ryOCf5oj/gdxRmUuHjawQvEw44uqtkLR4JOfGWHNowGjg5UfImyjGFmuYYhyIjjaENzw==}
+  '@lazyapps/readmodelstorage-mongodb@0.1.2':
+    resolution: {integrity: sha512-wfsL7oymQRkw48P+4zNeUJr9Zu1TkhHtWSXPhOn6lCq1dOqpgw3oYESM0Dvnz8xSl/TwLKGEdWOnyekaH2NK1Q==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@mongodb-js/saslprep@1.4.5':
@@ -4448,15 +4448,16 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@lazyapps/aggregatestore-inmemory@0.1.0':
+  '@lazyapps/aggregatestore-inmemory@0.1.2':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
 
-  '@lazyapps/bootstrap@0.1.2(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.2.0(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.1.0
-      '@lazyapps/logger': 0.1.0
-      '@lazyapps/readmodels': 0.1.0
+      '@lazyapps/command-processor': 0.1.2
+      '@lazyapps/logger': 0.2.0
+      '@lazyapps/readmodels': 0.1.2
+      '@opentelemetry/api': 1.9.0
     optionalDependencies:
       '@sveltejs/kit': 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
       vite: 4.5.14(@types/node@25.2.1)
@@ -4468,11 +4469,12 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/bootstrap@0.1.2(vite@5.4.21(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.2.0(vite@5.4.21(@types/node@25.2.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.1.0
-      '@lazyapps/logger': 0.1.0
-      '@lazyapps/readmodels': 0.1.0
+      '@lazyapps/command-processor': 0.1.2
+      '@lazyapps/logger': 0.2.0
+      '@lazyapps/readmodels': 0.1.2
+      '@opentelemetry/api': 1.9.0
     optionalDependencies:
       vite: 5.4.21(@types/node@25.2.1)
     transitivePeerDependencies:
@@ -4483,21 +4485,22 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/change-notification-sender-fetch@0.1.0':
+  '@lazyapps/change-notification-sender-fetch@0.1.2':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
       isomorphic-fetch: 3.0.0
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/change-notifier-socket-io@0.1.1':
+  '@lazyapps/change-notifier-socket-io@0.1.3':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
       body-parser: 1.20.4
       cookie: 0.5.0
       cookie-parser: 1.4.7
       cors: 2.8.6
       express: 4.22.1
+      express-jwt: 8.5.1
       jsonwebtoken: 9.0.3
       morgan: 1.10.1
       nanoid: 5.1.6
@@ -4508,12 +4511,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@lazyapps/command-processor@0.1.0':
+  '@lazyapps/command-processor@0.1.2':
     dependencies:
-      '@lazyapps/aggregatestore-inmemory': 0.1.0
-      '@lazyapps/eventbus-mqemitter-redis': 0.1.0
-      '@lazyapps/eventstore-mongodb': 0.1.1
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/aggregatestore-inmemory': 0.1.2
+      '@lazyapps/eventbus-mqemitter-redis': 0.1.2
+      '@lazyapps/eventstore-mongodb': 0.1.3
+      '@lazyapps/logger': 0.2.0
+      '@opentelemetry/api': 1.9.0
       nanoid: 5.1.6
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
@@ -4523,30 +4527,30 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/command-sender-fetch@0.1.0':
+  '@lazyapps/command-sender-fetch@0.1.2':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
       isomorphic-fetch: 3.0.0
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.0':
+  '@lazyapps/eventbus-mqemitter-redis@0.1.2':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
       mqemitter-redis: 5.1.0
       p-retry: 6.2.1
     transitivePeerDependencies:
       - supports-color
 
-  '@lazyapps/eventbus-rabbitmq@0.1.0':
+  '@lazyapps/eventbus-rabbitmq@0.1.2':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
       amqplib: 0.10.9
       p-retry: 6.2.1
 
-  '@lazyapps/eventstore-mongodb@0.1.1':
+  '@lazyapps/eventstore-mongodb@0.1.3':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
       mongodb: 5.9.2
       p-retry: 6.2.1
     transitivePeerDependencies:
@@ -4556,9 +4560,9 @@ snapshots:
       - mongodb-client-encryption
       - snappy
 
-  '@lazyapps/express@0.1.0':
+  '@lazyapps/express@0.1.4':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
       body-parser: 1.20.4
       cookie-parser: 1.4.7
       cors: 2.8.6
@@ -4574,23 +4578,25 @@ snapshots:
       chalk: 5.6.2
       colord: 2.9.3
 
-  '@lazyapps/logger@0.1.0':
+  '@lazyapps/logger@0.2.0':
     dependencies:
       chalk: 5.6.2
       loglevel: 1.9.2
       loglevel-plugin-prefix: 0.8.4
 
-  '@lazyapps/mqemitter@0.1.0(mqemitter@5.0.0)':
+  '@lazyapps/mqemitter@0.2.0(mqemitter@5.0.0)':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
+      '@opentelemetry/api': 1.9.0
       mqemitter-cs: 1.0.1(mqemitter@5.0.0)
       nanoid: 5.1.6
     transitivePeerDependencies:
       - mqemitter
 
-  '@lazyapps/observability@0.1.0':
+  '@lazyapps/observability@0.2.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
+      '@opentelemetry/api-logs': 0.211.0
       '@opentelemetry/exporter-logs-otlp-grpc': 0.211.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-metrics-otlp-grpc': 0.211.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-trace-otlp-grpc': 0.211.0(@opentelemetry/api@1.9.0)
@@ -4607,15 +4613,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@lazyapps/readmodels@0.1.0':
+  '@lazyapps/readmodels@0.1.2':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
+      '@opentelemetry/api': 1.9.0
       lodash: 4.17.23
       promise-queue: 2.2.5
 
-  '@lazyapps/readmodelstorage-mongodb@0.1.0':
+  '@lazyapps/readmodelstorage-mongodb@0.1.2':
     dependencies:
-      '@lazyapps/logger': 0.1.0
+      '@lazyapps/logger': 0.2.0
       mongodb: 5.9.2
       p-retry: 6.2.1
     transitivePeerDependencies:

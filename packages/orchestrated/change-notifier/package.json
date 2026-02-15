@@ -15,10 +15,10 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@lazyapps/bootstrap": "^0.1.2",
-    "@lazyapps/change-notifier-socket-io": "^0.1.1",
-    "@lazyapps/logger": "^0.1.0",
-    "@lazyapps/observability": "^0.1.0"
+    "@lazyapps/bootstrap": "^0.2.0",
+    "@lazyapps/change-notifier-socket-io": "^0.1.3",
+    "@lazyapps/logger": "^0.2.0",
+    "@lazyapps/observability": "^0.2.0"
   },
   "type": "module"
 }
