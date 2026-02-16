@@ -5,7 +5,20 @@
   "type": "module",
   "scripts": {
     "pnpm-update": "pnpm --recursive update --latest",
-    "test:e2e": "./tests/e2e/run.sh"
+    "test:e2e": "./tests/e2e/run.sh",
+    "use-branch": "node scripts/use-branch-packages.js",
+    "use-released": "node scripts/use-released-packages.js",
+    "orch:build": "docker compose -f packages/orchestrated/compose.yml build",
+    "orch:start": "docker compose -f packages/orchestrated/compose.yml --profile aspire up -d",
+    "orch:aspire": "docker compose -f packages/orchestrated/compose.yml --profile aspire up -d",
+    "orch:grafana": "OTLP_HOST=grafana OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile grafana up -d",
+    "orch:jaeger": "OTLP_HOST=jaeger OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile jaeger up -d",
+    "orch:signoz": "OTLP_HOST=signoz-otel-collector OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile signoz up -d",
+    "orch:down": "docker compose -f packages/orchestrated/compose.yml --profile aspire --profile grafana --profile jaeger --profile signoz down -v",
+    "orch:logs": "docker compose -f packages/orchestrated/compose.yml logs -f | pnpm exec log-highlight",
+    "mono:start-services": "pnpm --filter @lazyapps/demo-monolith run start-mongo && pnpm --filter @lazyapps/demo-monolith run start-aspire",
+    "mono:start": "pnpm --filter @lazyapps/demo-monolith run start-highlight",
+    "mono:stop-services": "pnpm --filter @lazyapps/demo-monolith run stop-services"
   },
   "repository": {
     "type": "git",
