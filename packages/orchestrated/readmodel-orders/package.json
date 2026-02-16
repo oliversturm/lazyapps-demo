@@ -21,7 +21,7 @@
     "@lazyapps/eventbus-rabbitmq": "^0.1.2",
     "@lazyapps/express": "^0.1.4",
     "@lazyapps/logger": "^0.2.0",
-    "@lazyapps/observability": "^0.2.0",
+    "@lazyapps/observability": "^0.3.0",
     "@lazyapps/readmodels": "^0.1.2",
     "@lazyapps/readmodelstorage-mongodb": "^0.1.2",
     "express-graphql": "^0.12.0",

@@ -1,6 +1,7 @@
 x-otel-env: &otel-env
   OTEL_EXPORTER_OTLP_ENDPOINT: 'http://${OTLP_HOST:-dashboard}:${OTLP_PORT:-18889}'
   OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc'
+  OTEL_RESOURCE_ATTRIBUTES: 'service.namespace=lazyapps-demo,deployment.environment.name=development'
 
 services:
   traefik:

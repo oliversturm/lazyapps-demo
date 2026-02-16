@@ -21,7 +21,7 @@
     "@lazyapps/eventstore-mongodb": "^0.1.3",
     "@lazyapps/express": "^0.1.4",
     "@lazyapps/logger": "^0.2.0",
-    "@lazyapps/observability": "^0.2.0"
+    "@lazyapps/observability": "^0.3.0"
   },
   "type": "module"
 }

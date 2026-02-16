@@ -45,8 +45,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0(mqemitter@5.0.0)
       '@lazyapps/observability':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@lazyapps/readmodelstorage-mongodb':
         specifier: ^0.1.2
         version: 0.1.2
@@ -121,8 +121,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@lazyapps/observability':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -152,8 +152,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@lazyapps/observability':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -296,8 +296,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@lazyapps/observability':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@lazyapps/readmodels':
         specifier: ^0.1.2
         version: 0.1.2
@@ -333,8 +333,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
       '@lazyapps/observability':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       '@lazyapps/readmodels':
         specifier: ^0.1.2
         version: 0.1.2
@@ -914,8 +914,8 @@ packages:
     resolution: {integrity: sha512-g4Qtq4Mej4qCXL50lHTEt0/P6oVafJsSnURV/i4gXLqnbEQc3J2/EH8zhDM8y3CRJDVgdGPEFy9N9wHYrMxWHw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/observability@0.2.0':
-    resolution: {integrity: sha512-Xa7KaYbtTLoSqo2HQtkruuLQRU14kq/hXSNRETbTD917q7qIk+OtYTojP9r53fcjgacl/Aagox52cBievAWJsQ==}
+  '@lazyapps/observability@0.3.0':
+    resolution: {integrity: sha512-KQL2TC0WnU0aeF0sp/yNcp3Fx91l5dtx0w+Fz1hNLbsmEvUN/8tf93ZZc4K1qXlMjMBSmljgmPB5TmcYoKfjrg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/readmodels@0.1.2':
@@ -4593,8 +4593,9 @@ snapshots:
     transitivePeerDependencies:
       - mqemitter
 
-  '@lazyapps/observability@0.2.0':
+  '@lazyapps/observability@0.3.0':
     dependencies:
+      '@lazyapps/logger': 0.2.0
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.211.0
       '@opentelemetry/exporter-logs-otlp-grpc': 0.211.0(@opentelemetry/api@1.9.0)

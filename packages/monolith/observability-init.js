@@ -4,11 +4,6 @@ import { trace, context } from '@opentelemetry/api';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 
 initialize({
-  serviceName: 'lazyapps-monolith',
-  otlp: {
-    endpoint:
-      process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317',
-  },
   httpInstrumentation: {
     ignoreIncomingRequestHook: (request) => {
       const url = request.url || '';
@@ -17,9 +12,9 @@ initialize({
         url.startsWith('/node_modules/') ||
         url.startsWith('/src/') ||
         url.endsWith('.svelte') ||
-						url.includes('__vite') ||
-						url.endsWith('.js') ||
-						url.startsWith('/socket.io/')
+        url.includes('__vite') ||
+        url.endsWith('.js') ||
+        url.startsWith('/socket.io/')
       );
     },
   },
