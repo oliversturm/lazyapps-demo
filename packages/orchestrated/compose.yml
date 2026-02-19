@@ -274,6 +274,21 @@ services:
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'change-notifier'
 
+  admin-ui:
+    build: ../../../lazyapps-libs/packages/admin-ui
+    depends_on:
+      - command-processor
+      - readmodel-customers
+      - readmodel-orders
+    develop:
+      watch:
+        - action: sync
+          path: ../../../lazyapps-libs/packages/admin-ui/src
+          target: /app/src
+    environment:
+      ADMIN_COMMAND_PROCESSOR_URL: 'http://commands.localhost'
+      ADMIN_READ_MODEL_SERVICES: '{"rm-customers":"http://rm-customers.localhost","rm-orders":"http://rm-orders.localhost"}'
+
   frontend-react:
     build: ./frontend-react
     depends_on:

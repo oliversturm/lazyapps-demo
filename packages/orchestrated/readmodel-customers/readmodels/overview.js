@@ -1,6 +1,7 @@
 const collectionName = 'customers_overview';
 
 export default {
+  collections: [collectionName],
   projections: {
     CUSTOMER_CREATED: (
       {

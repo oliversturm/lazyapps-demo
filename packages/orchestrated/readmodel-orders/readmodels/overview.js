@@ -88,6 +88,7 @@ const confirmOrder = (
   ]);
 
 export default {
+  collections: [ordersCollectionName, customersCollectionName],
   projections: {
     CUSTOMER_CREATED: ({ storage }, { aggregateId, payload: { name } }) =>
       storage.insertOne(customersCollectionName, { id: aggregateId, name }),

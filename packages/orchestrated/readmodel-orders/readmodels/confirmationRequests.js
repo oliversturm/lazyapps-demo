@@ -25,6 +25,7 @@ export const checkOrderValueSideEffect = (
       });
 
 export default {
+  collections: [confirmationRequestsCollectionName],
   projections: {
     ORDER_CONFIRMATION_REQUIRED: (
       {

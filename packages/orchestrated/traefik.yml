@@ -48,6 +48,12 @@ http:
         - web
       service: change-notifier-orchestrated
 
+    admin-ui-orchestrated:
+      rule: "Host(`admin.localhost`)"
+      entrypoints:
+        - web
+      service: admin-ui-orchestrated
+
     frontend-react-orchestrated:
       rule: "Host(`react.localhost`)"
       entrypoints:
@@ -118,6 +124,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://change-notifier:80"
+
+    admin-ui-orchestrated:
+      loadBalancer:
+        servers:
+          - url: "http://admin-ui:5173"
 
     frontend-react-orchestrated:
       loadBalancer:

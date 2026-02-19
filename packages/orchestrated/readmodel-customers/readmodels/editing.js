@@ -1,6 +1,7 @@
 const collectionName = 'customers_editing';
 
 export default {
+  collections: [collectionName],
   projections: {
     CUSTOMER_CREATED: (
       { storage },

@@ -27,6 +27,7 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
+    "@lazyapps/admin-api": "^0.1.0",
     "@lazyapps/aggregatestore-inmemory": "^0.1.2",
     "@lazyapps/bootstrap": "^0.2.0",
     "@lazyapps/change-notification-sender-fetch": "^0.1.2",
@@ -37,6 +38,7 @@
     "@lazyapps/logger": "^0.2.0",
     "@lazyapps/mqemitter": "^0.2.0",
     "@lazyapps/observability": "^0.3.0",
+    "@lazyapps/readmodel-backup-mongodb": "^0.1.0",
     "@lazyapps/readmodelstorage-mongodb": "^0.1.2",
     "@sveltejs/adapter-auto": "^2.1.0",
     "@sveltejs/kit": "^1.22.4",

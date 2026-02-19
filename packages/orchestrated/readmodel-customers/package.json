@@ -15,6 +15,7 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
+    "@lazyapps/admin-api": "^0.1.0",
     "@lazyapps/bootstrap": "^0.2.0",
     "@lazyapps/change-notification-sender-fetch": "^0.1.2",
     "@lazyapps/command-sender-fetch": "^0.1.2",
@@ -22,6 +23,7 @@
     "@lazyapps/express": "^0.1.4",
     "@lazyapps/logger": "^0.2.0",
     "@lazyapps/observability": "^0.3.0",
+    "@lazyapps/readmodel-backup-mongodb": "^0.1.0",
     "@lazyapps/readmodels": "^0.1.2",
     "@lazyapps/readmodelstorage-mongodb": "^0.1.2"
   },

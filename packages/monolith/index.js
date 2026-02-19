@@ -1,6 +1,7 @@
 import { inmemory } from '@lazyapps/aggregatestore-inmemory';
 import { mongodb as eventStoreMongo } from '@lazyapps/eventstore-mongodb';
 import { mongodb as readModelStorageMongo } from '@lazyapps/readmodelstorage-mongodb';
+import { mongoBackup } from '@lazyapps/readmodel-backup-mongodb';
 import { start } from '@lazyapps/bootstrap';
 import mqemitter from 'mqemitter';
 import {
@@ -23,6 +24,7 @@ log.debug('Starting up');
 
 const mqCommandsPort = process.env.MQ_COMMANDS_PORT || 51883;
 const mqQueriesPort = process.env.MQ_QUERIES_PORT || 51884;
+const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017';
 
 registerSharedMqEmitter('commands', mqemitter(), mqCommandsPort);
 registerSharedMqEmitter('events', mqemitter());
@@ -35,16 +37,14 @@ start({
   commands: {
     receiver: commandReceiverMqEmitter({ mqName: 'commands' }),
     aggregateStore: inmemory(),
-    eventStore: eventStoreMongo({
-      url: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',
-    }),
+    eventStore: eventStoreMongo({ url: mongoUrl }),
     eventBus: commandProcessorEventBusMqEmitter({ mqName: 'events' }),
     aggregates,
   },
   readModels: {
     listener: readModelListenerMqEmitter({ mqName: 'queries' }),
     storage: readModelStorageMongo({
-      url: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',
+      url: mongoUrl,
       database: 'monolith-readmodels',
     }),
     eventBus: readModelEventBusMqEmitter({ mqName: 'events' }),
@@ -74,6 +74,7 @@ start({
       url: 'http://127.0.0.1:53008/change',
     }),
     commandSender: commandSenderMqEmitter({ mqName: 'commands' }),
+    backup: mongoBackup(),
     readModels,
   },
   changeNotifier: {
@@ -93,5 +94,16 @@ start({
     // and then run preview. Or build and
     // run with Node adapter. Not sure
     // we need both?
+  },
+  admin: {
+    port: process.env.ADMIN_PORT || 3005,
+    eventStore: eventStoreMongo({ url: mongoUrl }),
+    readModelStorage: readModelStorageMongo({
+      url: mongoUrl,
+      database: 'monolith-readmodels',
+    }),
+    eventBus: commandProcessorEventBusMqEmitter({ mqName: 'events' }),
+    backup: mongoBackup(),
+    readModels,
   },
 });

@@ -15,6 +15,7 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
+    "@lazyapps/admin-api": "^0.1.0",
     "@lazyapps/aggregatestore-inmemory": "^0.1.2",
     "@lazyapps/bootstrap": "^0.2.0",
     "@lazyapps/eventbus-rabbitmq": "^0.1.2",
