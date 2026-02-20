@@ -105,6 +105,28 @@ export default {
             ),
           ),
         ),
+
+    SUBJECT_FORGOTTEN: (
+      {
+        storage,
+        changeNotification: { sendChangeNotification, createChangeInfo },
+      },
+      { payload: { subjectId } },
+    ) =>
+      storage
+        .deleteMany(confirmationRequestsCollectionName, {
+          customerId: subjectId,
+        })
+        .then(() =>
+          sendChangeNotification(
+            createChangeInfo(
+              'orders',
+              'confirmationRequests',
+              'all',
+              'all',
+            ),
+          ),
+        ),
   },
 
   resolvers: {

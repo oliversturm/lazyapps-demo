@@ -17,6 +17,7 @@
   "dependencies": {
     "@lazyapps/aggregatestore-inmemory": "^0.1.2",
     "@lazyapps/bootstrap": "^0.2.0",
+    "@lazyapps/encryption": "^1.0.0",
     "@lazyapps/eventbus-rabbitmq": "^0.1.2",
     "@lazyapps/eventstore-mongodb": "^0.1.3",
     "@lazyapps/express": "^0.1.4",

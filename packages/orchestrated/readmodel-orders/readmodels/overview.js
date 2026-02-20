@@ -190,6 +190,22 @@ export default {
             }),
           ),
         ),
+
+    SUBJECT_FORGOTTEN: (
+      {
+        storage,
+        changeNotification: { sendChangeNotification, createChangeInfo },
+      },
+      { payload: { subjectId } },
+    ) =>
+      Promise.all([
+        storage.deleteMany(customersCollectionName, { id: subjectId }),
+        storage.deleteMany(ordersCollectionName, { customerId: subjectId }),
+      ]).then(() =>
+        sendChangeNotification(
+          createChangeInfo('orders', 'overview', 'all', 'all'),
+        ),
+      ),
   },
 
   resolvers: {

@@ -17,6 +17,7 @@
   "dependencies": {
     "@lazyapps/bootstrap": "^0.2.0",
     "@lazyapps/change-notification-sender-fetch": "^0.1.2",
+    "@lazyapps/encryption": "^1.0.0",
     "@lazyapps/command-sender-fetch": "^0.1.2",
     "@lazyapps/eventbus-rabbitmq": "^0.1.2",
     "@lazyapps/express": "^0.1.4",

@@ -16,6 +16,9 @@ export default {
         { id: aggregateId },
         { $set: { name, location } },
       ),
+
+    SUBJECT_FORGOTTEN: ({ storage }, { payload: { subjectId } }) =>
+      storage.deleteMany(collectionName, { id: subjectId }),
   },
 
   resolvers: {

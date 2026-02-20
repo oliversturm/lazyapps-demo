@@ -5,12 +5,37 @@ import { changeNotificationSenderFetch } from '@lazyapps/change-notification-sen
 import { start } from '@lazyapps/bootstrap';
 import * as readModels from './readmodels/index.js';
 import { commandSenderFetch } from '@lazyapps/command-sender-fetch';
+import {
+  createEncryption,
+  vaultKeyStore,
+  appRole,
+} from '@lazyapps/encryption';
+import {
+  encryptionSchema,
+  encryptionContexts,
+  readModelEncryptionConfig,
+} from '../common/encryption-config.js';
+
+const encryption = createEncryption({
+  schema: encryptionSchema,
+  keyStore: vaultKeyStore({
+    vaultUrl: process.env.VAULT_ADDR || 'http://vault:8200',
+    authMethod: appRole({
+      roleId: process.env.VAULT_ROLE_ID,
+      secretId: process.env.VAULT_SECRET_ID,
+    }),
+  }),
+  contexts: encryptionContexts,
+  readModelEncryption: readModelEncryptionConfig,
+});
 
 start({
   correlation: {
     serviceId: 'RM/CUS',
   },
+  encryption,
   readModels: {
+    role: 'customer-service',
     listener: express({ port: process.env.EXPRESS_PORT || 3003 }),
     storage: mongodb({
       url: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',

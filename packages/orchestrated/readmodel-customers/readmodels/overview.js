@@ -35,6 +35,19 @@ export default {
             }),
           ),
         ),
+
+    SUBJECT_FORGOTTEN: (
+      {
+        storage,
+        changeNotification: { sendChangeNotification, createChangeInfo },
+      },
+      { payload: { subjectId } },
+    ) =>
+      storage.deleteMany(collectionName, { id: subjectId }).then(() =>
+        sendChangeNotification(
+          createChangeInfo('customers', 'overview', 'all', 'all'),
+        ),
+      ),
   },
 
   resolvers: {

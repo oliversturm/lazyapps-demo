@@ -6,12 +6,37 @@ import { start } from '@lazyapps/bootstrap';
 import * as readModels from './readmodels/index.js';
 import { commandSenderFetch } from '@lazyapps/command-sender-fetch';
 import { customizeExpress } from './graphql-server.js';
+import {
+  createEncryption,
+  vaultKeyStore,
+  appRole,
+} from '@lazyapps/encryption';
+import {
+  encryptionSchema,
+  encryptionContexts,
+  readModelEncryptionConfig,
+} from '../common/encryption-config.js';
+
+const encryption = createEncryption({
+  schema: encryptionSchema,
+  keyStore: vaultKeyStore({
+    vaultUrl: process.env.VAULT_ADDR || 'http://vault:8200',
+    authMethod: appRole({
+      roleId: process.env.VAULT_ROLE_ID,
+      secretId: process.env.VAULT_SECRET_ID,
+    }),
+  }),
+  contexts: encryptionContexts,
+  readModelEncryption: readModelEncryptionConfig,
+});
 
 start({
   correlation: {
     serviceId: 'RM/ORD',
   },
+  encryption,
   readModels: {
+    role: 'order-service',
     listener: express({
       port: process.env.EXPRESS_PORT || 3005,
       customizeExpress,

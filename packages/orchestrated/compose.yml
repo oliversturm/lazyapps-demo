@@ -30,6 +30,37 @@ services:
   rabbit:
     image: rabbitmq:latest
 
+  vault:
+    image: hashicorp/vault:latest
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: 'dev-root-token'
+      VAULT_DEV_LISTEN_ADDRESS: '0.0.0.0:8200'
+    ports:
+      - '8200:8200'
+    volumes:
+      - ./vault-init.sh:/vault-init.sh:ro
+    healthcheck:
+      test: ['CMD', 'vault', 'status']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  vault-init:
+    image: hashicorp/vault:latest
+    depends_on:
+      vault:
+        condition: service_healthy
+    environment:
+      VAULT_ADDR: 'http://vault:8200'
+      VAULT_TOKEN: 'dev-root-token'
+    entrypoint: /bin/sh
+    command: ['/vault-init.sh']
+    volumes:
+      - ./vault-init.sh:/vault-init.sh:ro
+    restart: 'no'
+
   # Aspire Dashboard
   dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
@@ -186,6 +217,7 @@ services:
     depends_on:
       - mongo
       - rabbit
+      - vault-init
     volumes:
       - ./command-records:/command-records:consistent
     develop:
@@ -201,6 +233,9 @@ services:
       LOG_LEVEL: 'trace'
       COMMAND_RECORD_PATH: '/command-records'
       OTEL_SERVICE_NAME: 'command-processor'
+      VAULT_ADDR: 'http://vault:8200'
+      VAULT_ROLE_ID: 'command-processor-role-id'
+      VAULT_SECRET_ID: 'command-processor-secret-id'
 
   readmodel-customers:
     build: ./readmodel-customers
@@ -208,6 +243,7 @@ services:
       - mongo
       - rabbit
       - change-notifier
+      - vault-init
     develop:
       watch:
         - action: sync
@@ -223,6 +259,9 @@ services:
       COMMAND_URL: 'http://command-processor/api/command'
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'readmodel-customers'
+      VAULT_ADDR: 'http://vault:8200'
+      VAULT_ROLE_ID: 'readmodel-customers-role-id'
+      VAULT_SECRET_ID: 'readmodel-customers-secret-id'
 
   readmodel-orders:
     build: ./readmodel-orders
@@ -230,6 +269,7 @@ services:
       - mongo
       - rabbit
       - change-notifier
+      - vault-init
     develop:
       watch:
         - action: sync
@@ -245,6 +285,9 @@ services:
       COMMAND_URL: 'http://command-processor/api/command'
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'readmodel-orders'
+      VAULT_ADDR: 'http://vault:8200'
+      VAULT_ROLE_ID: 'readmodel-orders-role-id'
+      VAULT_SECRET_ID: 'readmodel-orders-secret-id'
 
   readmodel-dotnet:
     build:
