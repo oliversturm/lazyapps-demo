@@ -1,4 +1,4 @@
 import { SystemContext, SystemProvider } from './provider';
-import { useCommands, useReadModel } from './hooks';
+import { useCommands, useForgetSubject, useReadModel } from './hooks';
 
-export { SystemContext, SystemProvider, useReadModel, useCommands };
+export { SystemContext, SystemProvider, useReadModel, useCommands, useForgetSubject };

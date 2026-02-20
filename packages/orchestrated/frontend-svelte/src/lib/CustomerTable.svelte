@@ -2,6 +2,7 @@
   import { v4 as uuid } from 'uuid';
 
   import Button from './Button.svelte';
+  import { forgetSubject } from './commands';
 
   import Table from './table/Table.svelte';
   import Tbody from './table/Tbody.svelte';
@@ -12,6 +13,12 @@
   import Working from './Working.svelte';
 
   export let store;
+
+  const handleForget = (id, name) => {
+    if (confirm(`Forget customer "${name}"? This cannot be undone.`)) {
+      forgetSubject(id);
+    }
+  };
 </script>
 
 {#if !$store.loaded}
@@ -36,6 +43,11 @@
               kind="inline"
               text="Place Order"
               target={`/order/${row.id}/${uuid()}`}
+            />
+            <Button
+              kind="inline"
+              text="Forget"
+              on:click={() => handleForget(row.id, row.name)}
             />
           </Td>
           <Td>{row.id}</Td>

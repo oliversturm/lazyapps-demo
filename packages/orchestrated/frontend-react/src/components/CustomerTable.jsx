@@ -3,7 +3,7 @@ import Button from './Button';
 import { Table, Tbody, Td, Th, Thead, Tr } from './Table';
 import { Working } from './Working';
 
-const CustomerTable = ({ data, rowEdit, onPlaceOrder }) => {
+const CustomerTable = ({ data, rowEdit, onPlaceOrder, onForget }) => {
   return data ? (
     <Table>
       <Thead>
@@ -26,6 +26,11 @@ const CustomerTable = ({ data, rowEdit, onPlaceOrder }) => {
                 kind="inline"
                 onClick={() => onPlaceOrder(row.id)}
                 text="Place Order"
+              />
+              <Button
+                kind="inline"
+                onClick={() => onForget(row.id, row.name)}
+                text="Forget"
               />
             </Td>
             <Td>{row.id}</Td>

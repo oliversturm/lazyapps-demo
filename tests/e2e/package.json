@@ -2,6 +2,7 @@
   "name": "lazyapps-e2e",
   "private": true,
   "scripts": {
+    "install:lockfile": "pnpm install --ignore-workspace",
     "test": "playwright test"
   },
   "dependencies": {

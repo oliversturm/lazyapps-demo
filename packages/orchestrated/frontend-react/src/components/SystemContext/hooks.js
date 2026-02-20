@@ -28,4 +28,9 @@ const useCommands = (options = {}) => {
   return finalCommands;
 };
 
-export { useReadModel, useCommands };
+const useForgetSubject = () => {
+  const { forgetSubject } = useContext(SystemContext);
+  return forgetSubject;
+};
+
+export { useReadModel, useCommands, useForgetSubject };

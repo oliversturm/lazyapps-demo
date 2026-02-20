@@ -42,6 +42,13 @@ const SystemProvider = ({
         }),
         {},
       ),
+      forgetSubject: (subjectId) => {
+        const baseUrl = new URL(commandEndpoint).origin;
+        return postCommand(`${baseUrl}/api/forget-subject`, {
+          subjectId,
+          correlationId: `REACT-${nanoid()}`,
+        });
+      },
     }),
     [aggregates, readModelEndpoints, commandEndpoint, changeNotifierEndpoint],
   );

@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid';
 
 const commandEndpoint = import.meta.env.VITE_COMMAND_URL || 'http://127.0.0.1:3001/api/command';
+const commandBaseUrl = new URL(commandEndpoint).origin;
 
 // Same code as React
 const _postCommand = (endpoint, content) => {
@@ -25,3 +26,6 @@ const _postCommand = (endpoint, content) => {
 };
 
 export const postCommand = (content) => _postCommand(commandEndpoint, content);
+
+export const forgetSubject = (subjectId) =>
+	_postCommand(`${commandBaseUrl}/api/forget-subject`, { subjectId });

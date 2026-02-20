@@ -213,7 +213,9 @@ services:
       LOW_CARDINAL_EXCEPTION_GROUPING: 'false'
 
   command-processor:
-    build: ./command-processor
+    build:
+      context: .
+      dockerfile: command-processor/Dockerfile
     depends_on:
       - mongo
       - rabbit
@@ -224,7 +226,7 @@ services:
       watch:
         - action: sync
           path: ./command-processor
-          target: /app
+          target: /app/command-processor
     environment:
       <<: *otel-env
       EXPRESS_PORT: '80'
@@ -238,7 +240,9 @@ services:
       VAULT_SECRET_ID: 'command-processor-secret-id'
 
   readmodel-customers:
-    build: ./readmodel-customers
+    build:
+      context: .
+      dockerfile: readmodel-customers/Dockerfile
     depends_on:
       - mongo
       - rabbit
@@ -248,7 +252,7 @@ services:
       watch:
         - action: sync
           path: ./readmodel-customers
-          target: /app
+          target: /app/readmodel-customers
     environment:
       <<: *otel-env
       EXPRESS_PORT: '80'
@@ -264,7 +268,9 @@ services:
       VAULT_SECRET_ID: 'readmodel-customers-secret-id'
 
   readmodel-orders:
-    build: ./readmodel-orders
+    build:
+      context: .
+      dockerfile: readmodel-orders/Dockerfile
     depends_on:
       - mongo
       - rabbit
@@ -274,7 +280,7 @@ services:
       watch:
         - action: sync
           path: ./readmodel-orders
-          target: /app
+          target: /app/readmodel-orders
     environment:
       <<: *otel-env
       EXPRESS_PORT: '80'
