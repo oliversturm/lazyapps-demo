@@ -13,7 +13,6 @@ import {
 import {
   encryptionSchema,
   encryptionContexts,
-  dekBackend,
 } from '../common/encryption-config.js';
 import * as aggregates from './aggregates/index.js';
 import path from 'path';
@@ -38,7 +37,6 @@ const encryption = createEncryption({
       roleId: process.env.VAULT_ROLE_ID,
       secretId: process.env.VAULT_SECRET_ID,
     }),
-    dekBackend,
   }),
   contexts: encryptionContexts,
 });

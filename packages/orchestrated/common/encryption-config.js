@@ -16,12 +16,6 @@ export const encryptionSchema = defineEncryptionSchema({
   },
 });
 
-export const dekBackend = {
-  url: process.env.DEK_MONGO_URL || process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',
-  database: process.env.DEK_MONGO_DATABASE || 'encryption-keys',
-  collection: process.env.DEK_MONGO_COLLECTION || 'deks',
-};
-
 export const encryptionContexts = {
   personal: { roles: ['admin', 'support', 'self', 'customer-service', 'order-service'] },
   'order-details': { roles: ['admin', 'support', 'sales', 'order-service'] },

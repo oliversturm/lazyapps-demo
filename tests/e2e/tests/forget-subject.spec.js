@@ -7,13 +7,6 @@ import {
 } from './helpers/app.js';
 
 test.describe('Forget subject workflow', () => {
-  test.beforeEach(({ }, testInfo) => {
-    test.skip(
-      testInfo.project.name === 'monolith-svelte',
-      'Forget subject requires encryption (Vault), not available in monolith',
-    );
-  });
-
   test('forgets customer and removes their orders', async ({
     browser,
     baseURL,

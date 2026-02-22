@@ -20,6 +20,7 @@ export default defineConfig({
       use: {
         baseURL: 'http://monolith:5173',
       },
+      testIgnore: /forget-subject/,
     },
     {
       name: 'orchestrated-svelte',
