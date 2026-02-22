@@ -3,6 +3,12 @@ set -e
 
 echo "Initializing Vault for LazyApps encryption..."
 
+# Skip if already initialized (idempotent for re-runs)
+if vault read auth/approle/role/command-processor >/dev/null 2>&1; then
+  echo "Vault already initialized, skipping."
+  exit 0
+fi
+
 # Enable transit secrets engine
 vault secrets enable transit 2>/dev/null || echo "Transit engine already enabled"
 

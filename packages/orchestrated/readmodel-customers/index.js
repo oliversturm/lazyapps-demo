@@ -13,7 +13,7 @@ import {
 import {
   encryptionSchema,
   encryptionContexts,
-  readModelEncryptionConfig,
+  dekBackend,
 } from '../common/encryption-config.js';
 
 const encryption = createEncryption({
@@ -24,9 +24,9 @@ const encryption = createEncryption({
       roleId: process.env.VAULT_ROLE_ID,
       secretId: process.env.VAULT_SECRET_ID,
     }),
+    dekBackend,
   }),
   contexts: encryptionContexts,
-  readModelEncryption: readModelEncryptionConfig,
 });
 
 start({

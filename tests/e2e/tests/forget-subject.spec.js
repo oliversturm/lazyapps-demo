@@ -56,7 +56,7 @@ test.describe('Forget subject workflow', () => {
       page1.on('dialog', (dialog) => dialog.accept());
 
       // Click Forget
-      await row.getByText('Forget').click();
+      await row.getByText('Forget', { exact: true }).click();
 
       // Customer should disappear from overview
       await expect(page1.getByText(customerName)).toBeHidden({
