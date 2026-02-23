@@ -14,6 +14,13 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
     `LLM client initialized (model: ${defaultModel}, baseURL: ${baseURL || 'default'})`,
   );
 
+  const describeError = (err) => {
+    const status = err.status ? `${err.status} ` : '';
+    const detail =
+      err.error?.detail || err.error?.message || err.message || String(err);
+    return `${status}${detail}`;
+  };
+
   // Simple chat completion (no tools)
   const chatCompletion = async (
     messages,
@@ -24,10 +31,17 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
       : messages;
 
     const startTime = Date.now();
-    const response = await client.chat.completions.create({
-      model: modelOverride || defaultModel,
-      messages: fullMessages,
-    });
+    let response;
+    try {
+      response = await client.chat.completions.create({
+        model: modelOverride || defaultModel,
+        messages: fullMessages,
+      });
+    } catch (err) {
+      const desc = describeError(err);
+      log.error(`Chat completion failed: ${desc}`);
+      throw new Error(`Chat completion failed: ${desc}`);
+    }
     const duration = Date.now() - startTime;
     const usage = response.usage;
 
@@ -52,11 +66,18 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
       : messages;
 
     const startTime = Date.now();
-    const response = await client.chat.completions.create({
-      model: modelOverride || defaultModel,
-      messages: fullMessages,
-      response_format: { type: 'json_object' },
-    });
+    let response;
+    try {
+      response = await client.chat.completions.create({
+        model: modelOverride || defaultModel,
+        messages: fullMessages,
+        response_format: { type: 'json_object' },
+      });
+    } catch (err) {
+      const desc = describeError(err);
+      log.error(`JSON completion failed: ${desc}`);
+      throw new Error(`JSON completion failed: ${desc}`);
+    }
     const duration = Date.now() - startTime;
     const usage = response.usage;
 
@@ -95,11 +116,18 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
     const toolCalls = []; // track for transparency
 
     for (let i = 0; i < maxIterations; i++) {
-      const response = await client.chat.completions.create({
-        model: modelOverride || defaultModel,
-        messages: fullMessages,
-        tools,
-      });
+      let response;
+      try {
+        response = await client.chat.completions.create({
+          model: modelOverride || defaultModel,
+          messages: fullMessages,
+          tools,
+        });
+      } catch (err) {
+        const desc = describeError(err);
+        log.error(`Tool completion failed: ${desc}`);
+        throw new Error(`Tool completion failed: ${desc}`);
+      }
 
       totalTokens += response.usage?.total_tokens || 0;
       const { finish_reason, message } = response.choices[0];
@@ -144,11 +172,18 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
       ? [{ role: 'system', content: systemPrompt }, ...messages]
       : messages;
 
-    const stream = await client.chat.completions.create({
-      model: modelOverride || defaultModel,
-      messages: fullMessages,
-      stream: true,
-    });
+    let stream;
+    try {
+      stream = await client.chat.completions.create({
+        model: modelOverride || defaultModel,
+        messages: fullMessages,
+        stream: true,
+      });
+    } catch (err) {
+      const desc = describeError(err);
+      log.error(`Stream completion failed: ${desc}`);
+      throw new Error(`Stream completion failed: ${desc}`);
+    }
 
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content;
