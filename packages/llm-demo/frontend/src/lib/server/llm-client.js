@@ -18,6 +18,10 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
     const status = err.status ? `${err.status} ` : '';
     const detail =
       err.error?.detail || err.error?.message || err.message || String(err);
+    // Log the full error body for 5xx errors where providers give minimal info
+    if (err.status >= 500 && err.error) {
+      log.debug(`Full provider error: ${JSON.stringify(err.error)}`);
+    }
     return `${status}${detail}`;
   };
 
