@@ -141,10 +141,16 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
         };
       }
 
-      // Execute tool calls — construct a clean assistant message to avoid
-      // provider-specific extra fields (e.g. reasoning_content, name: null)
-      // that some APIs reject on the follow-up request.
-      const assistantMessage = { role: 'assistant', tool_calls: message.tool_calls };
+      // Execute tool calls — construct a fully clean assistant message to
+      // avoid provider-specific extra fields (e.g. reasoning_content,
+      // name: null) that some APIs reject on the follow-up request.
+      // Deep-clone tool_calls to sever any reference to SDK response objects.
+      const cleanToolCalls = message.tool_calls.map((tc) => ({
+        id: tc.id,
+        type: 'function',
+        function: { name: tc.function.name, arguments: tc.function.arguments },
+      }));
+      const assistantMessage = { role: 'assistant', tool_calls: cleanToolCalls };
       if (message.content) assistantMessage.content = message.content;
       fullMessages.push(assistantMessage);
       for (const toolCall of message.tool_calls) {
