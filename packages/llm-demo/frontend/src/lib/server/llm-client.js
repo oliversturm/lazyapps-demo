@@ -141,8 +141,12 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
         };
       }
 
-      // Execute tool calls
-      fullMessages.push(message);
+      // Execute tool calls — construct a clean assistant message to avoid
+      // provider-specific extra fields (e.g. reasoning_content, name: null)
+      // that some APIs reject on the follow-up request.
+      const assistantMessage = { role: 'assistant', tool_calls: message.tool_calls };
+      if (message.content) assistantMessage.content = message.content;
+      fullMessages.push(assistantMessage);
       for (const toolCall of message.tool_calls) {
         const args = JSON.parse(toolCall.function.arguments);
         const result = await executeToolFn(toolCall.function.name, args);
