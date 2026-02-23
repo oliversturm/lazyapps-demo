@@ -33,7 +33,6 @@ services:
   # Aspire Dashboard
   dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
-    profiles: ['aspire']
     environment:
       ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: 'true'
 
