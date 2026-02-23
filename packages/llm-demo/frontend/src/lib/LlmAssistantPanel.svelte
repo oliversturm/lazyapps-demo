@@ -144,6 +144,9 @@
   }
 
   const addMessage = (msg) => {
+    if (!conversationsByContext[currentPage]) {
+      conversationsByContext[currentPage] = [];
+    }
     conversationsByContext[currentPage] = [
       ...conversationsByContext[currentPage],
       msg,
@@ -273,7 +276,9 @@
   $: if (messages.length && messagesContainer) {
     // Scroll to bottom when new messages arrive
     setTimeout(() => {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
     }, 0);
   }
 </script>
