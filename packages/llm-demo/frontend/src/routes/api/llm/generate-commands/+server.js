@@ -1,6 +1,8 @@
+import { json } from '@sveltejs/kit';
 import { getLogger } from '@lazyapps/logger';
+import { llmClient } from '$lib/server/llm.js';
 
-const MAX_COMMANDS = 10; // R-4.3.3: configurable max commands per request
+const MAX_COMMANDS = 10;
 
 const buildSystemPrompt = (
   context,
@@ -60,59 +62,57 @@ User: "Place an order for office supplies worth 500 for Acme Corp" (where Acme C
 Response: {"commands": [{"aggregateName": "order", "aggregateId": "f6e5d4c3-b2a1-4098-7654-321fedcba987", "command": "CREATE", "payload": {"customerId": "abc-123", "text": "Office supplies", "value": 500}}]}
 `;
 
-export const createGenerateCommandsRoute = (llmClient) => {
-  const log = getLogger('LLM', 'GEN-CMD');
+const log = getLogger('LLM', 'GEN-CMD');
 
-  return async (req, res) => {
-    const { text, context, conversationHistory } = req.body;
+export const POST = async ({ request }) => {
+  const { text, context, conversationHistory } = await request.json();
 
-    if (!text) {
-      return res.status(400).json({ error: 'text is required' });
-    }
+  if (!text) {
+    return json({ error: 'text is required' }, { status: 400 });
+  }
 
-    const systemPrompt = buildSystemPrompt(context || {});
-    const messages = [
-      ...(conversationHistory || []),
-      { role: 'user', content: text },
-    ];
+  const systemPrompt = buildSystemPrompt(context || {});
+  const messages = [
+    ...(conversationHistory || []),
+    { role: 'user', content: text },
+  ];
 
-    try {
-      const result = await llmClient.jsonCompletion(messages, {
-        systemPrompt,
-      });
+  try {
+    const result = await llmClient.jsonCompletion(messages, {
+      systemPrompt,
+    });
 
-      if (result.error) {
-        log.error(`JSON parse error: ${result.error}`);
-        return res.json({
-          commands: [],
-          explanation: 'Failed to parse LLM response as JSON',
-          raw: result.raw,
-          usage: result.usage,
-          duration: result.duration,
-        });
-      }
-
-      const content = result.content;
-      const commands = Array.isArray(content.commands)
-        ? content.commands.slice(0, MAX_COMMANDS)
-        : [];
-
-      log.info(
-        `Generated ${commands.length} commands for: "${text.substring(0, 80)}"`,
-      );
-
-      res.json({
-        commands,
-        explanation: content.explanation || null,
+    if (result.error) {
+      log.error(`JSON parse error: ${result.error}`);
+      return json({
+        commands: [],
+        explanation: 'Failed to parse LLM response as JSON',
+        raw: result.raw,
         usage: result.usage,
         duration: result.duration,
       });
-    } catch (error) {
-      log.error(`Generate commands failed: ${error.message}`);
-      res.status(500).json({
-        error: 'Command generation failed',
-        message: error.message,
-      });
     }
-  };
+
+    const content = result.content;
+    const commands = Array.isArray(content.commands)
+      ? content.commands.slice(0, MAX_COMMANDS)
+      : [];
+
+    log.info(
+      `Generated ${commands.length} commands for: "${text.substring(0, 80)}"`,
+    );
+
+    return json({
+      commands,
+      explanation: content.explanation || null,
+      usage: result.usage,
+      duration: result.duration,
+    });
+  } catch (error) {
+    log.error(`Generate commands failed: ${error.message}`);
+    return json(
+      { error: 'Command generation failed', message: error.message },
+      { status: 500 },
+    );
+  }
 };

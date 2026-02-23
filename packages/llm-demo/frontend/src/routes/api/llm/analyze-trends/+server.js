@@ -1,4 +1,6 @@
+import { json } from '@sveltejs/kit';
 import { getLogger } from '@lazyapps/logger';
+import { llmClient } from '$lib/server/llm.js';
 
 const RM_CUSTOMERS_URL =
   process.env.RM_CUSTOMERS_URL || 'http://readmodel-customers';
@@ -17,10 +19,10 @@ const fetchCustomer = (customerId) =>
 
 // Fetch orders for a customer from readmodel-orders
 const fetchOrdersByCustomer = (customerId) =>
-  fetch(`${RM_ORDERS_URL}/query/overview/customerById`, {
+  fetch(`${RM_ORDERS_URL}/query/overview/ordersByCustomerId`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: customerId }),
+    body: JSON.stringify({ customerId }),
   }).then((res) => res.json());
 
 // Fetch all orders (for cross-customer analysis)
@@ -152,83 +154,87 @@ ${JSON.stringify(allOrders.slice(0, 100).map((o) => ({ id: o.id, customerId: o.c
   },
 };
 
-export const createAnalyzeTrendsRoute = (llmClient) => {
-  const log = getLogger('LLM', 'TRENDS');
+const log = getLogger('LLM', 'TRENDS');
 
-  return async (req, res) => {
-    const { analysisType, customerId, conversationHistory } = req.body;
+export const POST = async ({ request }) => {
+  const { analysisType, customerId, conversationHistory } =
+    await request.json();
 
-    if (!analysisType) {
-      return res.status(400).json({ error: 'analysisType is required' });
-    }
+  if (!analysisType) {
+    return json({ error: 'analysisType is required' }, { status: 400 });
+  }
 
-    const promptConfig = ANALYSIS_PROMPTS[analysisType];
-    if (!promptConfig) {
-      return res.status(400).json({
+  const promptConfig = ANALYSIS_PROMPTS[analysisType];
+  if (!promptConfig) {
+    return json(
+      {
         error: `Unknown analysisType: ${analysisType}`,
         validTypes: Object.keys(ANALYSIS_PROMPTS),
-      });
+      },
+      { status: 400 },
+    );
+  }
+
+  try {
+    // Fetch data from read models
+    const [customer, orders, allOrders] = await Promise.all([
+      customerId ? fetchCustomer(customerId) : null,
+      customerId ? fetchOrdersByCustomer(customerId) : [],
+      promptConfig.needsAllOrders ? fetchAllOrders() : [],
+    ]);
+
+    if (customerId && !customer) {
+      return json(
+        { error: `Customer ${customerId} not found` },
+        { status: 404 },
+      );
     }
 
-    try {
-      // Fetch data from read models (R-5.1.3, R-5.1.4)
-      const [customer, orders, allOrders] = await Promise.all([
-        customerId ? fetchCustomer(customerId) : null,
-        customerId ? fetchOrdersByCustomer(customerId) : [],
-        promptConfig.needsAllOrders ? fetchAllOrders() : [],
-      ]);
+    // Build analysis prompt with fetched data
+    const systemPrompt = promptConfig.buildPrompt(
+      customer,
+      orders,
+      allOrders,
+    );
+    const messages = [
+      ...(conversationHistory || []),
+      {
+        role: 'user',
+        content: promptConfig.userMessage(customer, orders),
+      },
+    ];
 
-      if (customerId && !customer) {
-        return res
-          .status(404)
-          .json({ error: `Customer ${customerId} not found` });
-      }
+    const result = await llmClient.jsonCompletion(messages, {
+      systemPrompt,
+    });
 
-      // Build analysis prompt with fetched data
-      const systemPrompt = promptConfig.buildPrompt(
-        customer,
-        orders,
-        allOrders,
-      );
-      const messages = [
-        ...(conversationHistory || []),
-        {
-          role: 'user',
-          content: promptConfig.userMessage(customer, orders),
-        },
-      ];
-
-      const result = await llmClient.jsonCompletion(messages, {
-        systemPrompt,
-      });
-
-      if (result.error) {
-        log.error(`Analysis parse error: ${result.error}`);
-        return res.json({
-          analysisType,
-          result: null,
-          error: 'Failed to parse analysis response',
-          usage: result.usage,
-          duration: result.duration,
-        });
-      }
-
-      log.info(
-        `Analysis complete: ${analysisType} for customer ${customerId || 'all'}`,
-      );
-
-      res.json({
+    if (result.error) {
+      log.error(`Analysis parse error: ${result.error}`);
+      return json({
         analysisType,
-        customerId,
-        result: result.content,
+        result: null,
+        error: 'Failed to parse analysis response',
         usage: result.usage,
         duration: result.duration,
       });
-    } catch (error) {
-      log.error(`Analyze trends failed: ${error.message}`);
-      res
-        .status(500)
-        .json({ error: 'Analysis failed', message: error.message });
     }
-  };
+
+    log.info(
+      `Analysis complete: ${analysisType} for customer ${customerId || 'all'}`,
+    );
+
+    return json({
+      analysisType,
+      customerId,
+      result: result.content,
+      usage: result.usage,
+      duration: result.duration,
+    });
+  } catch (error) {
+    log.error(`Analyze trends failed: ${error.message}`);
+    return json(
+      { error: 'Analysis failed', message: error.message },
+      { status: 500 },
+    );
+  }
 };

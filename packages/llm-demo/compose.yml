@@ -100,7 +100,6 @@ services:
       - mongo
       - rabbit
       - change-notifier
-      - llm-service
     develop:
       watch:
         - action: sync
@@ -114,7 +113,10 @@ services:
       RABBIT_URL: 'amqp://rabbit'
       CHANGENOTIFICATION_FETCH_URL: 'http://change-notifier/change'
       COMMAND_URL: 'http://command-processor/api/command'
-      LLM_SERVICE_URL: 'http://llm-service'
+      LLM_API_KEY: '${LLM_API_KEY:-}'
+      LLM_BASE_URL: '${LLM_BASE_URL:-}'
+      LLM_MODEL: '${LLM_MODEL:-gpt-4o}'
+      LLM_MOCK: '${LLM_MOCK:-true}'
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'readmodel-orders'
 
@@ -146,6 +148,7 @@ services:
       - command-processor
       - readmodel-customers
       - readmodel-orders
+      - readmodel-events
       - change-notifier
     develop:
       watch:
@@ -159,28 +162,10 @@ services:
       VITE_RM_ORDERS_URL: 'http://rm-orders.localhost'
       VITE_COMMAND_URL: 'http://commands.localhost/api/command'
       VITE_CHANGENOTIFIER_URL: 'http://change-notifier.localhost'
-      VITE_LLM_URL: 'http://llm.localhost'
-
-  llm-service:
-    build: ./llm-service
-    depends_on:
-      - readmodel-customers
-      - readmodel-orders
-      - readmodel-events
-    develop:
-      watch:
-        - action: sync
-          path: ./llm-service
-          target: /app
-    environment:
-      <<: *otel-env
-      EXPRESS_PORT: '80'
       LLM_API_KEY: '${LLM_API_KEY:-}'
       LLM_BASE_URL: '${LLM_BASE_URL:-}'
       LLM_MODEL: '${LLM_MODEL:-gpt-4o}'
       LLM_MOCK: '${LLM_MOCK:-true}'
-      LOG_LEVEL: 'trace'
-      OTEL_SERVICE_NAME: 'llm-service'
       RM_CUSTOMERS_URL: 'http://readmodel-customers'
       RM_ORDERS_URL: 'http://readmodel-orders'
       RM_EVENTS_URL: 'http://readmodel-events'

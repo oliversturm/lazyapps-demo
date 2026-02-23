@@ -123,13 +123,13 @@ export default {
             { name: 'LLM reputation check', execution: 'liveOnly' },
           ),
           sideEffects.schedule(
-            () =>
-              trendAnalysisSideEffect(
-                storage,
-                changeNotification,
-                order.customerId,
-                order.customerName,
-              ),
+            trendAnalysisSideEffect(
+              storage,
+              commands,
+              changeNotification,
+              order.customerId,
+              order.customerName,
+            ),
             { name: 'Trend analysis check', execution: 'liveOnly' },
           ),
         ]),
@@ -147,5 +147,7 @@ export default {
         .find(customersCollectionName, { id })
         .project({ _id: 0 })
         .toArray(),
+    ordersByCustomerId: (storage, { customerId }) =>
+      storage.find(ordersCollectionName, { customerId }).toArray(),
   },
 };

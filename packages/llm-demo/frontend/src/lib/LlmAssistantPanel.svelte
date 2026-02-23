@@ -28,9 +28,6 @@
   let explanationLoading = false;
   let lastExplainTimestamp = 0;
 
-  // LLM endpoint
-  const llmUrl = import.meta.env.VITE_LLM_URL || 'http://llm.localhost';
-
   // Approach B: notification subscription (D8)
   const ordersEndpoint =
     import.meta.env.VITE_RM_ORDERS_URL || 'http://rm-orders.localhost';
@@ -89,7 +86,7 @@
 
     explanationLoading = true;
     try {
-      const response = await fetch(`${llmUrl}/api/llm/explain-history`, {
+      const response = await fetch(`/api/llm/explain-history`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ aggregateId, aggregateName }),
@@ -169,7 +166,7 @@
     loading = true;
 
     try {
-      const response = await fetch(`${llmUrl}/api/llm/generate-commands`, {
+      const response = await fetch(`/api/llm/generate-commands`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -224,7 +221,7 @@
     analysisLoading = true;
 
     try {
-      const response = await fetch(`${llmUrl}/api/llm/analyze-trends`, {
+      const response = await fetch(`/api/llm/analyze-trends`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

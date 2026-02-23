@@ -36,12 +36,6 @@ http:
         - web
       service: frontend
 
-    llm-service:
-      rule: "Host(`llm.localhost`)"
-      entrypoints:
-        - web
-      service: llm-service
-
     dashboardUI:
       rule: "Host(`dashboardUI.localhost`)"
       entrypoints:
@@ -78,11 +72,6 @@ http:
       loadBalancer:
         servers:
           - url: "http://frontend:5173"
-
-    llm-service:
-      loadBalancer:
-        servers:
-          - url: "http://llm-service:80"
 
     dashboardUI:
       loadBalancer:

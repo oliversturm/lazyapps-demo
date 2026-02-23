@@ -7,9 +7,9 @@ export const doesntExist = (agg) => {
 };
 
 export const has = (ob, field) => {
-  if (!ob[field])
+  if (ob[field] === undefined || ob[field] === null)
     throw new Error(
-      `The object doesn't include the required field '${field}', or its value is empty`,
+      `The object doesn't include the required field '${field}'`,
     );
 };
 

@@ -2,7 +2,6 @@
   import ToolCallDisplay from '$lib/ToolCallDisplay.svelte';
   import UsageInfo from '$lib/UsageInfo.svelte';
 
-  const llmUrl = import.meta.env.VITE_LLM_URL || 'http://llm.localhost';
   let messages = [];
   let conversationHistory = [];
   let inputText = '';
@@ -25,7 +24,7 @@
 
     loading = true;
     try {
-      const response = await fetch(`${llmUrl}/api/llm/query-data`, {
+      const response = await fetch(`/api/llm/query-data`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

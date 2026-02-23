@@ -1,11 +1,13 @@
+import { json } from '@sveltejs/kit';
 import { getLogger } from '@lazyapps/logger';
+import { llmClient } from '$lib/server/llm.js';
 
 const RM_CUSTOMERS_URL =
   process.env.RM_CUSTOMERS_URL || 'http://readmodel-customers';
 const RM_ORDERS_URL =
   process.env.RM_ORDERS_URL || 'http://readmodel-orders';
 
-// -- Tool Definitions (R-7.2.1, R-7.2.2, R-7.2.3) --
+// -- Tool Definitions --
 
 const tools = [
   {
@@ -118,7 +120,7 @@ const executeTool = async (name, args) => {
   }
 };
 
-// -- System Prompt (R-7.3.1) --
+// -- System Prompt --
 
 const systemPrompt = `You are a customer service assistant for an order management system.
 Answer questions about customers and orders using the available tools.
@@ -136,43 +138,41 @@ IMPORTANT RULES:
 
 // -- Route Handler --
 
-export const createQueryDataRoute = (llmClient) => {
-  const log = getLogger('LLM', 'RAG');
+const log = getLogger('LLM', 'RAG');
 
-  return async (req, res) => {
-    const { messages, conversationHistory } = req.body;
+export const POST = async ({ request }) => {
+  const { messages, conversationHistory } = await request.json();
 
-    if (!messages || !Array.isArray(messages)) {
-      return res.status(400).json({ error: 'messages array is required' });
-    }
+  if (!messages || !Array.isArray(messages)) {
+    return json({ error: 'messages array is required' }, { status: 400 });
+  }
 
-    try {
-      // Combine conversation history with new messages
-      const fullMessages = [...(conversationHistory || []), ...messages];
+  try {
+    // Combine conversation history with new messages
+    const fullMessages = [...(conversationHistory || []), ...messages];
 
-      const result = await llmClient.toolCompletion(
-        fullMessages,
-        tools,
-        executeTool,
-        { systemPrompt, maxIterations: 5 },
-      );
+    const result = await llmClient.toolCompletion(
+      fullMessages,
+      tools,
+      executeTool,
+      { systemPrompt, maxIterations: 5 },
+    );
 
-      log.info(
-        `RAG query: ${result.toolCalls.length} tool calls, ${result.duration}ms`,
-      );
+    log.info(
+      `RAG query: ${result.toolCalls.length} tool calls, ${result.duration}ms`,
+    );
 
-      res.json({
-        content: result.content,
-        toolCalls: result.toolCalls,
-        usage: result.usage,
-        duration: result.duration,
-      });
-    } catch (error) {
-      log.error(`RAG query failed: ${error.message}`);
-      res.status(500).json({
-        error: 'Query failed',
-        message: error.message,
-      });
-    }
-  };
+    return json({
+      content: result.content,
+      toolCalls: result.toolCalls,
+      usage: result.usage,
+      duration: result.duration,
+    });
+  } catch (error) {
+    log.error(`RAG query failed: ${error.message}`);
+    return json(
+      { error: 'Query failed', message: error.message },
+      { status: 500 },
+    );
+  }
 };

@@ -4,6 +4,8 @@ const eventHistoryCollectionName = 'eventHistory';
 const eventTypes = [
   'CUSTOMER_CREATED',
   'CUSTOMER_UPDATED',
+  'CUSTOMER_REPUTATION_UPDATED',
+  'CUSTOMER_TREND_ANALYZED',
   'ORDER_CREATED',
   'ORDER_CONFIRMED',
   'ORDER_CONFIRMATION_REQUIRED',

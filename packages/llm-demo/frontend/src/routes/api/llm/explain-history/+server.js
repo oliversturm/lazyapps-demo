@@ -1,4 +1,6 @@
+import { json } from '@sveltejs/kit';
 import { getLogger } from '@lazyapps/logger';
+import { llmClient } from '$lib/server/llm.js';
 
 const RM_EVENTS_URL = process.env.RM_EVENTS_URL || 'http://readmodel-events';
 const RM_ORDERS_URL = process.env.RM_ORDERS_URL || 'http://readmodel-orders';
@@ -81,111 +83,109 @@ ${JSON.stringify(events, null, 2)}
 
 ${reputationRecords.length > 0 ? `Reputation assessments (${reputationRecords.length} records):\n${JSON.stringify(reputationRecords, null, 2)}` : 'No reputation assessments available for this entity.'}`;
 
-export const createExplainHistoryRoute = (llmClient) => {
-  const log = getLogger('LLM', 'EXPLAIN');
+const log = getLogger('LLM', 'EXPLAIN');
 
-  return async (req, res) => {
-    const { aggregateId, aggregateName, question, conversationHistory } =
-      req.body;
+export const POST = async ({ request }) => {
+  const { aggregateId, aggregateName, question, conversationHistory } =
+    await request.json();
 
-    if (!aggregateId) {
-      return res.status(400).json({ error: 'aggregateId is required' });
+  if (!aggregateId) {
+    return json({ error: 'aggregateId is required' }, { status: 400 });
+  }
+
+  try {
+    // 1. Fetch event history for the aggregate
+    const events = await fetchEventHistory(aggregateId);
+
+    if (!events || events.length === 0) {
+      return json({
+        events: [],
+        reputation: [],
+        explanation: `No events found for ${aggregateName || 'entity'} ${aggregateId}.`,
+        keyEvents: [],
+        summary: 'No history available.',
+      });
     }
 
-    try {
-      // 1. Fetch event history for the aggregate
-      const events = await fetchEventHistory(aggregateId);
+    // 2. Fetch reputation data based on aggregate type
+    let reputationRecords = [];
+    let entityLabel = `${aggregateName || 'entity'} ${aggregateId}`;
 
-      if (!events || events.length === 0) {
-        return res.json({
-          events: [],
-          reputation: [],
-          explanation: `No events found for ${aggregateName || 'entity'} ${aggregateId}.`,
-          keyEvents: [],
-          summary: 'No history available.',
-        });
+    if (aggregateName === 'customer') {
+      reputationRecords = await fetchReputationByCustomer(aggregateId);
+      const customer = await fetchCustomer(aggregateId);
+      if (customer) entityLabel = `customer "${customer.name}"`;
+    } else if (aggregateName === 'order') {
+      reputationRecords = await fetchReputationByOrder(aggregateId);
+      // Also fetch the customer's events for context
+      const orderCreated = events.find((e) => e.type === 'ORDER_CREATED');
+      if (orderCreated?.payload?.customerId) {
+        const customerEvents = await fetchRelatedCustomerEvents(
+          orderCreated.payload.customerId,
+        );
+        // Merge customer events for full context
+        events.push(
+          ...customerEvents.map((e) => ({
+            ...e,
+            _context: 'related-customer',
+          })),
+        );
+        events.sort(
+          (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
+        );
       }
+    }
 
-      // 2. Fetch reputation data based on aggregate type (R-8.1.5, R-8.5.1)
-      let reputationRecords = [];
-      let entityLabel = `${aggregateName || 'entity'} ${aggregateId}`;
+    // 3. Build prompt and call LLM
+    const systemPrompt = buildSystemPrompt(
+      events,
+      reputationRecords,
+      entityLabel,
+    );
+    const messages = [
+      ...(conversationHistory || []),
+      {
+        role: 'user',
+        content: question || `Explain the history of ${entityLabel}.`,
+      },
+    ];
 
-      if (aggregateName === 'customer') {
-        reputationRecords = await fetchReputationByCustomer(aggregateId);
-        const customer = await fetchCustomer(aggregateId);
-        if (customer) entityLabel = `customer "${customer.name}"`;
-      } else if (aggregateName === 'order') {
-        reputationRecords = await fetchReputationByOrder(aggregateId);
-        // Also fetch the customer's events for context
-        const orderCreated = events.find((e) => e.type === 'ORDER_CREATED');
-        if (orderCreated?.payload?.customerId) {
-          const customerEvents = await fetchRelatedCustomerEvents(
-            orderCreated.payload.customerId,
-          );
-          // Merge customer events for full context
-          events.push(
-            ...customerEvents.map((e) => ({
-              ...e,
-              _context: 'related-customer',
-            })),
-          );
-          events.sort(
-            (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
-          );
-        }
-      }
+    const result = await llmClient.jsonCompletion(messages, {
+      systemPrompt,
+    });
 
-      // 3. Build prompt and call LLM
-      const systemPrompt = buildSystemPrompt(
-        events,
-        reputationRecords,
-        entityLabel,
-      );
-      const messages = [
-        ...(conversationHistory || []),
-        {
-          role: 'user',
-          content: question || `Explain the history of ${entityLabel}.`,
-        },
-      ];
-
-      const result = await llmClient.jsonCompletion(messages, {
-        systemPrompt,
-      });
-
-      if (result.error) {
-        log.error(`Explain history parse error: ${result.error}`);
-        return res.json({
-          events,
-          reputation: reputationRecords,
-          explanation: 'Failed to generate explanation.',
-          keyEvents: [],
-          summary: 'Explanation unavailable.',
-          usage: result.usage,
-          duration: result.duration,
-        });
-      }
-
-      log.info(
-        `Explanation generated for ${aggregateName} ${aggregateId}: ${result.content?.summary || '(no summary)'}`,
-      );
-
-      res.json({
+    if (result.error) {
+      log.error(`Explain history parse error: ${result.error}`);
+      return json({
         events,
         reputation: reputationRecords,
-        explanation:
-          result.content?.explanation || 'No explanation generated.',
-        keyEvents: result.content?.keyEvents || [],
-        summary: result.content?.summary || '',
+        explanation: 'Failed to generate explanation.',
+        keyEvents: [],
+        summary: 'Explanation unavailable.',
         usage: result.usage,
         duration: result.duration,
       });
-    } catch (error) {
-      log.error(`Explain history failed: ${error.message}`);
-      res.status(500).json({
-        error: 'Explanation failed',
-        message: error.message,
-      });
     }
-  };
+
+    log.info(
+      `Explanation generated for ${aggregateName} ${aggregateId}: ${result.content?.summary || '(no summary)'}`,
+    );
+
+    return json({
+      events,
+      reputation: reputationRecords,
+      explanation:
+        result.content?.explanation || 'No explanation generated.',
+      keyEvents: result.content?.keyEvents || [],
+      summary: result.content?.summary || '',
+      usage: result.usage,
+      duration: result.duration,
+    });
+  } catch (error) {
+    log.error(`Explain history failed: ${error.message}`);
+    return json(
+      { error: 'Explanation failed', message: error.message },
+      { status: 500 },
+    );
+  }
 };
