@@ -1,0 +1,29 @@
+{
+  "name": "llm-demo-readmodel-orders",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "start": "node --watch index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.46.0",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "@lazyapps/bootstrap": "^0.2.0",
+    "@lazyapps/change-notification-sender-fetch": "^0.1.2",
+    "@lazyapps/command-sender-fetch": "^0.1.2",
+    "@lazyapps/eventbus-rabbitmq": "^0.1.2",
+    "@lazyapps/express": "^0.1.4",
+    "@lazyapps/logger": "^0.2.0",
+    "@lazyapps/observability": "^0.3.0",
+    "@lazyapps/readmodels": "^0.1.2",
+    "@lazyapps/readmodelstorage-mongodb": "^0.1.2"
+  },
+  "type": "module"
+}

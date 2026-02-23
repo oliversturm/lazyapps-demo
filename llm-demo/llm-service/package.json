@@ -1,0 +1,20 @@
+{
+  "name": "@lazyapps/demo-llm-service",
+  "version": "0.0.1",
+  "description": "LLM gateway service for llm-demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "start": "node --watch index.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "express": "^4.21.0",
+    "openai": "^4.77.0",
+    "@lazyapps/logger": "^0.2.0",
+    "@lazyapps/observability": "^0.3.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}
