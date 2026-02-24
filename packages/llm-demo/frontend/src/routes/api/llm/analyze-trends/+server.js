@@ -51,7 +51,7 @@ You MUST respond with valid JSON in this exact format:
 
 Customer: ${customer.name} (${customer.location || 'location unknown'})
 Order history (${orders.length} orders):
-${JSON.stringify(orders.map((o) => ({ text: o.text, value: o.value, status: o.status })), null, 2)}`,
+${JSON.stringify(orders.map((o) => ({ text: o.text, value: o.value, status: o.status })))}`,
 
     userMessage: (customer) =>
       `Suggest products for customer "${customer.name}" based on their order history.`,
@@ -74,7 +74,7 @@ You MUST respond with valid JSON in this exact format:
 
 Customer: ${customer.name} (${customer.location || 'location unknown'})
 Order history (${orders.length} orders):
-${JSON.stringify(orders.map((o) => ({ text: o.text, value: o.value, status: o.status })), null, 2)}`,
+${JSON.stringify(orders.map((o) => ({ text: o.text, value: o.value, status: o.status })))}`,
 
     userMessage: (customer) =>
       `Categorize interests for customer "${customer.name}" for ad targeting.`,
@@ -104,7 +104,7 @@ If no issues are found, return: { "flags": [], "summary": "No issues detected" }
 
 Customer: ${customer.name}
 Recent orders:
-${JSON.stringify(orders.map((o) => ({ id: o.id, text: o.text, value: o.value, status: o.status })), null, 2)}`,
+${JSON.stringify(orders.map((o) => ({ id: o.id, text: o.text, value: o.value, status: o.status })))}`,
 
     userMessage: (customer) =>
       `Review recent orders for customer "${customer.name}" for potential errors or duplicates.`,
@@ -136,14 +136,14 @@ ${
   customer
     ? `Customer: ${customer.name}
 Customer orders (${orders.length}):
-${JSON.stringify(orders.map((o) => ({ id: o.id, text: o.text, value: o.value, status: o.status })), null, 2)}`
+${JSON.stringify(orders.map((o) => ({ text: o.text, value: o.value, status: o.status })))}`
     : ''
 }
 
 ${
   allOrders.length > 0
     ? `All recent orders across customers (${allOrders.length}):
-${JSON.stringify(allOrders.slice(0, 100).map((o) => ({ id: o.id, customerId: o.customerId, customerName: o.customerName, text: o.text, value: o.value, status: o.status })), null, 2)}`
+${JSON.stringify(allOrders.slice(0, 50).map((o) => ({ customerId: o.customerId, customerName: o.customerName, text: o.text, value: o.value, status: o.status })))}`
     : ''
 }`,
 
@@ -197,7 +197,7 @@ export const POST = async ({ request }) => {
       allOrders,
     );
     const messages = [
-      ...(conversationHistory || []),
+      ...(conversationHistory || []).slice(-20),
       {
         role: 'user',
         content: promptConfig.userMessage(customer, orders),

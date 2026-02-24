@@ -33,7 +33,7 @@ Guidelines:
 
 Customer: ${customerName}
 Order history (${orderHistory.length} orders):
-${JSON.stringify(orderHistory.map((o) => ({ text: o.text, value: o.value, status: o.status })), null, 2)}`;
+${JSON.stringify(orderHistory.map((o) => ({ text: o.text, value: o.value, status: o.status })))}`;
 
 const reputationToPath = (reputation) =>
   reputation === 'good'

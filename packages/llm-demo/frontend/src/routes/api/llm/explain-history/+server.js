@@ -79,9 +79,9 @@ You MUST respond with valid JSON in this exact format:
 Entity: ${entityLabel}
 
 Event history (${events.length} events, chronological):
-${JSON.stringify(events, null, 2)}
+${JSON.stringify(events)}
 
-${reputationRecords.length > 0 ? `Reputation assessments (${reputationRecords.length} records):\n${JSON.stringify(reputationRecords, null, 2)}` : 'No reputation assessments available for this entity.'}`;
+${reputationRecords.length > 0 ? `Reputation assessments (${reputationRecords.length} records):\n${JSON.stringify(reputationRecords)}` : 'No reputation assessments available for this entity.'}`;
 
 const log = getLogger('LLM', 'EXPLAIN');
 
@@ -137,13 +137,22 @@ export const POST = async ({ request }) => {
     }
 
     // 3. Build prompt and call LLM
+    const promptEvents = events
+      .slice(-50)
+      .map(({ type, payload, timestamp, aggregateId, aggregateName }) => ({
+        type,
+        payload,
+        timestamp,
+        aggregateId,
+        aggregateName,
+      }));
     const systemPrompt = buildSystemPrompt(
-      events,
+      promptEvents,
       reputationRecords,
       entityLabel,
     );
     const messages = [
-      ...(conversationHistory || []),
+      ...(conversationHistory || []).slice(-20),
       {
         role: 'user',
         content: question || `Explain the history of ${entityLabel}.`,

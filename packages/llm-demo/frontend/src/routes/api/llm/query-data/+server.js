@@ -127,7 +127,7 @@ export const POST = async ({ request }) => {
 
   try {
     // Combine conversation history with new messages
-    const fullMessages = [...(conversationHistory || []), ...messages];
+    const fullMessages = [...(conversationHistory || []).slice(-20), ...messages];
 
     const result = await llmClient.toolCompletion(
       fullMessages,

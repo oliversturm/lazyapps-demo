@@ -30,14 +30,14 @@ ${
   customer
     ? `Customer: ${customer.name}
 Customer orders (${orders.length}):
-${JSON.stringify(orders.map((o) => ({ id: o.id, text: o.text, value: o.value, status: o.status })), null, 2)}`
+${JSON.stringify(orders.map((o) => ({ text: o.text, value: o.value, status: o.status })))}`
     : ''
 }
 
 ${
   allOrders.length > 0
     ? `All recent orders across customers (${allOrders.length}):
-${JSON.stringify(allOrders.slice(0, 100).map((o) => ({ id: o.id, customerId: o.customerId, customerName: o.customerName, text: o.text, value: o.value, status: o.status })), null, 2)}`
+${JSON.stringify(allOrders.slice(0, 50).map((o) => ({ customerId: o.customerId, customerName: o.customerName, text: o.text, value: o.value, status: o.status })))}`
     : ''
 }`;
 

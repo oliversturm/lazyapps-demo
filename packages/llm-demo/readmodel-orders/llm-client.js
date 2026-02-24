@@ -76,7 +76,7 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
   // Chat completion with structured JSON response
   const jsonCompletion = async (
     messages,
-    { systemPrompt, model: modelOverride } = {},
+    { systemPrompt, model: modelOverride, maxTokens } = {},
   ) => {
     const fullMessages = systemPrompt
       ? [{ role: 'system', content: systemPrompt }, ...messages]
@@ -89,6 +89,7 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
         model: modelOverride || defaultModel,
         messages: fullMessages,
         response_format: { type: 'json_object' },
+        max_tokens: maxTokens || 1024,
       });
     } catch (err) {
       const desc = describeError(err);

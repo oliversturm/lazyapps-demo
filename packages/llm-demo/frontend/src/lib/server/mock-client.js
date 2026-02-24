@@ -22,45 +22,7 @@ export const createMockClient = () => {
     log.debug(`Mock JSON: "${lastMessage.substring(0, 80)}..."`);
 
     // Route-aware mock responses based on system prompt content
-    if (systemPrompt?.includes('command generator')) {
-      // Parse the user message for intent
-      const userMsg = messages[messages.length - 1]?.content || '';
-
-      if (userMsg.toLowerCase().includes('customer')) {
-        return mockResponse({
-          commands: [
-            {
-              aggregateName: 'customer',
-              aggregateId: '00000000-mock-0000-0000-000000000001',
-              command: 'CREATE',
-              payload: { name: 'Mock Customer', location: 'Mock City' },
-            },
-          ],
-        });
-      }
-
-      if (userMsg.toLowerCase().includes('order')) {
-        return mockResponse({
-          commands: [
-            {
-              aggregateName: 'order',
-              aggregateId: '00000000-mock-0000-0000-000000000002',
-              command: 'CREATE',
-              payload: {
-                customerId: 'requires-real-id',
-                text: 'Mock Order',
-                value: 100,
-              },
-            },
-          ],
-        });
-      }
-
-      return mockResponse({
-        commands: [],
-        explanation: 'Mock: could not determine command type from input',
-      });
-    }
+    // Note: command generator now uses toolCompletion, not jsonCompletion
 
     if (systemPrompt?.includes('reputation')) {
       // Count confirmed orders in the system prompt
@@ -68,7 +30,7 @@ export const createMockClient = () => {
       const confirmedCount = confirmedMatches ? confirmedMatches.length : 0;
 
       // Check for unconfirmed orders
-      const hasUnconfirmed = systemPrompt.includes('"status": "unconfirmed"');
+      const hasUnconfirmed = /"status":\s*"unconfirmed"/.test(systemPrompt);
 
       if (confirmedCount >= 3 && !hasUnconfirmed) {
         return mockResponse({
@@ -198,7 +160,63 @@ export const createMockClient = () => {
 
     const toolCalls = [];
 
-    // Determine which tools to call based on the question
+    // Route: command generator uses tool-calling
+    if (opts.systemPrompt?.includes('command generator')) {
+      const userMsg = lastMessage.toLowerCase();
+
+      if (userMsg.includes('customer')) {
+        return {
+          ...mockResponse(
+            JSON.stringify({
+              commands: [
+                {
+                  aggregateName: 'customer',
+                  aggregateId: '00000000-mock-0000-0000-000000000001',
+                  command: 'CREATE',
+                  payload: { name: 'Mock Customer', location: 'Mock City' },
+                },
+              ],
+            }),
+          ),
+          toolCalls: [],
+        };
+      }
+
+      if (userMsg.includes('order')) {
+        return {
+          ...mockResponse(
+            JSON.stringify({
+              commands: [
+                {
+                  aggregateName: 'order',
+                  aggregateId: '00000000-mock-0000-0000-000000000002',
+                  command: 'CREATE',
+                  payload: {
+                    customerId: 'requires-real-id',
+                    text: 'Mock Order',
+                    value: 100,
+                  },
+                },
+              ],
+            }),
+          ),
+          toolCalls: [],
+        };
+      }
+
+      return {
+        ...mockResponse(
+          JSON.stringify({
+            commands: [],
+            explanation:
+              'Mock: could not determine command type from input',
+          }),
+        ),
+        toolCalls: [],
+      };
+    }
+
+    // Route: query-data tool-calling
     const lowerMsg = lastMessage.toLowerCase();
 
     if (
