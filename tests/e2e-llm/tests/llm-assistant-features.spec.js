@@ -15,7 +15,7 @@ import {
   getToolCallIndicators,
 } from './helpers/app.js';
 
-test.describe('LLM assistant features (F5, F6a, F6b, F7)', () => {
+test.describe('LLM assistant features (F5, F6, F7)', () => {
   let unique;
   let customerName;
   let orderText;
@@ -75,7 +75,7 @@ test.describe('LLM assistant features (F5, F6a, F6b, F7)', () => {
     }
   });
 
-  test('F6a: LLM generates command preview from natural language', async ({
+  test('F6: LLM generates command preview and sending completes', async ({
     browser,
     baseURL,
   }) => {
@@ -106,50 +106,13 @@ test.describe('LLM assistant features (F5, F6a, F6b, F7)', () => {
       });
 
       // Verify at least one command is shown with a Send button
-      const sendButtons = panel.locator('.bg-amber-50 button', {
-        hasText: 'Send',
-      });
-      await expect(sendButtons.first()).toBeVisible({ timeout: 10000 });
-    } finally {
-      await context.close();
-    }
-  });
-
-  test('F6b: sending a generated command completes or errors', async ({
-    browser,
-    baseURL,
-  }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    try {
-      await waitForApp(page, baseURL);
-
-      // Navigate to Customers page
-      await navigate(page, 'Customers');
-      await ensurePanelExpanded(page);
-
-      // Generate a command
-      await sendLlmMessage(
-        page,
-        `Create a customer named SendTest-${unique} in Munich`
-      );
-      await waitForLlmResponse(page);
-
-      const panel = getLlmPanel(page);
-
-      // Wait for CommandPreview
-      await expect(panel.locator('.bg-amber-50')).toBeVisible({
-        timeout: 60000,
-      });
-
-      // Click the first Send button on the generated command
       const sendButton = panel
         .locator('.bg-amber-50 button', { hasText: 'Send' })
         .first();
-      await sendButton.click();
+      await expect(sendButton).toBeVisible({ timeout: 10000 });
 
-      // Accept either "Sent" (success) or "Error" (failure) status
+      // Click Send and verify it completes or errors
+      await sendButton.click();
       await expect(
         panel.locator('.bg-amber-50').getByText(/Sent|Error/)
       ).toBeVisible({ timeout: 30000 });

@@ -384,7 +384,7 @@
                 : assessment.reputation === 'poor'
                   ? 'bg-red-300 text-red-900'
                   : 'bg-yellow-300 text-yellow-900'}">{assessment.reputation}</span>
-              <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-600">{assessment.path}</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700">{assessment.path}</span>
             </div>
             <div class="text-gray-600">{assessment.reasoning}</div>
             {#if assessment.failSafe}
