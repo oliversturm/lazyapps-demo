@@ -411,6 +411,8 @@
               <div class="text-xs text-gray-500 mb-1">{msg.content}</div>
               <CommandPreview
                 commands={msg.commands}
+                initialStatuses={msg.statuses}
+                onStatusChange={(s) => { msg.statuses = s; }}
                 onDone={() => (pendingCommands = null)}
               />
               <UsageInfo usage={msg.usage} duration={msg.duration} />

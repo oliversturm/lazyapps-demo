@@ -3,10 +3,14 @@
 
   export let commands = [];
   export let onDone = () => {};
+  export let initialStatuses = null;
+  export let onStatusChange = () => {};
 
   // Deep clone commands so edits don't mutate the original
   let editableCommands = commands.map((cmd) => JSON.parse(JSON.stringify(cmd)));
-  let statuses = commands.map(() => 'pending'); // pending | editing | sent | error
+  let statuses = initialStatuses || commands.map(() => 'pending'); // pending | editing | sent | error
+
+  $: onStatusChange([...statuses]);
   let editTexts = commands.map(() => '');
   let editErrors = commands.map(() => null);
   let sending = false;
