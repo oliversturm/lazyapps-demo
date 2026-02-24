@@ -414,4 +414,94 @@ test.describe('Reputation-based routing and reassessment', () => {
       await context.close();
     }
   });
+
+  test('S7: auto-confirm chain triggers reassessment with updated reasoning', async ({
+    browser,
+    baseURL,
+  }) => {
+    const unique = `${Date.now()}`;
+    const customerName = `RepS7-${unique}`;
+    const order1Text = `AutoConf1-${unique}`;
+    const order2Text = `AutoConf2-${unique}`;
+
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    try {
+      await waitForApp(page, baseURL);
+
+      // Create a fresh customer (no reputation history)
+      await createCustomer(page, {
+        name: customerName,
+        location: 'AutoConfirmCity',
+      });
+
+      // Place a low-value order ($500) — should auto-confirm
+      // Default threshold (no reputation) is $1000
+      await placeOrder(page, customerName, {
+        text: order1Text,
+        value: 500,
+      });
+
+      // Verify order #1 auto-confirmed
+      await navigate(page, 'Orders');
+      const row1 = page.locator('tr', {
+        has: page.getByText(order1Text, { exact: true }),
+      });
+      await expect(
+        row1.getByText('confirmed', { exact: true }),
+      ).toBeVisible({ timeout: 30000 });
+
+      // Wait for first reputation reassessment (triggered by ORDER_CONFIRMED)
+      const customerId = await getCustomerIdByName(page, customerName);
+      expect(customerId).toBeTruthy();
+      const firstRecords = await pollReputation(page, customerId, {
+        minCount: 1,
+      });
+      expect(firstRecords.length).toBeGreaterThanOrEqual(1);
+
+      const firstReasoning = firstRecords[0].reasoning;
+      expect(firstReasoning).toBeTruthy();
+      expect(['good', 'neutral', 'poor']).toContain(
+        firstRecords[0].reputation,
+      );
+
+      // Place a second low-value order ($300) — should also auto-confirm
+      await placeOrder(page, customerName, {
+        text: order2Text,
+        value: 300,
+      });
+
+      // Verify order #2 auto-confirmed
+      await navigate(page, 'Orders');
+      const row2 = page.locator('tr', {
+        has: page.getByText(order2Text, { exact: true }),
+      });
+      await expect(
+        row2.getByText('confirmed', { exact: true }),
+      ).toBeVisible({ timeout: 30000 });
+
+      // KEY ASSERTION: Poll for a SECOND reputation record.
+      // Before the fix, the second reassessment was suppressed because
+      // change detection only compared the reputation VALUE (e.g. 'neutral').
+      // The stale reasoning bug meant no UPDATE_CUSTOMER_REPUTATION was
+      // sent when reasoning changed but the value stayed the same.
+      // With the fix, reasoning change detection produces a second record.
+      const updatedRecords = await pollReputation(page, customerId, {
+        minCount: 2,
+      });
+      expect(updatedRecords.length).toBeGreaterThanOrEqual(2);
+
+      // Verify the latest reasoning reflects the updated order history
+      // (2 orders instead of 1) and is not identical to the first
+      const latestReasoning = updatedRecords[0].reasoning;
+      expect(latestReasoning).toBeTruthy();
+      expect(latestReasoning).not.toBe(firstReasoning);
+      expect(['good', 'neutral', 'poor']).toContain(
+        updatedRecords[0].reputation,
+      );
+    } finally {
+      await context.close();
+    }
+  });
 });

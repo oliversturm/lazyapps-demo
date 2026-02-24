@@ -191,6 +191,7 @@ describe('reputationReassessmentSideEffect', () => {
     orderData = null,
     orderHistory = [],
     storedReputation = null,
+    storedReasoning = null,
   } = {}) => ({
     find: vi.fn().mockImplementation((collection, query) => {
       if (collection === 'orders_overview' && query.id) {
@@ -209,13 +210,14 @@ describe('reputationReassessmentSideEffect', () => {
       }
       if (collection === 'orders_reputation') {
         // Change detection lookup
+        const record = storedReputation
+          ? [{ reputation: storedReputation, reasoning: storedReasoning }]
+          : [];
         return {
           sort: vi.fn().mockReturnValue({
             limit: vi.fn().mockReturnValue({
               project: vi.fn().mockReturnValue({
-                toArray: vi.fn().mockResolvedValue(
-                  storedReputation ? [{ reputation: storedReputation }] : [],
-                ),
+                toArray: vi.fn().mockResolvedValue(record),
               }),
             }),
           }),
@@ -305,7 +307,7 @@ describe('reputationReassessmentSideEffect', () => {
       });
   });
 
-  test('skips UPDATE_CUSTOMER_REPUTATION when reputation unchanged', () => {
+  test('skips UPDATE_CUSTOMER_REPUTATION when reputation and reasoning unchanged', () => {
     const orderData = {
       id: 'order-1',
       customerId: 'cust-1',
@@ -316,6 +318,7 @@ describe('reputationReassessmentSideEffect', () => {
       orderData,
       orderHistory: [{ text: 'Widget', value: 100, status: 'confirmed' }],
       storedReputation: 'good',
+      storedReasoning: 'Still good',
     });
     mockJsonCompletion.mockResolvedValue({
       content: { reputation: 'good', reasoning: 'Still good' },
@@ -442,6 +445,214 @@ describe('reputationReassessmentSideEffect', () => {
       .then(flushPromises)
       .then(() => {
         expect(mockJsonCompletion).not.toHaveBeenCalled();
+        expect(commands.execute).not.toHaveBeenCalled();
+      });
+  });
+});
+
+// --- Tests exposing the stale-reasoning bug ---
+//
+// The change detection in updateReputationInBackground (reputationCheck.js
+// lines ~107-113) compares ONLY the reputation value (good/neutral/poor).
+// When the LLM returns the same reputation value but different reasoning
+// text, the UPDATE_CUSTOMER_REPUTATION command is suppressed — leaving
+// stale reasoning in the read model.
+//
+// These tests assert the CORRECT behavior (update should be sent when
+// reasoning changes). They are expected to FAIL on the current code,
+// proving the bug exists.
+
+describe('reputationReassessmentSideEffect — stale reasoning bug', () => {
+  let commands;
+
+  // Extended mock that also tracks stored reasoning alongside reputation,
+  // so the fix can compare both fields.
+  const makeStorageMock = ({
+    orderData = null,
+    orderHistory = [],
+    storedReputation = null,
+    storedReasoning = null,
+  } = {}) => ({
+    find: vi.fn().mockImplementation((collection, query) => {
+      if (collection === 'orders_overview' && query.id) {
+        return {
+          toArray: vi.fn().mockResolvedValue(orderData ? [orderData] : []),
+        };
+      }
+      if (collection === 'orders_overview' && query.customerId) {
+        return {
+          project: vi.fn().mockReturnValue({
+            toArray: vi.fn().mockResolvedValue(orderHistory),
+          }),
+        };
+      }
+      if (collection === 'orders_reputation') {
+        return {
+          sort: vi.fn().mockReturnValue({
+            limit: vi.fn().mockReturnValue({
+              project: vi.fn().mockReturnValue({
+                toArray: vi.fn().mockResolvedValue(
+                  storedReputation
+                    ? [
+                        {
+                          reputation: storedReputation,
+                          reasoning: storedReasoning,
+                        },
+                      ]
+                    : [],
+                ),
+              }),
+            }),
+          }),
+        };
+      }
+      return { toArray: vi.fn().mockResolvedValue([]) };
+    }),
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    commands = {
+      execute: vi.fn().mockReturnValue(() => Promise.resolve()),
+    };
+  });
+
+  test('sends update when reasoning changes but reputation value stays the same', () => {
+    const orderData = {
+      id: 'order-2',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 300,
+    };
+    const storage = makeStorageMock({
+      orderData,
+      orderHistory: [
+        { text: 'Widget', value: 100, status: 'confirmed' },
+        { text: 'Gadget', value: 200, status: 'confirmed' },
+        { text: 'Doohickey', value: 300, status: 'confirmed' },
+      ],
+      storedReputation: 'neutral',
+      storedReasoning: 'Only one confirmed order — insufficient data',
+    });
+    mockJsonCompletion.mockResolvedValue({
+      content: {
+        reputation: 'neutral',
+        reasoning:
+          'Three confirmed orders with consistent values — building positive history but still neutral',
+      },
+    });
+
+    return reputationReassessmentSideEffect(
+      storage,
+      commands,
+      'order-2',
+    )()
+      .then(flushPromises)
+      .then(() => {
+        // BUG: Current code only compares reputation value, not reasoning.
+        // The update should be sent because reasoning changed, but current
+        // code skips it since reputation is still 'neutral'.
+        expect(commands.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            aggregateName: 'customer',
+            aggregateId: 'cust-1',
+            command: 'UPDATE_CUSTOMER_REPUTATION',
+            payload: expect.objectContaining({
+              reputation: 'neutral',
+              reasoning:
+                'Three confirmed orders with consistent values — building positive history but still neutral',
+            }),
+          }),
+        );
+      });
+  });
+
+  test('multi-order progression updates reasoning even when reputation stays neutral', () => {
+    // Customer already has reputation 'neutral' with old reasoning from
+    // an earlier assessment. A new order is confirmed and the LLM produces
+    // updated reasoning reflecting the larger order history, but the
+    // reputation value remains 'neutral'.
+    const orderData = {
+      id: 'order-3',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 450,
+    };
+    const storage = makeStorageMock({
+      orderData,
+      orderHistory: [
+        { text: 'Widget', value: 100, status: 'confirmed' },
+        { text: 'Gadget', value: 200, status: 'confirmed' },
+        { text: 'Doohickey', value: 300, status: 'confirmed' },
+        { text: 'Thingamajig', value: 450, status: 'confirmed' },
+      ],
+      storedReputation: 'neutral',
+      storedReasoning: 'Three confirmed orders — building history',
+    });
+    mockJsonCompletion.mockResolvedValue({
+      content: {
+        reputation: 'neutral',
+        reasoning:
+          'Four confirmed orders with growing values — approaching good standing',
+      },
+    });
+
+    return reputationReassessmentSideEffect(
+      storage,
+      commands,
+      'order-3',
+    )()
+      .then(flushPromises)
+      .then(() => {
+        // Should send update since reasoning is different, even though
+        // reputation value remains 'neutral'.
+        expect(commands.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            command: 'UPDATE_CUSTOMER_REPUTATION',
+            payload: expect.objectContaining({
+              reputation: 'neutral',
+              reasoning:
+                'Four confirmed orders with growing values — approaching good standing',
+            }),
+          }),
+        );
+      });
+  });
+
+  test('does not send update when both reputation and reasoning are identical', () => {
+    // Control case: when BOTH reputation and reasoning are the same,
+    // the update should genuinely be skipped. This verifies that the fix
+    // does not over-trigger updates.
+    const orderData = {
+      id: 'order-4',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 500,
+    };
+    const storage = makeStorageMock({
+      orderData,
+      orderHistory: [
+        { text: 'Widget', value: 100, status: 'confirmed' },
+        { text: 'Gadget', value: 500, status: 'confirmed' },
+      ],
+      storedReputation: 'neutral',
+      storedReasoning: 'Two confirmed orders — steady pattern',
+    });
+    mockJsonCompletion.mockResolvedValue({
+      content: {
+        reputation: 'neutral',
+        reasoning: 'Two confirmed orders — steady pattern',
+      },
+    });
+
+    return reputationReassessmentSideEffect(
+      storage,
+      commands,
+      'order-4',
+    )()
+      .then(flushPromises)
+      .then(() => {
+        // When both reputation and reasoning are identical, no update needed.
         expect(commands.execute).not.toHaveBeenCalled();
       });
   });

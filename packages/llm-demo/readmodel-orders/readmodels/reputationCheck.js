@@ -102,10 +102,10 @@ const updateReputationInBackground = (storage, commands, order) => {
         .find(reputationCollectionName, { customerId: order.customerId })
         .sort({ timestamp: -1 })
         .limit(1)
-        .project({ _id: 0, reputation: 1 })
+        .project({ _id: 0, reputation: 1, reasoning: 1 })
         .toArray()
         .then(([existing]) => {
-          if (existing && existing.reputation === reputation) {
+          if (existing && existing.reputation === reputation && existing.reasoning === reasoning) {
             log.info(
               `Reputation unchanged for ${order.customerId} (${reputation}), skipping update`,
             );
