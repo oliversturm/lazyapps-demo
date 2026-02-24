@@ -1,4 +1,11 @@
-import { doesntExist, exists, has, is, oneOf } from './validate.js';
+import {
+  doesntExist,
+  exists,
+  has,
+  is,
+  isFiniteNumber,
+  oneOf,
+} from './validate.js';
 
 export default {
   initial: () => ({}),
@@ -9,6 +16,7 @@ export default {
       has(payload, 'customerId');
       has(payload, 'text');
       has(payload, 'value');
+      isFiniteNumber(payload, 'value');
       return { type: 'ORDER_CREATED', payload };
     },
 

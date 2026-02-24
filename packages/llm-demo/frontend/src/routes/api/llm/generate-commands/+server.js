@@ -104,6 +104,10 @@ export const POST = async ({ request }) => {
       ? content.commands.slice(0, MAX_COMMANDS).map((cmd) => ({
           ...cmd,
           aggregateId: cmd.command === 'CREATE' ? nanoid() : cmd.aggregateId,
+          payload:
+            cmd.aggregateName === 'order' && cmd.command === 'CREATE'
+              ? { ...cmd.payload, value: Number(cmd.payload.value) }
+              : cmd.payload,
         }))
       : [];
 

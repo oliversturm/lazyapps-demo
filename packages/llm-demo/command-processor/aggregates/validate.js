@@ -28,3 +28,10 @@ export const oneOf = (ob, field, values) => {
       }' (expected one of [${values.map((v) => `'${v}'`).join(', ')}])`,
     );
 };
+
+export const isFiniteNumber = (ob, field) => {
+  if (!Number.isFinite(ob[field]))
+    throw new Error(
+      `The object's field '${field}' must be a finite number`,
+    );
+};

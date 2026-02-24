@@ -1,5 +1,12 @@
 import { describe, test, expect } from 'vitest';
-import { exists, doesntExist, has, is, oneOf } from '../aggregates/validate.js';
+import {
+  exists,
+  doesntExist,
+  has,
+  is,
+  isFiniteNumber,
+  oneOf,
+} from '../aggregates/validate.js';
 
 describe('has', () => {
   test('passes when field is present with string value', () => {
@@ -82,5 +89,65 @@ describe('oneOf', () => {
     expect(() =>
       oneOf({ rep: 'bad' }, 'rep', ['good', 'neutral', 'poor']),
     ).toThrow("unexpected value 'bad'");
+  });
+});
+
+describe('isFiniteNumber', () => {
+  test('passes for a positive integer', () => {
+    expect(() => isFiniteNumber({ value: 42 }, 'value')).not.toThrow();
+  });
+
+  test('passes for a float', () => {
+    expect(() => isFiniteNumber({ value: 3.14 }, 'value')).not.toThrow();
+  });
+
+  test('passes for zero', () => {
+    expect(() => isFiniteNumber({ value: 0 }, 'value')).not.toThrow();
+  });
+
+  test('passes for a negative number', () => {
+    expect(() => isFiniteNumber({ value: -7 }, 'value')).not.toThrow();
+  });
+
+  test('throws for a string', () => {
+    expect(() => isFiniteNumber({ value: '42' }, 'value')).toThrow(
+      'must be a finite number',
+    );
+  });
+
+  test('throws for NaN', () => {
+    expect(() => isFiniteNumber({ value: NaN }, 'value')).toThrow(
+      'must be a finite number',
+    );
+  });
+
+  test('throws for Infinity', () => {
+    expect(() => isFiniteNumber({ value: Infinity }, 'value')).toThrow(
+      'must be a finite number',
+    );
+  });
+
+  test('throws for -Infinity', () => {
+    expect(() => isFiniteNumber({ value: -Infinity }, 'value')).toThrow(
+      'must be a finite number',
+    );
+  });
+
+  test('throws for null', () => {
+    expect(() => isFiniteNumber({ value: null }, 'value')).toThrow(
+      'must be a finite number',
+    );
+  });
+
+  test('throws for undefined', () => {
+    expect(() => isFiniteNumber({}, 'value')).toThrow(
+      'must be a finite number',
+    );
+  });
+
+  test('throws for boolean', () => {
+    expect(() => isFiniteNumber({ value: true }, 'value')).toThrow(
+      'must be a finite number',
+    );
   });
 });

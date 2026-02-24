@@ -23,7 +23,7 @@
           aggregateName: 'order',
           aggregateId: orderId,
           command: 'CREATE',
-          payload: { customerId, text: data.text, value: data.value },
+          payload: { customerId, text: data.text, value: Number(data.value) },
         });
         goto('/customers');
       }

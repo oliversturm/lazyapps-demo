@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { getLogger } from '@lazyapps/logger';
 import { llmClient } from '$lib/server/llm.js';
+import { computeOrderStats } from '$lib/server/computeOrderStats.js';
 
 const RM_CUSTOMERS_URL =
   process.env.RM_CUSTOMERS_URL || 'http://readmodel-customers';
@@ -89,30 +90,7 @@ const executeTool = async (name, args) => {
 
     case 'query_order_stats': {
       const orders = await fetchJson(`${RM_ORDERS_URL}/query/overview/all`);
-      const totalValue = orders.reduce((sum, o) => sum + (o.value || 0), 0);
-      return {
-        totalOrders: orders.length,
-        totalValue,
-        averageValue: orders.length
-          ? Math.round((totalValue / orders.length) * 100) / 100
-          : 0,
-        byStatus: orders.reduce((acc, o) => {
-          acc[o.status] = (acc[o.status] || 0) + 1;
-          return acc;
-        }, {}),
-        topCustomers: Object.entries(
-          orders.reduce((acc, o) => {
-            if (!acc[o.customerName])
-              acc[o.customerName] = { count: 0, value: 0 };
-            acc[o.customerName].count++;
-            acc[o.customerName].value += o.value || 0;
-            return acc;
-          }, {}),
-        )
-          .map(([name, stats]) => ({ name, ...stats }))
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 5),
-      };
+      return computeOrderStats(orders);
     }
 
     default:
