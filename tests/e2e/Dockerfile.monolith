@@ -1,8 +1,8 @@
 FROM node:lts
-RUN npm install -g pnpm
+RUN corepack enable
 WORKDIR /src
 COPY . .
-RUN pnpm i
+RUN pnpm install
 WORKDIR /src/packages/monolith
 EXPOSE 5173 53008
 CMD ["node", "index.js"]

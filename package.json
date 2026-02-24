@@ -35,6 +35,7 @@
     "url": "https://github.com/oliversturm/lazyapps-demo/issues"
   },
   "homepage": "https://github.com/oliversturm/lazyapps-demo#readme",
+  "packageManager": "pnpm@10.30.0",
   "devDependencies": {
     "@lazyapps/log-highlight": "^0.1.1",
     "vitest": "^2.1.8"
