@@ -1,5 +1,5 @@
 <script>
-  import { v4 as uuid } from 'uuid';
+  import { nanoid } from 'nanoid';
 
   import Button from '$lib/Button.svelte';
   import CustomerTable from '$lib/CustomerTable.svelte';
@@ -28,4 +28,4 @@
 </script>
 
 <CustomerTable {store} />
-<Button kind="separate" text="New Customer" target={`/customer/${uuid()}`} />
+<Button kind="separate" text="New Customer" target={`/customer/${nanoid()}`} />

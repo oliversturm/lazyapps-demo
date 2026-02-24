@@ -12,7 +12,13 @@ if [ -f "$ENV_FILE" ]; then
   set +a
 fi
 
+LOG_DIR="$SCRIPT_DIR/test-results"
+mkdir -p "$LOG_DIR"
+
 cleanup() {
+  echo "--- Capturing container logs ---"
+  docker compose -f "$COMPOSE_FILE" logs --no-color > "$LOG_DIR/containers.log" 2>&1 || true
+  echo "Container logs saved to $LOG_DIR/containers.log"
   docker compose -f "$COMPOSE_FILE" down -v --remove-orphans
 }
 trap cleanup EXIT

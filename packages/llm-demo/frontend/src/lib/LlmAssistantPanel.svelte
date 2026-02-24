@@ -55,6 +55,9 @@
   let seenAnalyses = new Set();
 
   // React to new event-driven analyses (D8)
+  // Always target the 'orders' context — trend analysis is order data and
+  // the notification should appear on the Orders page regardless of which
+  // page the user is on when the Socket.io event arrives.
   $: if ($analysisStore.data?.length > 0) {
     const latest = $analysisStore.data[$analysisStore.data.length - 1];
     if (
@@ -68,7 +71,7 @@
         content: `Auto-analysis triggered for ${latest.customerName}`,
         analysisType: latest.analysisType,
         result: latest.result,
-      });
+      }, 'orders');
     }
   }
 
@@ -143,15 +146,18 @@
     localStorage.setItem('llm-panel-collapsed', collapsed);
   }
 
-  const addMessage = (msg) => {
-    if (!conversationsByContext[currentPage]) {
-      conversationsByContext[currentPage] = [];
+  const addMessage = (msg, targetContext) => {
+    const ctx = targetContext || currentPage;
+    if (!conversationsByContext[ctx]) {
+      conversationsByContext[ctx] = [];
     }
-    conversationsByContext[currentPage] = [
-      ...conversationsByContext[currentPage],
+    conversationsByContext[ctx] = [
+      ...conversationsByContext[ctx],
       msg,
     ];
-    messages = conversationsByContext[currentPage];
+    if (ctx === currentPage) {
+      messages = conversationsByContext[ctx];
+    }
   };
 
   const clearChat = () => {

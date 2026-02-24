@@ -248,7 +248,7 @@ describe('trendAnalysis read model projections', () => {
         expect(createChangeInfo).toHaveBeenCalledWith(
           'orders',
           'trendAnalysis',
-          'cust-1',
+          'all',
           'addRow',
           expect.objectContaining({
             customerId: 'cust-1',

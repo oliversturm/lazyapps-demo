@@ -364,7 +364,7 @@ describe('reputationCheck read model projections', () => {
         expect(createChangeInfo).toHaveBeenCalledWith(
           'orders',
           'reputation',
-          'cust-1',
+          'all',
           'addRow',
           expect.objectContaining({
             customerId: 'cust-1',

@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { nanoid } from 'nanoid';
 import { getLogger } from '@lazyapps/logger';
 import { llmClient } from '$lib/server/llm.js';
 
@@ -13,7 +14,7 @@ const buildSystemPrompt = (
 ### customer
 - **CREATE**: Creates a new customer.
   - Required payload: { name: string, location: string }
-  - aggregateId: You MUST generate a new UUID (format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx)
+  - aggregateId: Use any placeholder string (the server will replace it with a generated ID)
 - **UPDATE**: Updates an existing customer.
   - Required payload: { name: string, location: string } (include all fields, even unchanged ones)
   - aggregateId: MUST be the existing customer's id from the context data below
@@ -21,7 +22,7 @@ const buildSystemPrompt = (
 ### order
 - **CREATE**: Creates a new order for a customer.
   - Required payload: { customerId: string, text: string, value: number }
-  - aggregateId: You MUST generate a new UUID
+  - aggregateId: Use any placeholder string (the server will replace it with a generated ID)
   - customerId MUST be an existing customer's id from the context data below
 - **REQUIRE_CONFIRMATION**: Flags an order for manual confirmation. (System use only — do not generate this.)
 - **CONFIRM**: Confirms a pending order.
@@ -33,7 +34,7 @@ const buildSystemPrompt = (
 Every command MUST be a JSON object with exactly these fields:
 {
   "aggregateName": "customer" or "order",
-  "aggregateId": "<uuid>",
+  "aggregateId": "<id>",
   "command": "<COMMAND_NAME>",
   "payload": { ... }
 }
@@ -43,7 +44,7 @@ Every command MUST be a JSON object with exactly these fields:
 - You MUST return valid JSON: an object with a "commands" array.
 - Do NOT invent new command types beyond those listed above.
 - Every command MUST include a valid aggregateId.
-- For CREATE commands, generate a fresh UUID v4 for aggregateId.
+- For CREATE commands, use any placeholder string as aggregateId — the server replaces it.
 - For non-CREATE commands, use the id of an existing entity from the context data.
 - Maximum ${MAX_COMMANDS} commands per response.
 - If the user's request is ambiguous or you cannot map it to valid commands, return an empty commands array with an "explanation" field describing the issue.
@@ -95,7 +96,10 @@ export const POST = async ({ request }) => {
 
     const content = result.content;
     const commands = Array.isArray(content.commands)
-      ? content.commands.slice(0, MAX_COMMANDS)
+      ? content.commands.slice(0, MAX_COMMANDS).map((cmd) => ({
+          ...cmd,
+          aggregateId: cmd.command === 'CREATE' ? nanoid() : cmd.aggregateId,
+        }))
       : [];
 
     log.info(

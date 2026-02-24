@@ -19,7 +19,6 @@
       command: 'CONFIRM',
       payload: { },
     });
-
   };
 </script>
 

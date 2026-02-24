@@ -139,13 +139,16 @@ export default {
             createChangeInfo(
               'orders',
               'trendAnalysis',
-              event.aggregateId,
+              'all',
               'addRow',
               {
                 customerId: event.aggregateId,
                 customerName: event.payload.customerName,
                 analysisType: event.payload.analysisType,
                 result: event.payload.result,
+                orderCount: event.payload.orderCount,
+                trigger: event.payload.trigger,
+                timestamp: event.timestamp || new Date().toISOString(),
               },
             ),
           ),

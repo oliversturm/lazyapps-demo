@@ -12,6 +12,11 @@ export const waitForApp = async (page, url) => {
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 5000 });
       await page.locator('.bg-orange-100').waitFor({ timeout: 3000 });
+      const res = await page.request.post(
+        'http://readmodel-customers/query/overview/all',
+        { headers: { 'Content-Type': 'application/json' }, data: {} },
+      );
+      if (!res.ok()) throw new Error(`Backend returned ${res.status()}`);
       return;
     } catch {
       if (i === maxAttempts - 1)
@@ -39,7 +44,6 @@ export const createCustomer = async (page, { name, location }) => {
   await navigate(page, 'Customers');
   await page.getByText('New Customer').waitFor();
   await page.getByText('New Customer').click();
-  await page.waitForLoadState('networkidle');
   await page.locator('input[name="name"]').waitFor({ timeout: 10000 });
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
@@ -60,7 +64,6 @@ export const placeOrder = async (page, customerName, { text, value }) => {
     has: page.locator('td', { hasText: customerName }),
   });
   await row.getByText('Place Order').click();
-  await page.waitForLoadState('networkidle');
   await page.locator('input[name="text"]').waitFor({ timeout: 10000 });
   await page.locator('input[name="text"]').fill(text);
   await page.locator('input[name="value"]').fill(String(value));

@@ -1,5 +1,5 @@
 <script>
-  import { v4 as uuid } from 'uuid';
+  import { nanoid } from 'nanoid';
 
   import Button from './Button.svelte';
   import { requestExplain } from './contextDataStore.js';
@@ -36,7 +36,7 @@
             <Button
               kind="inline"
               text="Place Order"
-              target={`/order/${row.id}/${uuid()}`}
+              target={`/order/${row.id}/${nanoid()}`}
             />
             <button
               class="text-xs text-blue-600 hover:underline"
