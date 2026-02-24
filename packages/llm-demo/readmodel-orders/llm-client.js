@@ -18,9 +18,22 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
     const status = err.status ? `${err.status} ` : '';
     const detail =
       err.error?.detail || err.error?.message || err.message || String(err);
-    // Log the full error body for 5xx errors where providers give minimal info
-    if (err.status >= 500 && err.error) {
-      log.debug(`Full provider error: ${JSON.stringify(err.error)}`);
+    // Log full diagnostics for provider errors (rate limits, capacity, server errors)
+    if (err.status && err.status >= 400) {
+      const retryAfter = err.headers?.get?.('retry-after');
+      const rateHeaders = ['retry-after', 'x-ratelimit-limit', 'x-ratelimit-remaining', 'x-ratelimit-reset']
+        .map((h) => [h, err.headers?.get?.(h)])
+        .filter(([, v]) => v != null)
+        .map(([h, v]) => `${h}: ${v}`)
+        .join(', ');
+      log.warn(
+        `Provider error ${err.status}: ${JSON.stringify(err.error)}` +
+          (rateHeaders ? ` | headers: ${rateHeaders}` : '') +
+          (err.requestID ? ` | request-id: ${err.requestID}` : ''),
+      );
+      if (retryAfter) {
+        log.warn(`Retry-After: ${retryAfter}s`);
+      }
     }
     return `${status}${detail}`;
   };

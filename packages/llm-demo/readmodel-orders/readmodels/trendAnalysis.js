@@ -106,7 +106,12 @@ export const trendAnalysisSideEffect = (
                     command: 'RECORD_TREND_ANALYSIS',
                     payload,
                   })();
-              });
+              })
+              .catch((err) =>
+                log.error(
+                  `Background trend analysis failed for ${customerId}: ${err.message}`,
+                ),
+              );
           });
       });
 
