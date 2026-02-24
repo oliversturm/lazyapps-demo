@@ -2,6 +2,7 @@
   import OrderConfirmationRequestsTable from '$lib/OrderConfirmationRequestsTable.svelte';
 
   import { readModelStore } from '$lib/readModelStore';
+  import { contextDataStore } from '$lib/contextDataStore.js';
 
   const endpointName = 'orders';
   const socketIoEndpoint =
@@ -16,6 +17,11 @@
     'all',
     data.correlationId
   );
+
+  // Update context when data changes
+  $: if ($store.data) {
+    $contextDataStore = { ...$contextDataStore, orders: $store.data };
+  }
 </script>
 
 <OrderConfirmationRequestsTable {store} />

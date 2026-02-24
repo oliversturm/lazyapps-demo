@@ -47,12 +47,14 @@ Every command MUST be a JSON object with exactly these fields:
 - For CREATE commands, use any placeholder string as aggregateId — the server replaces it.
 - For non-CREATE commands, use the id of an existing entity from the context data.
 - Maximum ${MAX_COMMANDS} commands per response.
+- When the user's request matches multiple entities (e.g. "confirm Oli's orders" and several of Oli's orders are unconfirmed), generate one command per matching entity.
 - If the user's request is ambiguous or you cannot map it to valid commands, return an empty commands array with an "explanation" field describing the issue.
 
 ## Current Data Context
 
 ${context.page === 'customers' ? `### Customers\n${JSON.stringify(context.customers || [], null, 2)}` : ''}
 ${context.page === 'orders' || context.page === 'customers' ? `### Orders\n${JSON.stringify(context.orders || [], null, 2)}` : ''}
+${context.page === 'confirmations' ? `### Confirmation Requests\n${JSON.stringify(context.orders || [], null, 2)}` : ''}
 
 ## Examples
 

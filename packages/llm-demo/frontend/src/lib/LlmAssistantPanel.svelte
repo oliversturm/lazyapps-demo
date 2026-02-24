@@ -279,8 +279,10 @@
   };
 
   let messagesContainer;
-  $: if (messages.length && messagesContainer) {
-    // Scroll to bottom when new messages arrive
+  let prevMessageCount = 0;
+  $: if (messages.length > prevMessageCount && messagesContainer) {
+    // Scroll to bottom only when new messages are added
+    prevMessageCount = messages.length;
     setTimeout(() => {
       if (messagesContainer) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
