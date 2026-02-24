@@ -2,11 +2,13 @@
 # Seed data for llm-demo presentations
 # Usage: ./seed-data.sh [COMMAND_URL]
 
-COMMAND_URL="${1:-http://commands.localhost/api/command}"
+COMMAND_URL="${1:-http://127.0.0.1/api/command}"
+COMMAND_HOST="commands.localhost"
 
 post_command() {
   curl -s -X POST "$COMMAND_URL" \
-    -H "Content-Type: application/json" \
+			 -H "Content-Type: application/json" \
+			 -H "Host: $COMMAND_HOST" \
     -d "$1" > /dev/null
   echo "  Sent: $(echo "$1" | jq -r '.command') $(echo "$1" | jq -r '.aggregateName') $(echo "$1" | jq -r '.payload.name // .payload.text // ""')"
 }
