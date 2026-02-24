@@ -376,19 +376,19 @@
       <div class="border-t pt-2 mt-2 px-2">
         <div class="text-xs font-bold mb-1">Reputation Assessments</div>
         {#each $reputationStore.data.slice(0, 5) as assessment}
-          <div class="border rounded p-2 my-1 text-xs">
+          <div class="border rounded p-2 my-1 bg-blue-50 text-xs">
             <div class="flex items-center gap-2 mb-1">
               <span class="font-medium">{assessment.customerName}</span>
-              <span class="px-1 rounded {assessment.reputation === 'good'
-                ? 'bg-green-200 text-green-800'
+              <span class="text-xs px-2 py-0.5 rounded {assessment.reputation === 'good'
+                ? 'bg-green-300 text-green-900'
                 : assessment.reputation === 'poor'
-                  ? 'bg-red-200 text-red-800'
-                  : 'bg-yellow-200 text-yellow-800'}">{assessment.reputation}</span>
-              <span class="text-gray-400">{assessment.path}</span>
+                  ? 'bg-red-300 text-red-900'
+                  : 'bg-yellow-300 text-yellow-900'}">{assessment.reputation}</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-600">{assessment.path}</span>
             </div>
             <div class="text-gray-600">{assessment.reasoning}</div>
             {#if assessment.failSafe}
-              <div class="text-orange-600 text-xs mt-1">Default assessment (LLM unavailable)</div>
+              <div class="text-orange-600 text-xs mt-1 italic">Default assessment (LLM unavailable)</div>
             {/if}
           </div>
         {/each}

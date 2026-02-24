@@ -49,10 +49,10 @@
     <div class="font-bold mb-1 flex items-center gap-2">
       Risk Assessment
       <span class="text-xs px-2 py-0.5 rounded {result.riskLevel === 'high'
-        ? 'bg-red-300'
+        ? 'bg-red-300 text-red-900'
         : result.riskLevel === 'medium'
-          ? 'bg-yellow-300'
-          : 'bg-green-300'}">{result.riskLevel}</span>
+          ? 'bg-yellow-300 text-yellow-900'
+          : 'bg-green-300 text-green-900'}">{result.riskLevel}</span>
     </div>
     {#if result.issues?.length > 0}
       {#each result.issues as issue}
