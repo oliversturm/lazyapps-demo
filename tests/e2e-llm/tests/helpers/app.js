@@ -85,6 +85,69 @@ export const confirmOrder = async (page, orderText) => {
   await row.getByText('Confirm', { exact: true }).click();
 };
 
+/**
+ * Decline an order from the order confirmation requests page.
+ */
+export const declineOrder = async (page, orderText) => {
+  await navigate(page, 'Order Confirmation Requests');
+  await page.getByText(orderText).waitFor({ timeout: 10000 });
+  const row = page.locator('tr', {
+    has: page.getByText(orderText, { exact: true }),
+  });
+  await row.getByText('Decline', { exact: true }).waitFor({ timeout: 10000 });
+  await row.getByText('Decline', { exact: true }).click();
+};
+
+/**
+ * Get the customer ID by querying the customers readmodel API.
+ */
+export const getCustomerIdByName = async (page, customerName) => {
+  const res = await page.request.post(
+    'http://readmodel-customers/query/overview/all',
+    { headers: { 'Content-Type': 'application/json' }, data: {} },
+  );
+  const customers = await res.json();
+  const customer = customers.find((c) => c.name === customerName);
+  return customer?.id;
+};
+
+/**
+ * Poll the reputation API until at least `minCount` records exist for a customer.
+ * Returns the reputation records sorted by timestamp (newest first).
+ */
+export const pollReputation = async (
+  page,
+  customerId,
+  { minCount = 1, timeout = 90000 } = {},
+) => {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const res = await page.request.post(
+      'http://readmodel-orders/query/reputation/byCustomerId',
+      {
+        headers: { 'Content-Type': 'application/json' },
+        data: { customerId },
+      },
+    );
+    if (res.ok()) {
+      const records = await res.json();
+      if (records.length >= minCount) return records;
+    }
+    await page.waitForTimeout(2000);
+  }
+  return [];
+};
+
+/**
+ * Map a reputation value to its auto-confirm threshold.
+ */
+export const reputationToThreshold = (reputation) =>
+  reputation === 'good'
+    ? 5000
+    : reputation === 'poor'
+      ? 0
+      : 1000;
+
 // ─── LLM panel helpers ───
 
 /**

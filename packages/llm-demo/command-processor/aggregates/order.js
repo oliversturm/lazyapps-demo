@@ -23,6 +23,12 @@ export default {
       oneOf(aggregate, 'status', ['new', 'unconfirmed']);
       return { type: 'ORDER_CONFIRMED' };
     },
+
+    DECLINE: (aggregate) => {
+      exists(aggregate);
+      is(aggregate, 'status', 'unconfirmed');
+      return { type: 'ORDER_DECLINED' };
+    },
   },
 
   projections: {
@@ -40,6 +46,11 @@ export default {
     ORDER_CONFIRMED: (aggregate) => ({
       ...aggregate,
       status: 'confirmed',
+    }),
+
+    ORDER_DECLINED: (aggregate) => ({
+      ...aggregate,
+      status: 'declined',
     }),
   },
 };

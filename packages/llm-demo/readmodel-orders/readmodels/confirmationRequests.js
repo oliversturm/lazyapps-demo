@@ -3,27 +3,6 @@ import { ordersCollectionName } from './overview.js';
 export const confirmationRequestsCollectionName =
   'orders_confirmation_requests';
 
-const expensiveOrderValue = 1000;
-
-export const checkOrderValueSideEffect = (
-  commands,
-  changeNotification,
-  order,
-) =>
-  order.value > expensiveOrderValue
-    ? commands.execute({
-        aggregateName: 'order',
-        aggregateId: order.id,
-        command: 'REQUIRE_CONFIRMATION',
-        payload: {},
-      })
-    : commands.execute({
-        aggregateName: 'order',
-        aggregateId: order.id,
-        command: 'CONFIRM',
-        payload: {},
-      });
-
 export default {
   projections: {
     ORDER_CONFIRMATION_REQUIRED: (
@@ -101,6 +80,34 @@ export default {
               {
                 id: aggregateId,
                 status: 'confirmed',
+              },
+            ),
+          ),
+        ),
+
+    ORDER_DECLINED: (
+      {
+        storage,
+        changeNotification: { sendChangeNotification, createChangeInfo },
+      },
+      { aggregateId },
+    ) =>
+      storage
+        .updateOne(
+          confirmationRequestsCollectionName,
+          { id: aggregateId },
+          { $set: { status: 'declined' } },
+        )
+        .then(() =>
+          sendChangeNotification(
+            createChangeInfo(
+              'orders',
+              'confirmationRequests',
+              'all',
+              'updateRow',
+              {
+                id: aggregateId,
+                status: 'declined',
               },
             ),
           ),

@@ -21,7 +21,7 @@
     if (cmd.aggregateName === 'customer' && !['CREATE', 'UPDATE'].includes(cmd.command)) {
       return `Unknown customer command: ${cmd.command}`;
     }
-    if (cmd.aggregateName === 'order' && !['CREATE', 'CONFIRM'].includes(cmd.command)) {
+    if (cmd.aggregateName === 'order' && !['CREATE', 'CONFIRM', 'DECLINE'].includes(cmd.command)) {
       return `Unknown order command: ${cmd.command}`;
     }
     return null;

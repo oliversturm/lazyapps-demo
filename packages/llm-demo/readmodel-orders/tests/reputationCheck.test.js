@@ -17,28 +17,21 @@ vi.mock('../llm.js', () => ({
   },
 }));
 
-const { reputationCheckSideEffect, default: reputationCheckReadModel } =
-  await import('../readmodels/reputationCheck.js');
+const {
+  reputationRoutingSideEffect,
+  reputationReassessmentSideEffect,
+  default: reputationCheckReadModel,
+} = await import('../readmodels/reputationCheck.js');
 
 // Helper: let fire-and-forget microtasks settle
 const flushPromises = () => new Promise((r) => setTimeout(r, 0));
 
-describe('reputationCheckSideEffect', () => {
+describe('reputationRoutingSideEffect', () => {
   let storage;
   let commands;
-  let changeNotification;
   let order;
 
-  // storage.find is called with different collections:
-  // - 'orders_reputation' for stored reputation lookup
-  // - 'orders_overview' for order history (background LLM call)
-  const makeFindMock = ({
-    storedReputation = null,
-    orderHistory = [
-      { text: 'Widget', value: 100, status: 'confirmed' },
-      { text: 'Gadget', value: 200, status: 'confirmed' },
-    ],
-  } = {}) =>
+  const makeFindMock = ({ storedReputation = null } = {}) =>
     vi.fn().mockImplementation((collection) => {
       if (collection === 'orders_reputation') {
         return {
@@ -53,10 +46,9 @@ describe('reputationCheckSideEffect', () => {
           }),
         };
       }
-      // orders_overview — for background LLM call
       return {
         project: vi.fn().mockReturnValue({
-          toArray: vi.fn().mockResolvedValue(orderHistory),
+          toArray: vi.fn().mockResolvedValue([]),
         }),
       };
     });
@@ -66,18 +58,10 @@ describe('reputationCheckSideEffect', () => {
 
     storage = {
       find: makeFindMock(),
-      insertOne: vi.fn().mockResolvedValue(),
     };
 
     commands = {
       execute: vi.fn().mockReturnValue(() => Promise.resolve()),
-    };
-
-    changeNotification = {
-      sendChangeNotification: vi.fn().mockResolvedValue(),
-      createChangeInfo: vi
-        .fn()
-        .mockImplementation((...args) => ({ args })),
     };
 
     order = {
@@ -88,16 +72,11 @@ describe('reputationCheckSideEffect', () => {
     };
   });
 
-  test('routes immediately via stored good reputation → CONFIRM', () => {
+  test('good reputation + value <= $5000 → CONFIRM', () => {
     storage.find = makeFindMock({ storedReputation: 'good' });
+    order.value = 4999;
 
-    return reputationCheckSideEffect(
-      storage,
-      commands,
-      changeNotification,
-      order,
-    )().then(() => {
-      // Order routed immediately to CONFIRM
+    return reputationRoutingSideEffect(storage, commands, order)().then(() => {
       expect(commands.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           aggregateName: 'order',
@@ -108,15 +87,39 @@ describe('reputationCheckSideEffect', () => {
     });
   });
 
-  test('routes immediately via stored poor reputation → REQUIRE_CONFIRMATION', () => {
+  test('good reputation + value > $5000 → REQUIRE_CONFIRMATION', () => {
+    storage.find = makeFindMock({ storedReputation: 'good' });
+    order.value = 5001;
+
+    return reputationRoutingSideEffect(storage, commands, order)().then(() => {
+      expect(commands.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggregateName: 'order',
+          aggregateId: 'order-1',
+          command: 'REQUIRE_CONFIRMATION',
+        }),
+      );
+    });
+  });
+
+  test('good reputation + value exactly $5000 → CONFIRM', () => {
+    storage.find = makeFindMock({ storedReputation: 'good' });
+    order.value = 5000;
+
+    return reputationRoutingSideEffect(storage, commands, order)().then(() => {
+      expect(commands.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          command: 'CONFIRM',
+        }),
+      );
+    });
+  });
+
+  test('poor reputation + any value → REQUIRE_CONFIRMATION (threshold $0)', () => {
     storage.find = makeFindMock({ storedReputation: 'poor' });
+    order.value = 1;
 
-    return reputationCheckSideEffect(
-      storage,
-      commands,
-      changeNotification,
-      order,
-    )().then(() => {
+    return reputationRoutingSideEffect(storage, commands, order)().then(() => {
       expect(commands.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           aggregateName: 'order',
@@ -127,88 +130,162 @@ describe('reputationCheckSideEffect', () => {
     });
   });
 
-  test('routes via stored neutral reputation → value-based (STANDARD)', () => {
+  test('neutral reputation + value <= $1000 → CONFIRM', () => {
     storage.find = makeFindMock({ storedReputation: 'neutral' });
-    order.value = 500; // under 1000 threshold → CONFIRM
+    order.value = 500;
 
-    return reputationCheckSideEffect(
-      storage,
-      commands,
-      changeNotification,
-      order,
-    )().then(() => {
-      // STANDARD path goes through checkOrderValueSideEffect
+    return reputationRoutingSideEffect(storage, commands, order)().then(() => {
       expect(commands.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          aggregateName: 'order',
-          aggregateId: 'order-1',
           command: 'CONFIRM',
         }),
       );
     });
   });
 
-  test('falls back to value-based routing when no stored reputation', () => {
-    storage.find = makeFindMock({ storedReputation: null });
-    order.value = 500; // under threshold → CONFIRM
+  test('neutral reputation + value > $1000 → REQUIRE_CONFIRMATION', () => {
+    storage.find = makeFindMock({ storedReputation: 'neutral' });
+    order.value = 1500;
 
-    return reputationCheckSideEffect(
-      storage,
-      commands,
-      changeNotification,
-      order,
-    )().then(() => {
+    return reputationRoutingSideEffect(storage, commands, order)().then(() => {
       expect(commands.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          aggregateName: 'order',
-          aggregateId: 'order-1',
-          command: 'CONFIRM',
-        }),
-      );
-    });
-  });
-
-  test('falls back to REQUIRE_CONFIRMATION for expensive orders with no reputation', () => {
-    storage.find = makeFindMock({ storedReputation: null });
-    order.value = 5000; // over 1000 threshold
-
-    return reputationCheckSideEffect(
-      storage,
-      commands,
-      changeNotification,
-      order,
-    )().then(() => {
-      expect(commands.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          aggregateName: 'order',
-          aggregateId: 'order-1',
           command: 'REQUIRE_CONFIRMATION',
         }),
       );
     });
   });
 
-  test('fires background LLM reputation update', () => {
+  test('no stored reputation (unknown) uses $1000 threshold → CONFIRM', () => {
     storage.find = makeFindMock({ storedReputation: null });
+    order.value = 500;
+
+    return reputationRoutingSideEffect(storage, commands, order)().then(() => {
+      expect(commands.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          command: 'CONFIRM',
+        }),
+      );
+    });
+  });
+
+  test('no stored reputation (unknown) + expensive order → REQUIRE_CONFIRMATION', () => {
+    storage.find = makeFindMock({ storedReputation: null });
+    order.value = 5000;
+
+    return reputationRoutingSideEffect(storage, commands, order)().then(() => {
+      expect(commands.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          command: 'REQUIRE_CONFIRMATION',
+        }),
+      );
+    });
+  });
+});
+
+describe('reputationReassessmentSideEffect', () => {
+  let storage;
+  let commands;
+
+  const makeStorageMock = ({
+    orderData = null,
+    orderHistory = [],
+    storedReputation = null,
+  } = {}) => ({
+    find: vi.fn().mockImplementation((collection, query) => {
+      if (collection === 'orders_overview' && query.id) {
+        // Fetching the order by aggregateId
+        return {
+          toArray: vi.fn().mockResolvedValue(orderData ? [orderData] : []),
+        };
+      }
+      if (collection === 'orders_overview' && query.customerId) {
+        // Fetching order history for LLM
+        return {
+          project: vi.fn().mockReturnValue({
+            toArray: vi.fn().mockResolvedValue(orderHistory),
+          }),
+        };
+      }
+      if (collection === 'orders_reputation') {
+        // Change detection lookup
+        return {
+          sort: vi.fn().mockReturnValue({
+            limit: vi.fn().mockReturnValue({
+              project: vi.fn().mockReturnValue({
+                toArray: vi.fn().mockResolvedValue(
+                  storedReputation ? [{ reputation: storedReputation }] : [],
+                ),
+              }),
+            }),
+          }),
+        };
+      }
+      return { toArray: vi.fn().mockResolvedValue([]) };
+    }),
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    commands = {
+      execute: vi.fn().mockReturnValue(() => Promise.resolve()),
+    };
+  });
+
+  test('fetches order from storage and calls LLM', () => {
+    const orderData = {
+      id: 'order-1',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 500,
+    };
+    storage = makeStorageMock({
+      orderData,
+      orderHistory: [{ text: 'Widget', value: 100, status: 'confirmed' }],
+      storedReputation: null,
+    });
     mockJsonCompletion.mockResolvedValue({
       content: { reputation: 'good', reasoning: 'Great customer' },
     });
 
-    return reputationCheckSideEffect(
+    return reputationReassessmentSideEffect(
       storage,
       commands,
-      changeNotification,
-      order,
+      'order-1',
     )()
       .then(flushPromises)
       .then(() => {
-        // Background LLM call was made
         expect(mockJsonCompletion).toHaveBeenCalledOnce();
         const [messages, opts] = mockJsonCompletion.mock.calls[0];
         expect(messages[0].role).toBe('user');
         expect(opts.systemPrompt).toContain('Alice');
+      });
+  });
 
-        // Background UPDATE_CUSTOMER_REPUTATION command was sent
+  test('sends UPDATE_CUSTOMER_REPUTATION when reputation changed', () => {
+    const orderData = {
+      id: 'order-1',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 500,
+    };
+    storage = makeStorageMock({
+      orderData,
+      orderHistory: [{ text: 'Widget', value: 100, status: 'confirmed' }],
+      storedReputation: 'neutral',
+    });
+    mockJsonCompletion.mockResolvedValue({
+      content: { reputation: 'good', reasoning: 'Improved' },
+    });
+
+    return reputationReassessmentSideEffect(
+      storage,
+      commands,
+      'order-1',
+    )()
+      .then(flushPromises)
+      .then(() => {
         expect(commands.execute).toHaveBeenCalledWith(
           expect.objectContaining({
             aggregateName: 'customer',
@@ -216,7 +293,7 @@ describe('reputationCheckSideEffect', () => {
             command: 'UPDATE_CUSTOMER_REPUTATION',
             payload: expect.objectContaining({
               reputation: 'good',
-              reasoning: 'Great customer',
+              reasoning: 'Improved',
               failSafe: false,
               orderId: 'order-1',
               orderValue: 500,
@@ -228,39 +305,78 @@ describe('reputationCheckSideEffect', () => {
       });
   });
 
-  test('background LLM error does not break order routing', () => {
-    storage.find = makeFindMock({ storedReputation: null });
-    mockJsonCompletion.mockRejectedValue(new Error('LLM down'));
+  test('skips UPDATE_CUSTOMER_REPUTATION when reputation unchanged', () => {
+    const orderData = {
+      id: 'order-1',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 500,
+    };
+    storage = makeStorageMock({
+      orderData,
+      orderHistory: [{ text: 'Widget', value: 100, status: 'confirmed' }],
+      storedReputation: 'good',
+    });
+    mockJsonCompletion.mockResolvedValue({
+      content: { reputation: 'good', reasoning: 'Still good' },
+    });
 
-    return reputationCheckSideEffect(
+    return reputationReassessmentSideEffect(
       storage,
       commands,
-      changeNotification,
-      order,
+      'order-1',
     )()
       .then(flushPromises)
       .then(() => {
-        // Order was still routed (value-based)
-        expect(commands.execute).toHaveBeenCalledWith(
-          expect.objectContaining({
-            aggregateName: 'order',
-            command: 'CONFIRM',
-          }),
-        );
+        expect(commands.execute).not.toHaveBeenCalled();
       });
   });
 
-  test('background LLM fail-safe on unknown reputation value', () => {
-    storage.find = makeFindMock({ storedReputation: null });
+  test('LLM error does not propagate', () => {
+    const orderData = {
+      id: 'order-1',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 500,
+    };
+    storage = makeStorageMock({
+      orderData,
+      orderHistory: [{ text: 'Widget', value: 100, status: 'confirmed' }],
+    });
+    mockJsonCompletion.mockRejectedValue(new Error('LLM down'));
+
+    return reputationReassessmentSideEffect(
+      storage,
+      commands,
+      'order-1',
+    )()
+      .then(flushPromises)
+      .then(() => {
+        // No commands executed, no error thrown
+        expect(commands.execute).not.toHaveBeenCalled();
+      });
+  });
+
+  test('LLM fail-safe on unknown reputation value', () => {
+    const orderData = {
+      id: 'order-1',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 500,
+    };
+    storage = makeStorageMock({
+      orderData,
+      orderHistory: [{ text: 'Widget', value: 100, status: 'confirmed' }],
+      storedReputation: null,
+    });
     mockJsonCompletion.mockResolvedValue({
       content: { reputation: 'excellent', reasoning: 'Custom value' },
     });
 
-    return reputationCheckSideEffect(
+    return reputationReassessmentSideEffect(
       storage,
       commands,
-      changeNotification,
-      order,
+      'order-1',
     )()
       .then(flushPromises)
       .then(() => {
@@ -278,16 +394,25 @@ describe('reputationCheckSideEffect', () => {
   });
 
   test('payload includes all 7 required fields', () => {
-    storage.find = makeFindMock({ storedReputation: null });
+    const orderData = {
+      id: 'order-1',
+      customerId: 'cust-1',
+      customerName: 'Alice',
+      value: 500,
+    };
+    storage = makeStorageMock({
+      orderData,
+      orderHistory: [{ text: 'Widget', value: 100, status: 'confirmed' }],
+      storedReputation: null,
+    });
     mockJsonCompletion.mockResolvedValue({
       content: { reputation: 'good', reasoning: 'Solid' },
     });
 
-    return reputationCheckSideEffect(
+    return reputationReassessmentSideEffect(
       storage,
       commands,
-      changeNotification,
-      order,
+      'order-1',
     )()
       .then(flushPromises)
       .then(() => {
@@ -303,6 +428,21 @@ describe('reputationCheckSideEffect', () => {
         expect(payload).toHaveProperty('orderValue');
         expect(payload).toHaveProperty('customerName');
         expect(payload).toHaveProperty('path');
+      });
+  });
+
+  test('does nothing when order not found in storage', () => {
+    storage = makeStorageMock({ orderData: null });
+
+    return reputationReassessmentSideEffect(
+      storage,
+      commands,
+      'nonexistent-order',
+    )()
+      .then(flushPromises)
+      .then(() => {
+        expect(mockJsonCompletion).not.toHaveBeenCalled();
+        expect(commands.execute).not.toHaveBeenCalled();
       });
   });
 });

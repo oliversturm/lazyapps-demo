@@ -20,6 +20,15 @@
       payload: { },
     });
   };
+
+  const decline = (id) => () => {
+    postCommand({
+      aggregateName: 'order',
+      aggregateId: id,
+      command: 'DECLINE',
+      payload: { },
+    });
+  };
 </script>
 
 {#if !$store.loaded}
@@ -49,6 +58,7 @@
         <Td>
           {#if row.status === 'unconfirmed'}
             <Button kind="inline" text="Confirm" on:click={confirm(row.id)} />
+            <Button kind="inline" text="Decline" on:click={decline(row.id)} />
           {/if}
           <button
             class="text-xs text-blue-600 hover:underline"

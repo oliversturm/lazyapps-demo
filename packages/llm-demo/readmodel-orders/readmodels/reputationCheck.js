@@ -1,6 +1,6 @@
 import { getLogger } from '@lazyapps/logger';
-import { checkOrderValueSideEffect } from './confirmationRequests.js';
 import { llmClient } from '../llm.js';
+import { ordersCollectionName } from './overview.js';
 
 const log = getLogger('READMODEL', 'REPUTATION');
 
@@ -13,7 +13,7 @@ const buildSystemPrompt = (customerName, orderHistory) =>
 Based on the customer's order history, evaluate their reputation level. Consider:
 - Number of successfully confirmed orders (higher = better)
 - Order value patterns (consistent, reasonable values = better)
-- Any unconfirmed or problematic orders (negative signal)
+- Any declined orders (strong negative signal)
 - Overall ordering pattern (regular, reliable activity = better)
 
 You MUST respond with valid JSON in this exact format:
@@ -26,9 +26,10 @@ The "reputation" field MUST be exactly one of: "good", "neutral", "poor".
 No other values are accepted.
 
 Guidelines:
-- "good": 3+ confirmed orders with no issues — reliable customer
-- "neutral": fewer than 3 orders, or mixed signals — insufficient data
-- "poor": unconfirmed orders, suspicious patterns, or red flags
+- "good": Multiple confirmed orders with no declines — reliable customer. Manual confirmation (order went through human review and was approved) is an especially strong positive signal.
+- "neutral": Few orders, or mixed signals — insufficient data to assess
+- "poor": Declined orders (strong negative signal — order was reviewed and rejected by a human), suspicious patterns, or red flags
+- Note: "unconfirmed" orders are simply in the review queue — this is not inherently negative.
 
 Customer: ${customerName}
 Order history (${orderHistory.length} orders):
@@ -41,39 +42,17 @@ const reputationToPath = (reputation) =>
       ? 'ENHANCED_REVIEW'
       : 'STANDARD';
 
-const routeOrder = (commands, changeNotification, order, path) => {
-  switch (path) {
-    case 'AUTO_CONFIRM':
-      return commands.execute({
-        aggregateName: 'order',
-        aggregateId: order.id,
-        command: 'CONFIRM',
-        payload: {},
-      })();
+const reputationToThreshold = (reputation) =>
+  reputation === 'good'
+    ? 5000
+    : reputation === 'poor'
+      ? 0
+      : 1000;
 
-    case 'ENHANCED_REVIEW':
-      return commands.execute({
-        aggregateName: 'order',
-        aggregateId: order.id,
-        command: 'REQUIRE_CONFIRMATION',
-        payload: {},
-      })();
-
-    case 'STANDARD':
-    default:
-      return checkOrderValueSideEffect(
-        commands,
-        changeNotification,
-        order,
-      )();
-  }
-};
-
-// Background LLM reputation update — fire-and-forget, never blocks
-// order routing.
+// Background LLM reputation update with change detection — fire-and-forget.
 const updateReputationInBackground = (storage, commands, order) => {
   storage
-    .find('orders_overview', { customerId: order.customerId })
+    .find(ordersCollectionName, { customerId: order.customerId })
     .project({ _id: 0, text: 1, value: 1, status: 1 })
     .toArray()
     .then((orderHistory) => {
@@ -118,24 +97,40 @@ const updateReputationInBackground = (storage, commands, order) => {
         `Reputation: ${order.customerId} → ${reputation} (${reasoning.substring(0, 80)})`,
       );
 
-      const path = reputationToPath(reputation);
-      const payload = {
-        reputation,
-        reasoning,
-        failSafe,
-        orderId: order.id,
-        orderValue: order.value,
-        customerName: order.customerName,
-        path,
-      };
+      // Change detection: only send UPDATE if reputation actually changed
+      return storage
+        .find(reputationCollectionName, { customerId: order.customerId })
+        .sort({ timestamp: -1 })
+        .limit(1)
+        .project({ _id: 0, reputation: 1 })
+        .toArray()
+        .then(([existing]) => {
+          if (existing && existing.reputation === reputation) {
+            log.info(
+              `Reputation unchanged for ${order.customerId} (${reputation}), skipping update`,
+            );
+            return;
+          }
 
-      return commands
-        .execute({
-          aggregateName: 'customer',
-          aggregateId: order.customerId,
-          command: 'UPDATE_CUSTOMER_REPUTATION',
-          payload,
-        })();
+          const path = reputationToPath(reputation);
+          const payload = {
+            reputation,
+            reasoning,
+            failSafe,
+            orderId: order.id,
+            orderValue: order.value,
+            customerName: order.customerName,
+            path,
+          };
+
+          return commands
+            .execute({
+              aggregateName: 'customer',
+              aggregateId: order.customerId,
+              command: 'UPDATE_CUSTOMER_REPUTATION',
+              payload,
+            })();
+        });
     })
     .catch((err) =>
       log.error(
@@ -144,21 +139,13 @@ const updateReputationInBackground = (storage, commands, order) => {
     );
 };
 
-// -- Side Effect (Pattern B: returns () => Promise) --
+// -- Side Effect: Reputation Routing (Pattern B: returns () => Promise) --
 //
-// Route the order immediately using stored reputation (or value-based
-// fallback if no prior assessment exists). The LLM reputation update
-// runs in the background so order routing is never blocked by LLM
-// latency.
+// Route the order immediately using stored reputation and threshold-based
+// comparison. No LLM call — fast synchronous lookup only.
 
-export const reputationCheckSideEffect = (
-  storage,
-  commands,
-  changeNotification,
-  order,
-) =>
+export const reputationRoutingSideEffect = (storage, commands, order) =>
   () =>
-    // 1. Look up the most recent stored reputation for this customer
     storage
       .find(reputationCollectionName, { customerId: order.customerId })
       .sort({ timestamp: -1 })
@@ -166,28 +153,48 @@ export const reputationCheckSideEffect = (
       .project({ _id: 0, reputation: 1 })
       .toArray()
       .then(([existing]) => {
-        // 2. Fire LLM reputation update in background (never awaited)
-        updateReputationInBackground(storage, commands, order);
+        const reputation =
+          existing && VALID_REPUTATIONS.includes(existing.reputation)
+            ? existing.reputation
+            : 'unknown';
+        const threshold = reputationToThreshold(reputation);
+        const command =
+          order.value <= threshold ? 'CONFIRM' : 'REQUIRE_CONFIRMATION';
 
-        // 3. Route the order immediately
-        if (existing && VALID_REPUTATIONS.includes(existing.reputation)) {
-          const path = reputationToPath(existing.reputation);
-          log.info(
-            `Routing order ${order.id} via stored reputation: ${existing.reputation} → ${path}`,
-          );
-          return routeOrder(commands, changeNotification, order, path);
-        }
-
-        // No prior reputation — fall back to standard value-based routing
         log.info(
-          `No stored reputation for ${order.customerId}, using value-based routing`,
+          `Routing order ${order.id}: reputation=${reputation}, threshold=$${threshold}, value=$${order.value} → ${command}`,
         );
-        return routeOrder(
-          commands,
-          changeNotification,
-          order,
-          'STANDARD',
-        );
+
+        return commands.execute({
+          aggregateName: 'order',
+          aggregateId: order.id,
+          command,
+          payload: {},
+        })();
+      });
+
+// -- Side Effect: Reputation Reassessment (Pattern B: returns () => Promise) --
+//
+// Triggered on ORDER_CONFIRMED and ORDER_DECLINED. Fetches order data from
+// storage, then fires background LLM reputation update.
+
+export const reputationReassessmentSideEffect = (
+  storage,
+  commands,
+  aggregateId,
+) =>
+  () =>
+    storage
+      .find(ordersCollectionName, { id: aggregateId })
+      .toArray()
+      .then(([order]) => {
+        if (!order) {
+          log.warn(
+            `Cannot reassess reputation: order ${aggregateId} not found`,
+          );
+          return;
+        }
+        updateReputationInBackground(storage, commands, order);
       });
 
 // -- Read Model --

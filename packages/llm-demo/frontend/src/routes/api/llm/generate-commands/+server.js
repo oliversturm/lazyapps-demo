@@ -28,6 +28,9 @@ const buildSystemPrompt = (
 - **CONFIRM**: Confirms a pending order.
   - Required payload: {}
   - aggregateId: MUST be the existing order's id from the context data below
+- **DECLINE**: Declines a pending order.
+  - Required payload: {}
+  - aggregateId: MUST be the existing order's id from the context data below
 
 ## Command Structure
 

@@ -1,6 +1,9 @@
 import { confirmationRequestsCollectionName } from './confirmationRequests.js';
 import { trendAnalysisSideEffect } from './trendAnalysis.js';
-import { reputationCheckSideEffect } from './reputationCheck.js';
+import {
+  reputationRoutingSideEffect,
+  reputationReassessmentSideEffect,
+} from './reputationCheck.js';
 
 export const customersCollectionName = 'orders_customers';
 export const ordersCollectionName = 'orders_overview';
@@ -119,8 +122,8 @@ export default {
       ).then((order) =>
         Promise.all([
           sideEffects.schedule(
-            reputationCheckSideEffect(storage, commands, changeNotification, order),
-            { name: 'LLM reputation check', execution: 'liveOnly' },
+            reputationRoutingSideEffect(storage, commands, order),
+            { name: 'Reputation routing', execution: 'liveOnly' },
           ),
           sideEffects.schedule(
             trendAnalysisSideEffect(
@@ -135,8 +138,44 @@ export default {
         ]),
       ),
 
-    ORDER_CONFIRMED: ({ storage, changeNotification }, { aggregateId }) =>
-      confirmOrder(storage, changeNotification, aggregateId),
+    ORDER_CONFIRMED: (
+      { storage, sideEffects, commands, changeNotification },
+      { aggregateId },
+    ) =>
+      confirmOrder(storage, changeNotification, aggregateId).then(() =>
+        sideEffects.schedule(
+          reputationReassessmentSideEffect(storage, commands, aggregateId),
+          { name: 'Reputation reassessment', execution: 'liveOnly' },
+        ),
+      ),
+
+    ORDER_DECLINED: (
+      {
+        storage,
+        sideEffects,
+        commands,
+        changeNotification: { sendChangeNotification, createChangeInfo },
+      },
+      { aggregateId },
+    ) =>
+      Promise.all([
+        storage.updateOne(
+          ordersCollectionName,
+          { id: aggregateId },
+          { $set: { status: 'declined' } },
+        ),
+        sendChangeNotification(
+          createChangeInfo('orders', 'overview', 'all', 'updateRow', {
+            id: aggregateId,
+            status: 'declined',
+          }),
+        ),
+      ]).then(() =>
+        sideEffects.schedule(
+          reputationReassessmentSideEffect(storage, commands, aggregateId),
+          { name: 'Reputation reassessment', execution: 'liveOnly' },
+        ),
+      ),
   },
 
   resolvers: {
