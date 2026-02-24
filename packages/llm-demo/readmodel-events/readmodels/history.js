@@ -9,6 +9,7 @@ const eventTypes = [
   'ORDER_CREATED',
   'ORDER_CONFIRMED',
   'ORDER_CONFIRMATION_REQUIRED',
+  'ORDER_DECLINED',
 ];
 
 // Shared generic handler — all event types get the same treatment
