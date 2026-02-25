@@ -10,7 +10,11 @@
   let editableCommands = commands.map((cmd) => JSON.parse(JSON.stringify(cmd)));
   let statuses = initialStatuses || commands.map(() => 'pending'); // pending | editing | sent | error
 
-  $: onStatusChange([...statuses]);
+  // Notify parent imperatively — a reactive $: here causes an infinite loop
+  // because the parent's inline callback invalidates `messages`, re-rendering
+  // this component with a new callback reference, which re-triggers the $:.
+  const notifyStatusChange = () => onStatusChange([...statuses]);
+
   let editTexts = commands.map(() => '');
   let editErrors = commands.map(() => null);
   let sending = false;
@@ -38,10 +42,12 @@
     if (error) {
       statuses[index] = 'error';
       statuses = statuses;
+      notifyStatusChange();
       return;
     }
     statuses[index] = 'sending';
     statuses = statuses;
+    notifyStatusChange();
     try {
       await postCommand(editableCommands[index]);
       statuses[index] = 'sent';
@@ -49,6 +55,7 @@
       statuses[index] = 'error';
     }
     statuses = statuses;
+    notifyStatusChange();
     if (statuses.every((s) => s === 'sent' || s === 'error')) {
       onDone();
     }
@@ -69,6 +76,7 @@
     editErrors[index] = null;
     statuses[index] = 'editing';
     statuses = statuses;
+    notifyStatusChange();
   };
 
   const saveEdit = (index) => {
@@ -89,6 +97,7 @@
     }
     editErrors = editErrors;
     statuses = statuses;
+    notifyStatusChange();
   };
 
   const discardEdit = (index) => {
@@ -98,6 +107,7 @@
     editErrors = editErrors;
     statuses[index] = 'pending';
     statuses = statuses;
+    notifyStatusChange();
   };
 
   const cancel = () => {
