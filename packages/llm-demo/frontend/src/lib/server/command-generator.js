@@ -2,6 +2,16 @@ import { nanoid } from 'nanoid';
 
 export const MAX_COMMANDS = 10;
 
+const RM_CUSTOMERS_URL =
+  process.env.RM_CUSTOMERS_URL || 'http://readmodel-customers';
+
+const fetchJson = (url, body = {}) =>
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).then((res) => res.json());
+
 // -- Tool Definitions --
 
 export const tools = [
@@ -10,9 +20,23 @@ export const tools = [
     function: {
       name: 'lookup_customers',
       description:
-        'Get the list of all customers with their IDs, names, and locations. ' +
-        'Use this to find customer IDs for UPDATE commands or to find customerId for CREATE order commands.',
-      parameters: { type: 'object', properties: {}, required: [] },
+        'Search for customers by name or get all customers. ' +
+        'Returns customer IDs, names, and locations. ' +
+        'Use the query parameter to search by name (supports fuzzy matching). ' +
+        'Use this to find customer IDs for commands.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description:
+              'Optional search query to find customers by name. ' +
+              'Supports fuzzy matching (e.g., "Oli" matches "Oliver"). ' +
+              'Omit to get all customers.',
+          },
+        },
+        required: [],
+      },
     },
   },
   {
@@ -43,11 +67,11 @@ export const tools = [
 export const executeTool = (name, args, context) => {
   switch (name) {
     case 'lookup_customers':
-      return (context.customers || []).map((c) => ({
-        id: c.id,
-        name: c.name,
-        location: c.location,
-      }));
+      return args.query
+        ? fetchJson(`${RM_CUSTOMERS_URL}/query/llm_lookup/search`, {
+            query: args.query,
+          })
+        : fetchJson(`${RM_CUSTOMERS_URL}/query/llm_lookup/all`);
     case 'lookup_orders': {
       const orders = (context.orders || []).map((o) => ({
         id: o.id,

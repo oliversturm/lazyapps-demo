@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   tools,
   executeTool,
@@ -18,6 +18,17 @@ describe('tools', () => {
     expect(tools[1].function.name).toBe('lookup_orders');
   });
 
+  test('lookup_customers accepts optional query parameter', () => {
+    const params = tools[0].function.parameters;
+    expect(params.properties).toHaveProperty('query');
+    expect(params.properties.query.type).toBe('string');
+    expect(params.required).toEqual([]);
+  });
+
+  test('lookup_customers description mentions fuzzy matching', () => {
+    expect(tools[0].function.description).toContain('fuzzy matching');
+  });
+
   test('lookup_orders accepts optional customerId parameter', () => {
     const params = tools[1].function.parameters;
     expect(params.properties).toHaveProperty('customerId');
@@ -28,11 +39,19 @@ describe('tools', () => {
 // ─── Tool executor ───
 
 describe('executeTool', () => {
+  const mockFetch = vi.fn();
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    globalThis.fetch = mockFetch;
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    mockFetch.mockReset();
+  });
+
   const context = {
-    customers: [
-      { id: 'c1', name: 'Alice', location: 'Berlin', extraField: 'ignored' },
-      { id: 'c2', name: 'Bob', location: 'London', extraField: 'ignored' },
-    ],
     orders: [
       {
         id: 'o1',
@@ -65,26 +84,54 @@ describe('executeTool', () => {
   };
 
   describe('lookup_customers', () => {
-    test('returns id, name, location only', () => {
-      const result = executeTool('lookup_customers', {}, context);
-      expect(result).toEqual([
-        { id: 'c1', name: 'Alice', location: 'Berlin' },
-        { id: 'c2', name: 'Bob', location: 'London' },
-      ]);
-    });
+    const allCustomers = [
+      { id: 'c1', name: 'Alice', location: 'Berlin' },
+      { id: 'c2', name: 'Bob', location: 'London' },
+    ];
 
-    test('strips extra fields', () => {
-      const result = executeTool('lookup_customers', {}, context);
-      result.forEach((c) => {
-        expect(c).not.toHaveProperty('extraField');
+    test('fetches all customers when no query provided', () => {
+      mockFetch.mockResolvedValue({
+        json: () => Promise.resolve(allCustomers),
+      });
+      return executeTool('lookup_customers', {}, context).then((result) => {
+        expect(result).toEqual(allCustomers);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://readmodel-customers/query/llm_lookup/all',
+          expect.objectContaining({
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        );
       });
     });
 
-    test('returns empty array when no customers', () => {
-      expect(executeTool('lookup_customers', {}, {})).toEqual([]);
-      expect(executeTool('lookup_customers', {}, { customers: [] })).toEqual(
-        [],
+    test('fetches with search query when query provided', () => {
+      const searchResults = [
+        { id: 'c1', name: 'Alice', location: 'Berlin', score: 0.1 },
+      ];
+      mockFetch.mockResolvedValue({
+        json: () => Promise.resolve(searchResults),
+      });
+      return executeTool('lookup_customers', { query: 'Ali' }, context).then(
+        (result) => {
+          expect(result).toEqual(searchResults);
+          expect(mockFetch).toHaveBeenCalledWith(
+            'http://readmodel-customers/query/llm_lookup/search',
+            expect.objectContaining({
+              method: 'POST',
+              body: JSON.stringify({ query: 'Ali' }),
+            }),
+          );
+        },
       );
+    });
+
+    test('returns a Promise', () => {
+      mockFetch.mockResolvedValue({
+        json: () => Promise.resolve([]),
+      });
+      const result = executeTool('lookup_customers', {}, context);
+      expect(result).toBeInstanceOf(Promise);
     });
   });
 
