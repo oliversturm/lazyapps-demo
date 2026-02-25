@@ -171,6 +171,13 @@
 
     const text = inputText.trim();
     inputText = '';
+
+    // Capture history BEFORE adding the new message to avoid duplication —
+    // the server appends the current message from `text` separately.
+    const history = messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map(({ role, content }) => ({ role, content }));
+
     addMessage({ role: 'user', content: text });
     loading = true;
 
@@ -185,9 +192,7 @@
             customers: contextData.customers || [],
             orders: contextData.orders || [],
           },
-          conversationHistory: messages
-            .filter((m) => m.role === 'user' || m.role === 'assistant')
-            .map(({ role, content }) => ({ role, content })),
+          conversationHistory: history,
         }),
       });
 

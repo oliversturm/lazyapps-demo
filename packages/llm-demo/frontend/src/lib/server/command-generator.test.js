@@ -258,6 +258,28 @@ describe('parseResponse', () => {
     expect(result.explanation).toBe('Ambiguous request — please specify.');
   });
 
+  test('wraps bare JSON array as commands', () => {
+    const input = JSON.stringify([
+      {
+        aggregateName: 'customer',
+        aggregateId: 'new-1',
+        command: 'CREATE',
+        payload: { name: 'Acme', location: 'Berlin' },
+      },
+    ]);
+    const result = parseResponse(input);
+    expect(result.commands).toHaveLength(1);
+    expect(result.commands[0].command).toBe('CREATE');
+  });
+
+  test('wraps bare markdown-wrapped JSON array as commands', () => {
+    const input =
+      '```json\n[{"aggregateName": "customer", "aggregateId": "new-1", "command": "CREATE", "payload": {"name": "Acme", "location": "Berlin"}}]\n```';
+    const result = parseResponse(input);
+    expect(result.commands).toHaveLength(1);
+    expect(result.commands[0].payload.name).toBe('Acme');
+  });
+
   test('handles JSON with only explanation, no commands key', () => {
     const input = JSON.stringify({
       explanation: 'Cannot map to commands',

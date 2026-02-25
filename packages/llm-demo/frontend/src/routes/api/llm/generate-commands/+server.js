@@ -18,6 +18,9 @@ export const POST = async ({ request }) => {
     return json({ error: 'text is required' }, { status: 400 });
   }
 
+  // conversationHistory contains PREVIOUS messages only — the current user
+  // message is in `text` and appended here. The frontend must NOT include the
+  // current message in conversationHistory to avoid sending it to the LLM twice.
   const messages = [
     ...(conversationHistory || []).slice(-20),
     { role: 'user', content: text },
@@ -31,18 +34,7 @@ export const POST = async ({ request }) => {
       { systemPrompt, maxIterations: 5 },
     );
 
-    log.info(
-      `[DEBUG] toolCompletion result.content type=${typeof result.content}, value=${JSON.stringify(result.content)?.substring(0, 200)}`,
-    );
-    log.info(
-      `[DEBUG] toolCalls=${JSON.stringify(result.toolCalls?.map(tc => tc.name))}`,
-    );
-
     const content = parseResponse(result.content);
-
-    log.info(
-      `[DEBUG] parseResponse result: commands=${content.commands?.length ?? 'undefined'}, explanation=${content.explanation?.substring(0, 100) ?? 'none'}`,
-    );
 
     const commands = transformCommands(content.commands);
 

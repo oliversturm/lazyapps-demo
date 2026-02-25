@@ -160,7 +160,10 @@ export const extractJson = (text) => {
  */
 export const parseResponse = (content) => {
   const parsed = extractJson(content);
-  if (parsed) return parsed;
+  if (parsed) {
+    if (Array.isArray(parsed)) return { commands: parsed };
+    return parsed;
+  }
   return { commands: [], explanation: content };
 };
 
