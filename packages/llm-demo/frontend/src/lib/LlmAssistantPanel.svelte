@@ -55,29 +55,6 @@
     'LLM-PANEL',
   );
 
-  let seenAnalyses = new Set();
-
-  // React to new event-driven analyses (D8)
-  // Always target the 'orders' context — trend analysis is order data and
-  // the notification should appear on the Orders page regardless of which
-  // page the user is on when the Socket.io event arrives.
-  $: if ($analysisStore.data?.length > 0) {
-    const latest = $analysisStore.data[$analysisStore.data.length - 1];
-    if (
-      latest.trigger === 'event-driven' &&
-      !seenAnalyses.has(latest.timestamp)
-    ) {
-      seenAnalyses.add(latest.timestamp);
-      addMessage({
-        role: 'system',
-        type: 'analysis',
-        content: `Auto-analysis triggered for ${latest.customerName}`,
-        analysisType: latest.analysisType,
-        result: latest.result,
-      }, 'orders');
-    }
-  }
-
   // React to explain requests from table buttons (F8)
   $: if ($contextDataStore.explainRequest?.timestamp > lastExplainTimestamp) {
     lastExplainTimestamp = $contextDataStore.explainRequest.timestamp;
@@ -132,18 +109,15 @@
     confirmations: 'Confirmations',
   }[currentPage];
 
-  // Reset to chat tab when leaving orders page
-  $: if (currentPage !== 'orders' && activeTab !== 'chat') {
-    activeTab = 'chat';
-  }
-
   // Tab badge counts
   $: reputationCount = [...($reputationStore.data || [])].filter((a, _i, arr) =>
     arr.find((x) => x.customerId === a.customerId) === a
   ).length;
-  $: riskCount = ($analysisStore.data || []).filter(
-    (a) => a.trigger === 'event-driven'
-  ).length;
+  $: riskCount = ($analysisStore.data || [])
+    .filter((a) => a.trigger === 'event-driven')
+    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+    .filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a)
+    .length;
 
   // Per-context conversation history (R-3.5.6)
   let conversationsByContext = {};
@@ -342,32 +316,30 @@
       >—</button>
     </div>
 
-    <!-- Tabs (orders page only) -->
-    {#if currentPage === 'orders'}
-      <div class="flex border-b text-xs">
-        <button
-          class="flex-1 py-1.5 text-center {activeTab === 'chat'
-            ? 'border-b-2 border-blue-500 font-bold text-blue-600'
-            : 'text-gray-500 hover:text-gray-700'}"
-          on:click={() => (activeTab = 'chat')}
-        >Chat</button>
-        <button
-          class="flex-1 py-1.5 text-center {activeTab === 'reputation'
-            ? 'border-b-2 border-blue-500 font-bold text-blue-600'
-            : 'text-gray-500 hover:text-gray-700'}"
-          on:click={() => (activeTab = 'reputation')}
-        >Reputation{#if reputationCount > 0}<span class="ml-1 px-1.5 py-0.5 bg-blue-100 rounded-full text-blue-600">{reputationCount}</span>{/if}</button>
-        <button
-          class="flex-1 py-1.5 text-center {activeTab === 'risk'
-            ? 'border-b-2 border-blue-500 font-bold text-blue-600'
-            : 'text-gray-500 hover:text-gray-700'}"
-          on:click={() => (activeTab = 'risk')}
-        >Risk{#if riskCount > 0}<span class="ml-1 px-1.5 py-0.5 bg-blue-100 rounded-full text-blue-600">{riskCount}</span>{/if}</button>
-      </div>
-    {/if}
+    <!-- Tabs -->
+    <div class="flex border-b text-xs">
+      <button
+        class="flex-1 py-1.5 text-center {activeTab === 'chat'
+          ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+          : 'text-gray-500 hover:text-gray-700'}"
+        on:click={() => (activeTab = 'chat')}
+      >Chat</button>
+      <button
+        class="flex-1 py-1.5 text-center {activeTab === 'reputation'
+          ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+          : 'text-gray-500 hover:text-gray-700'}"
+        on:click={() => (activeTab = 'reputation')}
+      >Reputation{#if reputationCount > 0}<span class="ml-1 px-1.5 py-0.5 bg-blue-100 rounded-full text-blue-600">{reputationCount}</span>{/if}</button>
+      <button
+        class="flex-1 py-1.5 text-center {activeTab === 'risk'
+          ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+          : 'text-gray-500 hover:text-gray-700'}"
+        on:click={() => (activeTab = 'risk')}
+      >Risk{#if riskCount > 0}<span class="ml-1 px-1.5 py-0.5 bg-blue-100 rounded-full text-blue-600">{riskCount}</span>{/if}</button>
+    </div>
 
-    <!-- Tab: Chat (also shown on non-orders pages) -->
-    {#if activeTab === 'chat' || currentPage !== 'orders'}
+    <!-- Tab: Chat -->
+    {#if activeTab === 'chat'}
       <!-- Customer chips for analysis (D7) -->
       {#if currentPage === 'customers' && contextData.customers?.length > 0}
         <div class="px-2 pt-2 flex flex-wrap gap-1">
@@ -509,7 +481,7 @@
     {/if}
 
     <!-- Tab: Reputation -->
-    {#if activeTab === 'reputation' && currentPage === 'orders'}
+    {#if activeTab === 'reputation'}
       <div class="flex-1 overflow-y-auto p-2 min-h-0">
         {#if $reputationStore.data?.length > 0}
           {#each [...$reputationStore.data].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
@@ -536,20 +508,27 @@
     {/if}
 
     <!-- Tab: Risk -->
-    {#if activeTab === 'risk' && currentPage === 'orders'}
+    {#if activeTab === 'risk'}
       <div class="flex-1 overflow-y-auto p-2 min-h-0">
         {#if ($analysisStore.data || []).filter((a) => a.trigger === 'event-driven').length > 0}
-          {#each ($analysisStore.data || []).filter((a) => a.trigger === 'event-driven').reverse() as analysis}
+          {#each ($analysisStore.data || [])
+            .filter((a) => a.trigger === 'event-driven')
+            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+            .filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as analysis}
             <div class="border rounded p-2 my-1 bg-orange-50 text-xs">
               <div class="flex items-center gap-2 mb-1">
                 <span class="font-medium">{analysis.customerName}</span>
                 <span class="text-xs px-2 py-0.5 rounded bg-orange-200 text-orange-800">{analysis.analysisType}</span>
+                {#if analysis.result?.riskLevel}
+                  <span class="text-xs px-2 py-0.5 rounded {analysis.result.riskLevel === 'high'
+                    ? 'bg-red-300 text-red-900'
+                    : analysis.result.riskLevel === 'medium'
+                      ? 'bg-yellow-300 text-yellow-900'
+                      : 'bg-green-300 text-green-900'}">{analysis.result.riskLevel}</span>
+                {/if}
               </div>
-              {#if analysis.result}
-                <AnalysisResults
-                  analysisType={analysis.analysisType}
-                  result={analysis.result}
-                />
+              {#if analysis.result?.summary}
+                <div class="text-gray-600">{analysis.result.summary}</div>
               {/if}
             </div>
           {/each}
