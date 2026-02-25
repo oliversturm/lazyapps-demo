@@ -309,7 +309,7 @@
     <span class="text-xs [writing-mode:vertical-lr] mt-2 text-gray-500">Assistant</span>
   </div>
 {:else}
-  <div class="w-[350px] flex-shrink-0 border rounded bg-white flex flex-col">
+  <div class="w-[350px] flex-shrink-0 border rounded bg-white flex flex-col h-full overflow-hidden">
     <!-- Header -->
     <div class="flex items-center gap-2 p-2 bg-blue-50 border-b">
       <span class="font-bold text-sm flex-1">LLM Assistant</span>
@@ -378,7 +378,7 @@
 
     <!-- Reputation Assessments (E6+E7) -->
     {#if currentPage === 'orders' && $reputationStore.data?.length > 0}
-      <div class="border-t pt-2 mt-2 px-2">
+      <div class="border-t pt-2 mt-2 px-2 max-h-[30%] overflow-y-auto flex-shrink-0">
         <div class="text-xs font-bold mb-1">Reputation Assessments</div>
         {#each [...$reputationStore.data].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
           <div class="border rounded p-2 my-1 bg-blue-50 text-xs">
@@ -402,7 +402,7 @@
 
     <!-- Messages -->
     <div
-      class="flex-1 overflow-y-auto p-2 space-y-2 min-h-[200px] max-h-[600px]"
+      class="flex-1 overflow-y-auto p-2 space-y-2 min-h-0"
       bind:this={messagesContainer}
     >
       {#each messages as msg}

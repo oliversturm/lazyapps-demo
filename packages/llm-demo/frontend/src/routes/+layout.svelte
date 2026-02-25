@@ -31,8 +31,8 @@
     {/each}
     <div class="ml-auto font-bold">LLM Demo</div>
   </div>
-  <div class="flex mt-4 gap-4">
-    <div class="flex-1 border-solid border rounded p-2 min-w-0">
+  <div class="flex mt-4 gap-4 h-[calc(100vh-120px)]">
+    <div class="flex-1 border-solid border rounded p-2 min-w-0 overflow-y-auto">
       <slot />
     </div>
     {#if showPanel}
