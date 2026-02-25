@@ -214,18 +214,22 @@ export const waitForLlmResponse = async (page, timeout = 60000) => {
 };
 
 /**
- * Get the reputation assessments section in the LLM panel.
+ * Switch to the Reputation tab and return the panel locator scoped to that tab.
  */
-export const getReputationSection = (page) => {
-  return getLlmPanel(page).locator('text=Reputation Assessments').locator('..');
+export const getReputationSection = async (page) => {
+  const panel = getLlmPanel(page);
+  await panel.locator('button', { hasText: 'Reputation' }).click();
+  return panel;
 };
 
 /**
- * Wait for at least one reputation assessment card to appear in the panel.
+ * Wait for at least one reputation assessment card to appear in the Reputation tab.
  */
 export const waitForReputationAssessment = async (page, timeout = 90000) => {
+  const panel = getLlmPanel(page);
+  await panel.locator('button', { hasText: 'Reputation' }).click();
   await expect(
-    getLlmPanel(page).getByText('Reputation Assessments')
+    panel.locator('.bg-blue-50.text-xs .font-medium').first()
   ).toBeVisible({ timeout });
 };
 

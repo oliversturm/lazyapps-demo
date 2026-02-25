@@ -6,6 +6,7 @@
   import UsageInfo from './UsageInfo.svelte';
   import { readModelStore } from './readModelStore';
   import { query } from './query.js';
+  import { postCommand } from './commands.js';
   import { contextDataStore } from './contextDataStore';
 
   // Props
@@ -113,8 +114,7 @@
   $: reputationCount = [...($reputationStore.data || [])].filter((a, _i, arr) =>
     arr.find((x) => x.customerId === a.customerId) === a
   ).length;
-  $: riskCount = ($analysisStore.data || [])
-    .filter((a) => a.trigger === 'event-driven')
+  $: riskCount = [...($analysisStore.data || [])]
     .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
     .filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a)
     .length;
@@ -250,6 +250,26 @@
         usage: data.usage,
         duration: data.duration,
       });
+
+      // Record potential-issues analyses so they appear in the Risk tab
+      if (
+        selectedAnalysisType === 'potential-issues' &&
+        selectedCustomerId &&
+        data.result
+      ) {
+        postCommand({
+          aggregateName: 'customer',
+          aggregateId: selectedCustomerId,
+          command: 'RECORD_TREND_ANALYSIS',
+          payload: {
+            analysisType: selectedAnalysisType,
+            result: data.result,
+            customerName: selectedCustomerName,
+            orderCount: 0,
+            trigger: 'manual',
+          },
+        });
+      }
     } catch (error) {
       addMessage({
         role: 'assistant',
@@ -510,9 +530,8 @@
     <!-- Tab: Risk -->
     {#if activeTab === 'risk'}
       <div class="flex-1 overflow-y-auto p-2 min-h-0">
-        {#if ($analysisStore.data || []).filter((a) => a.trigger === 'event-driven').length > 0}
-          {#each ($analysisStore.data || [])
-            .filter((a) => a.trigger === 'event-driven')
+        {#if ($analysisStore.data || []).length > 0}
+          {#each [...($analysisStore.data || [])]
             .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
             .filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as analysis}
             <div class="border rounded p-2 my-1 bg-orange-50 text-xs">

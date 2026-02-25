@@ -40,20 +40,16 @@ test.describe('LLM reputation and analysis (F3, F4, F8, F9)', () => {
       await navigate(page, 'Orders');
       await ensurePanelExpanded(page);
 
-      // Wait for reputation section to appear in the panel.
-      // The section appears once ANY reputation assessment exists.
+      // Switch to the Reputation tab and wait for assessment data to load.
       // Background LLM calls may be rate-limited, so we verify
       // the structural display of whatever data is available.
       await waitForReputationAssessment(page);
 
       const panel = getLlmPanel(page);
-      const reputationSection = panel.locator(
-        'text=Reputation Assessments'
-      ).locator('..');
 
       // Pick the first visible assessment card and verify its structure
-      const firstCard = reputationSection
-        .locator('.border.rounded.p-2')
+      const firstCard = panel
+        .locator('.border.rounded.p-2.bg-blue-50')
         .first();
       await expect(firstCard).toBeVisible({ timeout: 10000 });
 
@@ -226,19 +222,21 @@ test.describe('LLM reputation and analysis (F3, F4, F8, F9)', () => {
         });
       }
 
-      // Navigate to Orders page and check the LLM panel
+      // Navigate to Orders page and check the Risk tab in the LLM panel.
+      // Auto-triggered analyses (fired after 3+ orders for a customer)
+      // are recorded via RECORD_TREND_ANALYSIS and appear in the Risk tab.
       await navigate(page, 'Orders');
       await ensurePanelExpanded(page);
 
       const panel = getLlmPanel(page);
 
-      // Auto-analysis notification should appear in the panel.
-      // It renders as a system message containing "Auto-analysis triggered"
-      // with a lightning bolt emoji (⚡).
-      // This depends on the backend triggering analysis after 3+ orders.
+      // Switch to the Risk tab
+      await panel.locator('button', { hasText: 'Risk' }).click();
+
+      // The customer's risk assessment should appear as a card in the Risk tab.
       // Use a generous timeout since the LLM call takes time.
       await expect(
-        panel.getByText(/Auto-analysis triggered/)
+        panel.locator('.bg-orange-50', { hasText: customerName })
       ).toBeVisible({ timeout: 90000 });
     } finally {
       await context.close();

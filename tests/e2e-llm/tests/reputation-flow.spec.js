@@ -392,17 +392,14 @@ test.describe('Reputation-based routing and reassessment', () => {
       await navigate(page, 'Orders');
       await ensurePanelExpanded(page);
 
-      // Wait for reputation assessment to appear in the panel
+      // Switch to Reputation tab and wait for assessment data
       await waitForReputationAssessment(page);
 
       const panel = getLlmPanel(page);
-      const reputationSection = panel
-        .locator('text=Reputation Assessments')
-        .locator('..');
 
       // Verify at least one assessment card exists
-      const firstCard = reputationSection
-        .locator('.border.rounded.p-2')
+      const firstCard = panel
+        .locator('.border.rounded.p-2.bg-blue-50')
         .first();
       await expect(firstCard).toBeVisible({ timeout: 10000 });
 
