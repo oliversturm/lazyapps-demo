@@ -210,6 +210,7 @@ export default {
     ) =>
       storage
         .insertOne(reputationCollectionName, {
+          id: `${event.aggregateId}-${event.payload.orderId}-${event.timestamp || Date.now()}`,
           customerId: event.aggregateId,
           customerName: event.payload.customerName,
           reputation: event.payload.reputation,
@@ -228,6 +229,7 @@ export default {
               'all',
               'addRow',
               {
+                id: `${event.aggregateId}-${event.payload.orderId}-${event.timestamp || Date.now()}`,
                 customerId: event.aggregateId,
                 customerName: event.payload.customerName,
                 reputation: event.payload.reputation,

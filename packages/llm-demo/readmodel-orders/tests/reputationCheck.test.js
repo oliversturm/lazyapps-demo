@@ -700,6 +700,7 @@ describe('reputationCheck read model projections', () => {
         expect(storage.insertOne).toHaveBeenCalledOnce();
         expect(insertedDocs[0].collection).toBe('orders_reputation');
         expect(insertedDocs[0].doc).toEqual({
+          id: 'cust-1-order-1-2026-01-01T00:00:00.000Z',
           customerId: 'cust-1',
           customerName: 'Alice',
           reputation: 'good',
@@ -718,6 +719,7 @@ describe('reputationCheck read model projections', () => {
           'all',
           'addRow',
           expect.objectContaining({
+            id: 'cust-1-order-1-2026-01-01T00:00:00.000Z',
             customerId: 'cust-1',
             reputation: 'good',
           }),
