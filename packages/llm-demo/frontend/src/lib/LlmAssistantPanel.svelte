@@ -380,7 +380,7 @@
     {#if currentPage === 'orders' && $reputationStore.data?.length > 0}
       <div class="border-t pt-2 mt-2 px-2">
         <div class="text-xs font-bold mb-1">Reputation Assessments</div>
-        {#each [...$reputationStore.data].sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || '')).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
+        {#each [...$reputationStore.data].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
           <div class="border rounded p-2 my-1 bg-blue-50 text-xs">
             <div class="flex items-center gap-2 mb-1">
               <span class="font-medium">{assessment.customerName}</span>
