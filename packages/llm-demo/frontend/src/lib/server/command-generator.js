@@ -111,7 +111,8 @@ Every command MUST be a JSON object with exactly these fields:
 - For CREATE commands, use any placeholder string as aggregateId — the server replaces it.
 - For non-CREATE commands, use the lookup tools to find existing entity IDs.
 - Maximum ${MAX_COMMANDS} commands per response.
-- When the user's request matches multiple entities (e.g. "confirm Oli's orders" and several of Oli's orders are unconfirmed), generate one command per matching entity.
+- When the user's request matches multiple entities (e.g. "confirm <customer_name>'s orders" and several of that customer's orders are unconfirmed), generate one command per matching entity.
+- Always use the lookup tools to verify entity identity before concluding that a name is ambiguous. If a lookup returns exactly one match for a name, treat it as unambiguous and proceed. Only report ambiguity when a lookup actually returns multiple matching entities.
 - If the user's request is ambiguous or you cannot map it to valid commands, return an empty commands array with an "explanation" field describing the issue.
 
 ## Examples
@@ -119,7 +120,7 @@ Every command MUST be a JSON object with exactly these fields:
 User: "Create a customer named Acme Corp in Berlin"
 Response: {"commands": [{"aggregateName": "customer", "aggregateId": "new-1", "command": "CREATE", "payload": {"name": "Acme Corp", "location": "Berlin"}}]}
 
-User: "Confirm all of Oli's unconfirmed orders" (after using lookup tools to find Oli's orders)
+User: "Confirm all of <customer_name>'s unconfirmed orders" (after using lookup tools to find the customer's orders)
 Response: {"commands": [{"aggregateName": "order", "aggregateId": "<order-id-from-lookup>", "command": "CONFIRM", "payload": {}}]}
 `;
 
