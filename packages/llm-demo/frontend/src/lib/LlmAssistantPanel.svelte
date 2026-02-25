@@ -18,6 +18,9 @@
   let collapsed = false;
   let pendingCommands = null;
 
+  // Tab state
+  let activeTab = 'chat';
+
   // Analysis state (D7)
   let selectedAnalysisType = 'product-suggestions';
   let selectedCustomerId = null;
@@ -128,6 +131,19 @@
     orders: 'Orders',
     confirmations: 'Confirmations',
   }[currentPage];
+
+  // Reset to chat tab when leaving orders page
+  $: if (currentPage !== 'orders' && activeTab !== 'chat') {
+    activeTab = 'chat';
+  }
+
+  // Tab badge counts
+  $: reputationCount = [...($reputationStore.data || [])].filter((a, _i, arr) =>
+    arr.find((x) => x.customerId === a.customerId) === a
+  ).length;
+  $: riskCount = ($analysisStore.data || []).filter(
+    (a) => a.trigger === 'event-driven'
+  ).length;
 
   // Per-context conversation history (R-3.5.6)
   let conversationsByContext = {};
@@ -326,167 +342,221 @@
       >—</button>
     </div>
 
-    <!-- Customer chips for analysis (D7) -->
-    {#if currentPage === 'customers' && contextData.customers?.length > 0}
-      <div class="px-2 pt-2 flex flex-wrap gap-1">
-        {#each contextData.customers as customer}
-          <button
-            class="text-xs px-2 py-0.5 rounded {selectedCustomerId === customer.id
-              ? 'bg-blue-400 text-white'
-              : 'bg-gray-100 hover:bg-gray-200'}"
-            on:click={() => selectCustomer(customer)}
-          >{customer.name}</button>
-        {/each}
+    <!-- Tabs (orders page only) -->
+    {#if currentPage === 'orders'}
+      <div class="flex border-b text-xs">
+        <button
+          class="flex-1 py-1.5 text-center {activeTab === 'chat'
+            ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+            : 'text-gray-500 hover:text-gray-700'}"
+          on:click={() => (activeTab = 'chat')}
+        >Chat</button>
+        <button
+          class="flex-1 py-1.5 text-center {activeTab === 'reputation'
+            ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+            : 'text-gray-500 hover:text-gray-700'}"
+          on:click={() => (activeTab = 'reputation')}
+        >Reputation{#if reputationCount > 0}<span class="ml-1 px-1.5 py-0.5 bg-blue-100 rounded-full text-blue-600">{reputationCount}</span>{/if}</button>
+        <button
+          class="flex-1 py-1.5 text-center {activeTab === 'risk'
+            ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+            : 'text-gray-500 hover:text-gray-700'}"
+          on:click={() => (activeTab = 'risk')}
+        >Risk{#if riskCount > 0}<span class="ml-1 px-1.5 py-0.5 bg-blue-100 rounded-full text-blue-600">{riskCount}</span>{/if}</button>
       </div>
     {/if}
 
-    <!-- Quick Analysis section (D7) -->
-    {#if currentPage === 'customers' || currentPage === 'orders'}
-      <div class="border-t mx-2 pt-2 mt-2">
-        <div class="text-xs font-bold mb-1">Quick Analysis</div>
-        <select
-          bind:value={selectedAnalysisType}
-          class="text-xs border rounded p-1 w-full"
-        >
-          <option value="product-suggestions">Product Suggestions</option>
-          <option value="interest-range">Interest Categories</option>
-          <option value="erroneous-orders">Error Detection</option>
-          <option value="potential-issues">Risk Assessment</option>
-        </select>
+    <!-- Tab: Chat (also shown on non-orders pages) -->
+    {#if activeTab === 'chat' || currentPage !== 'orders'}
+      <!-- Customer chips for analysis (D7) -->
+      {#if currentPage === 'customers' && contextData.customers?.length > 0}
+        <div class="px-2 pt-2 flex flex-wrap gap-1">
+          {#each contextData.customers as customer}
+            <button
+              class="text-xs px-2 py-0.5 rounded {selectedCustomerId === customer.id
+                ? 'bg-blue-400 text-white'
+                : 'bg-gray-100 hover:bg-gray-200'}"
+              on:click={() => selectCustomer(customer)}
+            >{customer.name}</button>
+          {/each}
+        </div>
+      {/if}
 
-        {#if currentPage === 'customers' && selectedCustomerId}
-          <button
-            class="text-xs mt-1 px-2 py-1 bg-blue-200 rounded hover:bg-blue-300 w-full"
-            on:click={runAnalysis}
-            disabled={analysisLoading}
+      <!-- Quick Analysis section (D7) -->
+      {#if currentPage === 'customers' || currentPage === 'orders'}
+        <div class="border-b mx-2 pt-2 pb-2">
+          <div class="text-xs font-bold mb-1">Quick Analysis</div>
+          <select
+            bind:value={selectedAnalysisType}
+            class="text-xs border rounded p-1 w-full"
           >
-            {analysisLoading ? 'Analyzing...' : `Analyze ${selectedCustomerName}`}
-          </button>
-        {:else if currentPage === 'orders'}
+            <option value="product-suggestions">Product Suggestions</option>
+            <option value="interest-range">Interest Categories</option>
+            <option value="erroneous-orders">Error Detection</option>
+            <option value="potential-issues">Risk Assessment</option>
+          </select>
+
+          {#if currentPage === 'customers' && selectedCustomerId}
+            <button
+              class="text-xs mt-1 px-2 py-1 bg-blue-200 rounded hover:bg-blue-300 w-full"
+              on:click={runAnalysis}
+              disabled={analysisLoading}
+            >
+              {analysisLoading ? 'Analyzing...' : `Analyze ${selectedCustomerName}`}
+            </button>
+          {:else if currentPage === 'orders'}
+            <button
+              class="text-xs mt-1 px-2 py-1 bg-blue-200 rounded hover:bg-blue-300 w-full"
+              on:click={runAnalysis}
+              disabled={analysisLoading}
+            >
+              {analysisLoading ? 'Analyzing...' : 'Analyze All Orders'}
+            </button>
+          {:else if currentPage === 'customers'}
+            <div class="text-xs text-gray-400 mt-1">Select a customer above</div>
+          {/if}
+        </div>
+      {/if}
+
+      <!-- Messages -->
+      <div
+        class="flex-1 overflow-y-auto p-2 space-y-2 min-h-0"
+        bind:this={messagesContainer}
+      >
+        {#each messages as msg}
+          <div class="text-sm {msg.role === 'user' ? 'text-right' : ''}">
+            {#if msg.role === 'user'}
+              <div class="inline-block bg-blue-100 rounded px-2 py-1 max-w-[90%] text-left">
+                {msg.content}
+              </div>
+            {:else if msg.type === 'command-preview'}
+              <div class="bg-gray-50 rounded px-2 py-1">
+                <div class="text-xs text-gray-500 mb-1">{msg.content}</div>
+                <CommandPreview
+                  commands={msg.commands}
+                  initialStatuses={msg.statuses}
+                  onStatusChange={(s) => { msg.statuses = s; }}
+                  onDone={() => (pendingCommands = null)}
+                />
+                <UsageInfo usage={msg.usage} duration={msg.duration} />
+              </div>
+            {:else if msg.type === 'analysis'}
+              <div class="bg-gray-50 rounded px-2 py-1">
+                <div class="text-xs text-gray-500 mb-1">
+                  {#if msg.role === 'system'}
+                    ⚡ {msg.content}
+                  {:else}
+                    {msg.content}
+                  {/if}
+                </div>
+                {#if msg.result}
+                  <AnalysisResults
+                    analysisType={msg.analysisType}
+                    result={msg.result}
+                    usage={msg.usage}
+                    duration={msg.duration}
+                  />
+                {:else}
+                  <div class="text-xs text-gray-400">No results</div>
+                {/if}
+              </div>
+            {:else if msg.type === 'explanation'}
+              <ExplanationDisplay
+                explanation={msg.content}
+                events={msg.events}
+                keyEvents={msg.keyEvents}
+                reputation={msg.reputation}
+                summary={msg.summary}
+                usage={msg.usage}
+                duration={msg.duration}
+              />
+            {:else if msg.type === 'error'}
+              <div class="bg-red-50 text-red-700 rounded px-2 py-1">
+                {msg.content}
+              </div>
+            {:else}
+              <div class="bg-gray-100 rounded px-2 py-1">
+                {msg.content}
+                <UsageInfo usage={msg.usage} duration={msg.duration} />
+              </div>
+            {/if}
+          </div>
+        {/each}
+
+        {#if loading}
+          <div class="text-sm text-gray-400">Thinking...</div>
+        {/if}
+      </div>
+
+      <!-- Input -->
+      <div class="border-t p-2">
+        <div class="flex gap-2">
+          <input
+            type="text"
+            class="flex-1 text-sm border rounded px-2 py-1"
+            placeholder="Type a command..."
+            bind:value={inputText}
+            on:keydown={handleKeydown}
+            disabled={loading}
+          />
           <button
-            class="text-xs mt-1 px-2 py-1 bg-blue-200 rounded hover:bg-blue-300 w-full"
-            on:click={runAnalysis}
-            disabled={analysisLoading}
-          >
-            {analysisLoading ? 'Analyzing...' : 'Analyze All Orders'}
-          </button>
-        {:else if currentPage === 'customers'}
-          <div class="text-xs text-gray-400 mt-1">Select a customer above</div>
+            class="text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            on:click={sendMessage}
+            disabled={loading || !inputText.trim()}
+          >Send</button>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Tab: Reputation -->
+    {#if activeTab === 'reputation' && currentPage === 'orders'}
+      <div class="flex-1 overflow-y-auto p-2 min-h-0">
+        {#if $reputationStore.data?.length > 0}
+          {#each [...$reputationStore.data].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
+            <div class="border rounded p-2 my-1 bg-blue-50 text-xs">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-medium">{assessment.customerName}</span>
+                <span class="text-xs px-2 py-0.5 rounded {assessment.reputation === 'good'
+                  ? 'bg-green-300 text-green-900'
+                  : assessment.reputation === 'poor'
+                    ? 'bg-red-300 text-red-900'
+                    : 'bg-yellow-300 text-yellow-900'}">{assessment.reputation}</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700">{assessment.path}</span>
+              </div>
+              <div class="text-gray-600">{assessment.reasoning}</div>
+              {#if assessment.failSafe}
+                <div class="text-orange-600 text-xs mt-1 italic">Default assessment (LLM unavailable)</div>
+              {/if}
+            </div>
+          {/each}
+        {:else}
+          <div class="text-xs text-gray-400 p-2">No reputation assessments yet.</div>
         {/if}
       </div>
     {/if}
 
-    <!-- Reputation Assessments (E6+E7) -->
-    {#if currentPage === 'orders' && $reputationStore.data?.length > 0}
-      <div class="border-t pt-2 mt-2 px-2 max-h-[30%] overflow-y-auto flex-shrink-0">
-        <div class="text-xs font-bold mb-1">Reputation Assessments</div>
-        {#each [...$reputationStore.data].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
-          <div class="border rounded p-2 my-1 bg-blue-50 text-xs">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="font-medium">{assessment.customerName}</span>
-              <span class="text-xs px-2 py-0.5 rounded {assessment.reputation === 'good'
-                ? 'bg-green-300 text-green-900'
-                : assessment.reputation === 'poor'
-                  ? 'bg-red-300 text-red-900'
-                  : 'bg-yellow-300 text-yellow-900'}">{assessment.reputation}</span>
-              <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700">{assessment.path}</span>
-            </div>
-            <div class="text-gray-600">{assessment.reasoning}</div>
-            {#if assessment.failSafe}
-              <div class="text-orange-600 text-xs mt-1 italic">Default assessment (LLM unavailable)</div>
-            {/if}
-          </div>
-        {/each}
-      </div>
-    {/if}
-
-    <!-- Messages -->
-    <div
-      class="flex-1 overflow-y-auto p-2 space-y-2 min-h-0"
-      bind:this={messagesContainer}
-    >
-      {#each messages as msg}
-        <div class="text-sm {msg.role === 'user' ? 'text-right' : ''}">
-          {#if msg.role === 'user'}
-            <div class="inline-block bg-blue-100 rounded px-2 py-1 max-w-[90%] text-left">
-              {msg.content}
-            </div>
-          {:else if msg.type === 'command-preview'}
-            <div class="bg-gray-50 rounded px-2 py-1">
-              <div class="text-xs text-gray-500 mb-1">{msg.content}</div>
-              <CommandPreview
-                commands={msg.commands}
-                initialStatuses={msg.statuses}
-                onStatusChange={(s) => { msg.statuses = s; }}
-                onDone={() => (pendingCommands = null)}
-              />
-              <UsageInfo usage={msg.usage} duration={msg.duration} />
-            </div>
-          {:else if msg.type === 'analysis'}
-            <div class="bg-gray-50 rounded px-2 py-1">
-              <div class="text-xs text-gray-500 mb-1">
-                {#if msg.role === 'system'}
-                  ⚡ {msg.content}
-                {:else}
-                  {msg.content}
-                {/if}
+    <!-- Tab: Risk -->
+    {#if activeTab === 'risk' && currentPage === 'orders'}
+      <div class="flex-1 overflow-y-auto p-2 min-h-0">
+        {#if ($analysisStore.data || []).filter((a) => a.trigger === 'event-driven').length > 0}
+          {#each ($analysisStore.data || []).filter((a) => a.trigger === 'event-driven').reverse() as analysis}
+            <div class="border rounded p-2 my-1 bg-orange-50 text-xs">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-medium">{analysis.customerName}</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-orange-200 text-orange-800">{analysis.analysisType}</span>
               </div>
-              {#if msg.result}
+              {#if analysis.result}
                 <AnalysisResults
-                  analysisType={msg.analysisType}
-                  result={msg.result}
-                  usage={msg.usage}
-                  duration={msg.duration}
+                  analysisType={analysis.analysisType}
+                  result={analysis.result}
                 />
-              {:else}
-                <div class="text-xs text-gray-400">No results</div>
               {/if}
             </div>
-          {:else if msg.type === 'explanation'}
-            <ExplanationDisplay
-              explanation={msg.content}
-              events={msg.events}
-              keyEvents={msg.keyEvents}
-              reputation={msg.reputation}
-              summary={msg.summary}
-              usage={msg.usage}
-              duration={msg.duration}
-            />
-          {:else if msg.type === 'error'}
-            <div class="bg-red-50 text-red-700 rounded px-2 py-1">
-              {msg.content}
-            </div>
-          {:else}
-            <div class="bg-gray-100 rounded px-2 py-1">
-              {msg.content}
-              <UsageInfo usage={msg.usage} duration={msg.duration} />
-            </div>
-          {/if}
-        </div>
-      {/each}
-
-      {#if loading}
-        <div class="text-sm text-gray-400">Thinking...</div>
-      {/if}
-    </div>
-
-    <!-- Input -->
-    <div class="border-t p-2">
-      <div class="flex gap-2">
-        <input
-          type="text"
-          class="flex-1 text-sm border rounded px-2 py-1"
-          placeholder="Type a command..."
-          bind:value={inputText}
-          on:keydown={handleKeydown}
-          disabled={loading}
-        />
-        <button
-          class="text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-          on:click={sendMessage}
-          disabled={loading || !inputText.trim()}
-        >Send</button>
+          {/each}
+        {:else}
+          <div class="text-xs text-gray-400 p-2">No risk assessments yet.</div>
+        {/if}
       </div>
-    </div>
+    {/if}
   </div>
 {/if}
