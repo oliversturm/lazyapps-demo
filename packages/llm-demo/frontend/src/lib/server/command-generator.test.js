@@ -34,6 +34,10 @@ describe('tools', () => {
     expect(params.properties).toHaveProperty('customerId');
     expect(params.required).toEqual([]);
   });
+
+  test('lookup_orders description mentions unconfirmed status filter', () => {
+    expect(tools[1].function.description).toContain('unconfirmed');
+  });
 });
 
 // ─── Tool executor ───
@@ -508,15 +512,20 @@ describe('systemPrompt', () => {
     expect(systemPrompt).toContain('call lookup_customers FIRST');
   });
 
-  test('procedure step 2: determine intended action', () => {
+  test('procedure step 2: lookup_orders for CONFIRM/DECLINE with status check', () => {
+    expect(systemPrompt).toContain('call lookup_orders');
+    expect(systemPrompt).toContain('unconfirmed');
+  });
+
+  test('procedure step 3: determine intended action', () => {
     expect(systemPrompt).toContain('Determine the intended action');
   });
 
-  test('procedure step 3: invent reasonable product names', () => {
+  test('procedure step 4: invent reasonable product names', () => {
     expect(systemPrompt).toContain('invent reasonable product names');
   });
 
-  test('procedure step 4: output JSON with commands array', () => {
+  test('procedure step 5: output JSON with commands array', () => {
     expect(systemPrompt).toContain(
       'Output a JSON object with a "commands" array',
     );

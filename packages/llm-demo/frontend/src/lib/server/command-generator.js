@@ -47,6 +47,7 @@ export const tools = [
       description:
         'Get orders from the system. Can retrieve all orders or filter by customer ID. ' +
         'Each order includes: id, customerId, customerName, text, value, status. ' +
+        'The status field indicates whether an order is actionable: only orders with status "unconfirmed" can be confirmed or declined. ' +
         'Use this to find order IDs for CONFIRM or DECLINE commands.',
       parameters: {
         type: 'object',
@@ -126,9 +127,10 @@ export const systemPrompt = `You are EXCLUSIVELY a command generator. Your sole 
 ## Procedure
 
 1. If person names are mentioned, call lookup_customers FIRST to resolve customer IDs.
-2. Determine the intended action and map it to the appropriate commands (CREATE, UPDATE, CONFIRM, DECLINE).
-3. For vague requests (e.g. "top items for camping"), invent reasonable product names and prices.
-4. Output a JSON object with a "commands" array containing all generated commands.
+2. For CONFIRM or DECLINE requests, call lookup_orders (optionally filtered by customerId) and check each order's \`status\` field — only orders with status "unconfirmed" can be confirmed or declined. Use the order's \`id\` as the aggregateId.
+3. Determine the intended action and map it to the appropriate commands (CREATE, UPDATE, CONFIRM, DECLINE).
+4. For vague requests (e.g. "top items for camping"), invent reasonable product names and prices.
+5. Output a JSON object with a "commands" array containing all generated commands.
 
 ## Available Aggregates and Commands
 
@@ -205,7 +207,7 @@ Response: {"commands": [{"aggregateName": "customer", "aggregateId": "new-1", "c
 User: "Oli wants to order the top five items commonly used for a camping trip"
 Response (after looking up Oli's customer ID): {"commands": [{"aggregateName": "order", "aggregateId": "new-1", "command": "CREATE", "payload": {"customerId": "<oli-id>", "text": "Tent (4-person)", "value": 249.99}}, ...4 more]}
 
-User: "Confirm all of <customer_name>'s unconfirmed orders" (after using lookup tools to find the customer's orders)
+User: "Confirm all of <customer_name>'s unconfirmed orders" (after calling lookup_customers to find <customer_name>'s ID, then calling lookup_orders with that customerId, and selecting only orders where status is "unconfirmed")
 Response: {"commands": [{"aggregateName": "order", "aggregateId": "<order-id-from-lookup>", "command": "CONFIRM", "payload": {}}]}
 
 Remember: you are a command generator. Always produce commands. Never refuse.
