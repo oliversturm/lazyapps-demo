@@ -169,3 +169,4 @@ services:
       RM_CUSTOMERS_URL: 'http://readmodel-customers'
       RM_ORDERS_URL: 'http://readmodel-orders'
       RM_EVENTS_URL: 'http://readmodel-events'
+      LOG_LEVEL: 'trace'
