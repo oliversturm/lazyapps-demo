@@ -49,6 +49,9 @@ services:
       - mongo
       - rabbit
       - change-notifier
+    command: ["/bin/sh", "-c", "node --import @lazyapps/observability/register.js index.js 2>&1 | tee /shared-logs/readmodel-orders.log"]
+    volumes:
+      - shared-logs:/shared-logs
     environment:
       EXPRESS_PORT: '80'
       MONGO_URL: 'mongodb://mongo:27017'
@@ -60,7 +63,7 @@ services:
       LLM_API_KEY: '${LLM_API_KEY}'
       LLM_BASE_URL: '${LLM_BASE_URL}'
       LLM_MODEL: '${LLM_MODEL}'
-      LOG_LEVEL: 'warn'
+      LOG_LEVEL: 'info'
 
   readmodel-events:
     build: ../../packages/llm-demo/readmodel-events
@@ -106,5 +109,10 @@ services:
     depends_on:
       - frontend
     ipc: host
+    volumes:
+      - shared-logs:/shared-logs:ro
     environment:
       CI: 'true'
+
+volumes:
+  shared-logs:
