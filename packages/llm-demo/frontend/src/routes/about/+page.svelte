@@ -3,7 +3,7 @@
     About This Demo
   </div>
   <div class="py-8 font-bold text-2xl text-center">
-    LazyApps Orchestrated Demo Application<br />(Svelte Version)
+    LazyApps LLM Demo Application
   </div>
   <div class="px-2 py-1 border-t-2 text-xs text-right">&copy; Oliver Sturm</div>
 </div>
