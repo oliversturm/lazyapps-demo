@@ -1,8 +1,6 @@
 import { getLogger } from '@lazyapps/logger';
 import { llmClient } from '../llm.js';
 
-const log = getLogger('READMODEL', 'TRENDS');
-
 const analysisCollectionName = 'orders_trend_analysis';
 const ANALYSIS_THRESHOLD = 3; // minimum orders to trigger analysis
 
@@ -50,20 +48,31 @@ export const trendAnalysisSideEffect = (
   customerId,
   customerName,
 ) =>
-  () =>
-    // 1. Count recent orders for this customer
-    storage
+  (correlationId) => {
+    const log = getLogger('LLM/TrendBG', correlationId);
+    log.info(
+      `Trend analysis triggered by ORDER_CREATED for customer ${customerId} (${customerName})`,
+    );
+    return storage
       .find('orders_overview', { customerId })
       .toArray()
       .then((orders) => {
-        if (orders.length < ANALYSIS_THRESHOLD) return null;
+        if (orders.length < ANALYSIS_THRESHOLD) {
+          log.debug(
+            `Skipping: ${orders.length} orders < threshold ${ANALYSIS_THRESHOLD}`,
+          );
+          return null;
+        }
 
-        // 2. Fetch all orders for cross-customer analysis
+        // Fetch all orders for cross-customer analysis
         return storage
           .find('orders_overview', {})
           .toArray()
           .then((allOrders) => {
-            // 3. Build prompt
+            log.debug(
+              `Analysis data: ${orders.length} customer orders, ${allOrders.length} total orders`,
+            );
+
             const customer = { name: customerName };
             const systemPrompt = buildPotentialIssuesPrompt(
               customer,
@@ -77,20 +86,22 @@ export const trendAnalysisSideEffect = (
               },
             ];
 
-            // 4. Call LLM directly
+            log.debug(
+              `Requesting trend analysis, prompt length=${systemPrompt.length}`,
+            );
+
             return llmClient
-              .jsonCompletion(messages, { systemPrompt })
+              .jsonCompletion(messages, { systemPrompt, correlationId })
               .then((result) => {
                 if (result.error) {
                   log.error(`Analysis parse error: ${result.error}`);
                   return null;
                 }
 
-                log.info(
-                  `Analysis complete: potential-issues for customer ${customerId}`,
+                log.debug(
+                  `Analysis result: riskLevel=${result.content?.riskLevel}, issues=${result.content?.issues?.length}`,
                 );
 
-                // 5. Assemble payload and send command
                 const payload = {
                   analysisType: 'potential-issues',
                   result: result.content,
@@ -98,6 +109,10 @@ export const trendAnalysisSideEffect = (
                   orderCount: orders.length,
                   trigger: 'event-driven',
                 };
+
+                log.info(
+                  `Trend analysis complete: customer=${customerId}, risk=${result.content?.riskLevel}`,
+                );
 
                 return commands
                   .execute({
@@ -114,6 +129,7 @@ export const trendAnalysisSideEffect = (
               );
           });
       });
+  };
 
 export default {
   projections: {

@@ -144,7 +144,12 @@ export default {
     ) =>
       confirmOrder(storage, changeNotification, aggregateId).then(() =>
         sideEffects.schedule(
-          reputationReassessmentSideEffect(storage, commands, aggregateId),
+          reputationReassessmentSideEffect(
+            storage,
+            commands,
+            aggregateId,
+            'ORDER_CONFIRMED',
+          ),
           { name: 'Reputation reassessment', execution: 'liveOnly' },
         ),
       ),
@@ -172,7 +177,12 @@ export default {
         ),
       ]).then(() =>
         sideEffects.schedule(
-          reputationReassessmentSideEffect(storage, commands, aggregateId),
+          reputationReassessmentSideEffect(
+            storage,
+            commands,
+            aggregateId,
+            'ORDER_DECLINED',
+          ),
           { name: 'Reputation reassessment', execution: 'liveOnly' },
         ),
       ),

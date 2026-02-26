@@ -1,4 +1,5 @@
 import { computeOrderStats } from './computeOrderStats.js';
+import { getLogger } from '@lazyapps/logger';
 
 const RM_CUSTOMERS_URL =
   process.env.RM_CUSTOMERS_URL || 'http://readmodel-customers';
@@ -63,36 +64,71 @@ export const tools = [
 
 // -- Tool Executor --
 
-const fetchJson = (url, body = {}) =>
+const fetchJson = (url, body = {}, correlationId) =>
   fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, correlationId }),
   }).then((res) => res.json());
 
-export const executeTool = async (name, args) => {
+export const executeTool = async (name, args, { correlationId } = {}) => {
+  const log = getLogger('LLM/RAG', correlationId);
+  log.debug(
+    `executeTool: ${name}, args=${JSON.stringify(args).substring(0, 200)}`,
+  );
   switch (name) {
     case 'query_customers':
-      return fetchJson(`${RM_CUSTOMERS_URL}/query/llm_lookup/all`);
+      log.debug(`Fetching ${RM_CUSTOMERS_URL}/query/llm_lookup/all`);
+      return fetchJson(
+        `${RM_CUSTOMERS_URL}/query/llm_lookup/all`,
+        {},
+        correlationId,
+      ).then((result) => {
+        log.debug(`query_customers: ${result.length} customers`);
+        return result;
+      });
 
     case 'query_orders': {
+      log.debug(
+        `Fetching ${RM_ORDERS_URL}/query/overview/all${args.customerId ? ' (filtering by ' + args.customerId + ')' : ''}`,
+      );
       if (args.customerId) {
         const allOrders = await fetchJson(
           `${RM_ORDERS_URL}/query/overview/all`,
+          {},
+          correlationId,
         );
-        return allOrders.filter((o) => o.customerId === args.customerId);
+        const filtered = allOrders.filter(
+          (o) => o.customerId === args.customerId,
+        );
+        log.debug(`query_orders: ${filtered.length} orders`);
+        return filtered;
       }
-      return fetchJson(`${RM_ORDERS_URL}/query/overview/all`);
+      return fetchJson(
+        `${RM_ORDERS_URL}/query/overview/all`,
+        {},
+        correlationId,
+      ).then((result) => {
+        log.debug(`query_orders: ${result.length} orders`);
+        return result;
+      });
     }
 
     case 'query_order_stats': {
+      log.debug(
+        `Fetching ${RM_ORDERS_URL}/query/overview/all for stats computation`,
+      );
       const orders = await fetchJson(
         `${RM_ORDERS_URL}/query/overview/all`,
+        {},
+        correlationId,
       );
+      log.debug(`query_order_stats: computed from ${orders.length} orders`);
       return computeOrderStats(orders);
     }
 
     default:
+      log.warn(`Unknown tool: ${name}`);
       return { error: `Unknown tool: ${name}` };
   }
 };

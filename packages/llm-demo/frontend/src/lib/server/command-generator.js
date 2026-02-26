@@ -1,15 +1,16 @@
 import { nanoid } from 'nanoid';
+import { getLogger } from '@lazyapps/logger';
 
 export const MAX_COMMANDS = 10;
 
 const RM_CUSTOMERS_URL =
   process.env.RM_CUSTOMERS_URL || 'http://readmodel-customers';
 
-const fetchJson = (url, body = {}) =>
+const fetchJson = (url, body = {}, correlationId) =>
   fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, correlationId }),
   }).then((res) => res.json());
 
 // -- Tool Definitions --
@@ -65,13 +66,36 @@ export const tools = [
 // -- Tool Executor --
 
 export const executeTool = (name, args, context) => {
+  const { correlationId } = context;
+  const log = getLogger('LLM/GenCmd', correlationId);
+  log.debug(
+    `executeTool: ${name}, args=${JSON.stringify(args).substring(0, 200)}`,
+  );
   switch (name) {
-    case 'lookup_customers':
-      return args.query
-        ? fetchJson(`${RM_CUSTOMERS_URL}/query/llm_lookup/search`, {
-            query: args.query,
-          })
-        : fetchJson(`${RM_CUSTOMERS_URL}/query/llm_lookup/all`);
+    case 'lookup_customers': {
+      const endpoint = args.query ? 'search' : 'all';
+      log.debug(
+        `Fetching ${RM_CUSTOMERS_URL}/query/llm_lookup/${endpoint}`,
+      );
+      return (
+        args.query
+          ? fetchJson(
+              `${RM_CUSTOMERS_URL}/query/llm_lookup/search`,
+              { query: args.query },
+              correlationId,
+            )
+          : fetchJson(
+              `${RM_CUSTOMERS_URL}/query/llm_lookup/all`,
+              {},
+              correlationId,
+            )
+      ).then((result) => {
+        log.debug(
+          `lookup_customers: ${Array.isArray(result) ? result.length + ' customers' : 'result'}`,
+        );
+        return result;
+      });
+    }
     case 'lookup_orders': {
       const orders = (context.orders || []).map((o) => ({
         id: o.id,
@@ -81,11 +105,16 @@ export const executeTool = (name, args, context) => {
         value: o.value,
         status: o.status,
       }));
-      return args.customerId
+      const filtered = args.customerId
         ? orders.filter((o) => o.customerId === args.customerId)
         : orders;
+      log.debug(
+        `lookup_orders: ${filtered.length} orders${args.customerId ? ' for customer ' + args.customerId : ''}`,
+      );
+      return filtered;
     }
     default:
+      log.warn(`Unknown tool: ${name}`);
       return { error: `Unknown tool: ${name}` };
   }
 };

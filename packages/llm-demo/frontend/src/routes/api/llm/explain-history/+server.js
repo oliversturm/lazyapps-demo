@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { nanoid } from 'nanoid';
 import { getLogger } from '@lazyapps/logger';
 import { llmClient } from '$lib/server/llm.js';
 
@@ -8,45 +9,45 @@ const RM_CUSTOMERS_URL =
   process.env.RM_CUSTOMERS_URL || 'http://readmodel-customers';
 
 // Fetch event history for an aggregate
-const fetchEventHistory = (aggregateId) =>
+const fetchEventHistory = (aggregateId, correlationId) =>
   fetch(`${RM_EVENTS_URL}/query/history/byAggregateId`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ aggregateId }),
+    body: JSON.stringify({ aggregateId, correlationId }),
   }).then((res) => res.json());
 
 // Fetch reputation records for a customer
-const fetchReputationByCustomer = (customerId) =>
+const fetchReputationByCustomer = (customerId, correlationId) =>
   fetch(`${RM_ORDERS_URL}/query/reputation/byCustomerId`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ customerId }),
+    body: JSON.stringify({ customerId, correlationId }),
   }).then((res) => res.json());
 
 // Fetch reputation records for an order
-const fetchReputationByOrder = (orderId) =>
+const fetchReputationByOrder = (orderId, correlationId) =>
   fetch(`${RM_ORDERS_URL}/query/reputation/byOrderId`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ orderId }),
+    body: JSON.stringify({ orderId, correlationId }),
   }).then((res) => res.json());
 
 // Fetch customer details
-const fetchCustomer = (customerId) =>
+const fetchCustomer = (customerId, correlationId) =>
   fetch(`${RM_CUSTOMERS_URL}/query/editing/byId`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: customerId }),
+    body: JSON.stringify({ id: customerId, correlationId }),
   })
     .then((res) => res.json())
     .then((items) => items[0] || null);
 
 // Fetch related events for an order's customer
-const fetchRelatedCustomerEvents = (customerId) =>
+const fetchRelatedCustomerEvents = (customerId, correlationId) =>
   fetch(`${RM_EVENTS_URL}/query/history/byAggregateId`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ aggregateId: customerId }),
+    body: JSON.stringify({ aggregateId: customerId, correlationId }),
   }).then((res) => res.json());
 
 const buildSystemPrompt = (events, reputationRecords, entityLabel) =>
@@ -83,9 +84,10 @@ ${JSON.stringify(events)}
 
 ${reputationRecords.length > 0 ? `Reputation assessments (${reputationRecords.length} records):\n${JSON.stringify(reputationRecords)}` : 'No reputation assessments available for this entity.'}`;
 
-const log = getLogger('LLM', 'EXPLAIN');
-
 export const POST = async ({ request }) => {
+  const correlationId = `LLM-${nanoid()}`;
+  const log = getLogger('LLM/Explain', correlationId);
+  const startTime = Date.now();
   const { aggregateId, aggregateName, question, conversationHistory } =
     await request.json();
 
@@ -93,11 +95,20 @@ export const POST = async ({ request }) => {
     return json({ error: 'aggregateId is required' }, { status: 400 });
   }
 
+  log.info(
+    `Explain history [${correlationId}]: ${aggregateName || 'entity'} ${aggregateId}`,
+  );
+
   try {
     // 1. Fetch event history for the aggregate
-    const events = await fetchEventHistory(aggregateId);
+    const events = await fetchEventHistory(aggregateId, correlationId);
+
+    log.debug(`Fetched ${(events || []).length} events for ${aggregateId}`);
 
     if (!events || events.length === 0) {
+      log.info(
+        `No events found for ${aggregateName || 'entity'} ${aggregateId}`,
+      );
       return json({
         events: [],
         reputation: [],
@@ -112,16 +123,26 @@ export const POST = async ({ request }) => {
     let entityLabel = `${aggregateName || 'entity'} ${aggregateId}`;
 
     if (aggregateName === 'customer') {
-      reputationRecords = await fetchReputationByCustomer(aggregateId);
-      const customer = await fetchCustomer(aggregateId);
+      reputationRecords = await fetchReputationByCustomer(
+        aggregateId,
+        correlationId,
+      );
+      const customer = await fetchCustomer(aggregateId, correlationId);
       if (customer) entityLabel = `customer "${customer.name}"`;
     } else if (aggregateName === 'order') {
-      reputationRecords = await fetchReputationByOrder(aggregateId);
+      reputationRecords = await fetchReputationByOrder(
+        aggregateId,
+        correlationId,
+      );
       // Also fetch the customer's events for context
       const orderCreated = events.find((e) => e.type === 'ORDER_CREATED');
       if (orderCreated?.payload?.customerId) {
         const customerEvents = await fetchRelatedCustomerEvents(
           orderCreated.payload.customerId,
+          correlationId,
+        );
+        log.debug(
+          `Merged ${customerEvents.length} related customer events`,
         );
         // Merge customer events for full context
         events.push(
@@ -135,6 +156,8 @@ export const POST = async ({ request }) => {
         );
       }
     }
+
+    log.debug(`Fetched ${reputationRecords.length} reputation records`);
 
     // 3. Build prompt and call LLM
     const promptEvents = events
@@ -161,6 +184,7 @@ export const POST = async ({ request }) => {
 
     const result = await llmClient.jsonCompletion(messages, {
       systemPrompt,
+      correlationId,
     });
 
     if (result.error) {
@@ -176,8 +200,13 @@ export const POST = async ({ request }) => {
       });
     }
 
+    log.debug(
+      `Explanation: summary="${result.content?.summary?.substring(0, 100)}", keyEvents=${result.content?.keyEvents?.length}`,
+    );
+
+    const duration = Date.now() - startTime;
     log.info(
-      `Explanation generated for ${aggregateName} ${aggregateId}: ${result.content?.summary || '(no summary)'}`,
+      `Explanation generated for ${aggregateName || 'entity'} ${aggregateId}, ${duration}ms`,
     );
 
     return json({

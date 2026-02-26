@@ -20,6 +20,7 @@
     "llm:down": "docker compose -f packages/llm-demo/compose.yml down -v",
     "llm:logs": "docker compose -f packages/llm-demo/compose.yml logs -f | pnpm exec log-highlight",
     "llm:seed": "packages/llm-demo/seed-data.sh",
+    "llm:test:e2e": "./tests/e2e-llm/run.sh",
     "mono:start-services": "pnpm --filter @lazyapps/demo-monolith run start-mongo && pnpm --filter @lazyapps/demo-monolith run start-aspire",
     "mono:start": "pnpm --filter @lazyapps/demo-monolith run start-highlight",
     "mono:stop-services": "pnpm --filter @lazyapps/demo-monolith run stop-services"

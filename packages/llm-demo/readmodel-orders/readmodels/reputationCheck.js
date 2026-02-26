@@ -2,8 +2,6 @@ import { getLogger } from '@lazyapps/logger';
 import { llmClient } from '../llm.js';
 import { ordersCollectionName } from './overview.js';
 
-const log = getLogger('READMODEL', 'REPUTATION');
-
 const VALID_REPUTATIONS = ['good', 'neutral', 'poor'];
 const reputationCollectionName = 'orders_reputation';
 
@@ -50,12 +48,26 @@ const reputationToThreshold = (reputation) =>
       : 1000;
 
 // Background LLM reputation update with change detection — fire-and-forget.
-const updateReputationInBackground = (storage, commands, order) => {
+const updateReputationInBackground = (
+  storage,
+  commands,
+  order,
+  correlationId,
+  triggerEvent,
+) => {
+  const log = getLogger('LLM/Repute', correlationId);
+  log.info(
+    `Reputation check triggered by ${triggerEvent} for customer ${order.customerId}, order ${order.id}, value=$${order.value}`,
+  );
+
   storage
     .find(ordersCollectionName, { customerId: order.customerId })
     .project({ _id: 0, text: 1, value: 1, status: 1 })
     .toArray()
     .then((orderHistory) => {
+      log.debug(
+        `Order history: ${orderHistory.length} orders for customer ${order.customerId}`,
+      );
       const systemPrompt = buildSystemPrompt(
         order.customerName,
         orderHistory,
@@ -66,7 +78,13 @@ const updateReputationInBackground = (storage, commands, order) => {
           content: `Evaluate the reputation of customer "${order.customerName}" based on their ${orderHistory.length} order(s).`,
         },
       ];
-      return llmClient.jsonCompletion(messages, { systemPrompt });
+      log.debug(
+        `Requesting reputation assessment, prompt length=${systemPrompt.length}`,
+      );
+      return llmClient.jsonCompletion(messages, {
+        systemPrompt,
+        correlationId,
+      });
     })
     .then((result) => {
       let reputation;
@@ -93,8 +111,8 @@ const updateReputationInBackground = (storage, commands, order) => {
         }
       }
 
-      log.info(
-        `Reputation: ${order.customerId} → ${reputation} (${reasoning.substring(0, 80)})`,
+      log.debug(
+        `Reputation result: ${reputation} — ${reasoning.substring(0, 100)}`,
       );
 
       // Change detection: only send UPDATE if reputation actually changed
@@ -105,7 +123,11 @@ const updateReputationInBackground = (storage, commands, order) => {
         .project({ _id: 0, reputation: 1, reasoning: 1 })
         .toArray()
         .then(([existing]) => {
-          if (existing && existing.reputation === reputation && existing.reasoning === reasoning) {
+          if (
+            existing &&
+            existing.reputation === reputation &&
+            existing.reasoning === reasoning
+          ) {
             log.info(
               `Reputation unchanged for ${order.customerId} (${reputation}), skipping update`,
             );
@@ -122,6 +144,10 @@ const updateReputationInBackground = (storage, commands, order) => {
             customerName: order.customerName,
             path,
           };
+
+          log.info(
+            `Reputation update: ${order.customerId} → ${reputation} (path=${path})`,
+          );
 
           return commands
             .execute({
@@ -145,8 +171,12 @@ const updateReputationInBackground = (storage, commands, order) => {
 // comparison. No LLM call — fast synchronous lookup only.
 
 export const reputationRoutingSideEffect = (storage, commands, order) =>
-  () =>
-    storage
+  (correlationId) => {
+    const log = getLogger('RM/ReputeRoute', correlationId);
+    log.info(
+      `Reputation routing triggered by ORDER_CREATED for order ${order.id}, customer ${order.customerId}, value=$${order.value}`,
+    );
+    return storage
       .find(reputationCollectionName, { customerId: order.customerId })
       .sort({ timestamp: -1 })
       .limit(1)
@@ -172,6 +202,7 @@ export const reputationRoutingSideEffect = (storage, commands, order) =>
           payload: {},
         })();
       });
+  };
 
 // -- Side Effect: Reputation Reassessment (Pattern B: returns () => Promise) --
 //
@@ -182,9 +213,14 @@ export const reputationReassessmentSideEffect = (
   storage,
   commands,
   aggregateId,
+  triggerEvent,
 ) =>
-  () =>
-    storage
+  (correlationId) => {
+    const log = getLogger('RM/ReputeReassess', correlationId);
+    log.info(
+      `Reputation reassessment triggered by ${triggerEvent} for order ${aggregateId}`,
+    );
+    return storage
       .find(ordersCollectionName, { id: aggregateId })
       .toArray()
       .then(([order]) => {
@@ -194,8 +230,15 @@ export const reputationReassessmentSideEffect = (
           );
           return;
         }
-        updateReputationInBackground(storage, commands, order);
+        updateReputationInBackground(
+          storage,
+          commands,
+          order,
+          correlationId,
+          triggerEvent,
+        );
       });
+  };
 
 // -- Read Model --
 

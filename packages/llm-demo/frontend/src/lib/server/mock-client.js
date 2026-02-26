@@ -9,7 +9,7 @@ export const createMockClient = () => {
     duration: 50,
   });
 
-  const chatCompletion = async (messages, { systemPrompt } = {}) => {
+  const chatCompletion = async (messages, { systemPrompt, correlationId } = {}) => {
     const lastMessage = messages[messages.length - 1]?.content || '';
     log.debug(`Mock chat: "${lastMessage.substring(0, 80)}..."`);
     return mockResponse(
@@ -17,7 +17,7 @@ export const createMockClient = () => {
     );
   };
 
-  const jsonCompletion = async (messages, { systemPrompt } = {}) => {
+  const jsonCompletion = async (messages, { systemPrompt, correlationId } = {}) => {
     const lastMessage = messages[messages.length - 1]?.content || '';
     log.debug(`Mock JSON: "${lastMessage.substring(0, 80)}..."`);
 

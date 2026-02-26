@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { nanoid } from 'nanoid';
 import { getLogger } from '@lazyapps/logger';
 import { llmClient } from '$lib/server/llm.js';
 
@@ -8,29 +9,29 @@ const RM_ORDERS_URL =
   process.env.RM_ORDERS_URL || 'http://readmodel-orders';
 
 // Fetch customer data from readmodel-customers
-const fetchCustomer = (customerId) =>
+const fetchCustomer = (customerId, correlationId) =>
   fetch(`${RM_CUSTOMERS_URL}/query/editing/byId`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: customerId }),
+    body: JSON.stringify({ id: customerId, correlationId }),
   })
     .then((res) => res.json())
     .then((items) => items[0] || null);
 
 // Fetch orders for a customer from readmodel-orders
-const fetchOrdersByCustomer = (customerId) =>
+const fetchOrdersByCustomer = (customerId, correlationId) =>
   fetch(`${RM_ORDERS_URL}/query/overview/ordersByCustomerId`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ customerId }),
+    body: JSON.stringify({ customerId, correlationId }),
   }).then((res) => res.json());
 
 // Fetch all orders (for cross-customer analysis)
-const fetchAllOrders = () =>
+const fetchAllOrders = (correlationId) =>
   fetch(`${RM_ORDERS_URL}/query/overview/all`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({}),
+    body: JSON.stringify({ correlationId }),
   }).then((res) => res.json());
 
 const ANALYSIS_PROMPTS = {
@@ -154,9 +155,10 @@ ${JSON.stringify(allOrders.slice(0, 50).map((o) => ({ customerId: o.customerId, 
   },
 };
 
-const log = getLogger('LLM', 'TRENDS');
-
 export const POST = async ({ request }) => {
+  const correlationId = `LLM-${nanoid()}`;
+  const log = getLogger('LLM/Trends', correlationId);
+  const startTime = Date.now();
   const { analysisType, customerId, conversationHistory } =
     await request.json();
 
@@ -175,13 +177,21 @@ export const POST = async ({ request }) => {
     );
   }
 
+  log.info(
+    `Trend analysis [${correlationId}]: type=${analysisType}, customer=${customerId || 'all'}`,
+  );
+
   try {
     // Fetch data from read models
     const [customer, orders, allOrders] = await Promise.all([
-      customerId ? fetchCustomer(customerId) : null,
-      customerId ? fetchOrdersByCustomer(customerId) : [],
-      promptConfig.needsAllOrders ? fetchAllOrders() : [],
+      customerId ? fetchCustomer(customerId, correlationId) : null,
+      customerId ? fetchOrdersByCustomer(customerId, correlationId) : [],
+      promptConfig.needsAllOrders ? fetchAllOrders(correlationId) : [],
     ]);
+
+    log.debug(
+      `Fetched data: customer=${!!customer}, orders=${(orders || []).length}, allOrders=${(allOrders || []).length}`,
+    );
 
     if (customerId && !customer) {
       return json(
@@ -206,6 +216,7 @@ export const POST = async ({ request }) => {
 
     const result = await llmClient.jsonCompletion(messages, {
       systemPrompt,
+      correlationId,
     });
 
     if (result.error) {
@@ -219,8 +230,13 @@ export const POST = async ({ request }) => {
       });
     }
 
+    log.debug(
+      `Analysis result keys: ${Object.keys(result.content || {}).join(',')}`,
+    );
+
+    const duration = Date.now() - startTime;
     log.info(
-      `Analysis complete: ${analysisType} for customer ${customerId || 'all'}`,
+      `Analysis complete: ${analysisType} for ${customerId || 'all'}, ${duration}ms`,
     );
 
     return json({
