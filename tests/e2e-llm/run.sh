@@ -26,4 +26,4 @@ trap cleanup EXIT
 docker compose -f "$COMPOSE_FILE" build
 docker compose -f "$COMPOSE_FILE" up -d --wait \
   frontend
-docker compose -f "$COMPOSE_FILE" run --rm playwright npx playwright test "$@"
+docker compose -f "$COMPOSE_FILE" run playwright npx playwright test "$@"
