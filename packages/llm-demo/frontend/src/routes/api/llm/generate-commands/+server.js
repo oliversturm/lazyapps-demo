@@ -31,7 +31,7 @@ export const POST = async ({ request }) => {
       messages,
       tools,
       (name, args) => executeTool(name, args, context || {}),
-      { systemPrompt, maxIterations: 5 },
+      { systemPrompt, maxIterations: 5, toolChoice: 'required' },
     );
 
     const content = parseResponse(result.content);

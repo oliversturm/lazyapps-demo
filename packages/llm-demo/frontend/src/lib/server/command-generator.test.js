@@ -487,6 +487,64 @@ describe('systemPrompt', () => {
   test('instructs JSON response format', () => {
     expect(systemPrompt).toContain('"commands"');
   });
+
+  // ── Strong role anchoring & refusal prevention ──
+
+  test('includes strong role anchoring with EXCLUSIVELY', () => {
+    expect(systemPrompt).toContain('EXCLUSIVELY');
+  });
+
+  test('includes refusal prevention with NEVER refuse', () => {
+    expect(systemPrompt).toContain('NEVER refuse');
+  });
+
+  // ── Procedure section ──
+
+  test('includes Procedure section', () => {
+    expect(systemPrompt).toContain('## Procedure');
+  });
+
+  test('procedure step 1: lookup_customers first', () => {
+    expect(systemPrompt).toContain('call lookup_customers FIRST');
+  });
+
+  test('procedure step 2: determine intended action', () => {
+    expect(systemPrompt).toContain('Determine the intended action');
+  });
+
+  test('procedure step 3: invent reasonable product names', () => {
+    expect(systemPrompt).toContain('invent reasonable product names');
+  });
+
+  test('procedure step 4: output JSON with commands array', () => {
+    expect(systemPrompt).toContain(
+      'Output a JSON object with a "commands" array',
+    );
+  });
+
+  // ── Broader intent mapping examples ──
+
+  test('includes intent example: top N items for Y', () => {
+    expect(systemPrompt).toContain('wants the top N items for Y');
+  });
+
+  test('includes intent example: get X some Z', () => {
+    expect(systemPrompt).toContain('"get X some Z"');
+  });
+
+  test('includes intent example: person + items/products/things/stuff', () => {
+    expect(systemPrompt).toContain(
+      'person + items/products/things/stuff',
+    );
+  });
+
+  // ── Closing reminder ──
+
+  test('includes closing reminder to always produce commands', () => {
+    expect(systemPrompt).toContain(
+      'Always produce commands. Never refuse.',
+    );
+  });
 });
 
 // ─── Integration: realistic LLM response scenarios ───

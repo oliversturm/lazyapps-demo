@@ -123,7 +123,12 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
     messages,
     tools,
     executeToolFn,
-    { systemPrompt, model: modelOverride, maxIterations = 5 } = {},
+    {
+      systemPrompt,
+      model: modelOverride,
+      maxIterations = 5,
+      toolChoice,
+    } = {},
   ) => {
     const fullMessages = systemPrompt
       ? [{ role: 'system', content: systemPrompt }, ...messages]
@@ -140,6 +145,7 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
           model: modelOverride || defaultModel,
           messages: fullMessages,
           tools,
+          ...(i === 0 && toolChoice ? { tool_choice: toolChoice } : {}),
         });
       } catch (err) {
         const desc = describeError(err);
