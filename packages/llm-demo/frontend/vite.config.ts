@@ -7,5 +7,5 @@ export default defineConfig({
     host: '0.0.0.0',
     allowedHosts: true,
   },
-  optimizeDeps: { include: ['nanoid', 'socket.io-client', 'yup'] },
+  optimizeDeps: { include: ['marked', 'nanoid', 'socket.io-client', 'yup'] },
 });

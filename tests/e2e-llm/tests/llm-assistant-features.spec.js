@@ -68,7 +68,7 @@ test.describe('LLM assistant features (F5, F6, F7)', () => {
       // Verify the response content is non-empty
       const responseContent = assistantMessages
         .first()
-        .locator('.whitespace-pre-wrap');
+        .locator('.prose');
       await expect(responseContent).not.toHaveText('', { timeout: 10000 });
     } finally {
       await context.close();
