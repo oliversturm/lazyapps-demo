@@ -34,6 +34,11 @@ const fetchAllOrders = (correlationId) =>
     body: JSON.stringify({ correlationId }),
   }).then((res) => res.json());
 
+const validateRiskScore = (raw) => {
+  if (typeof raw !== 'number' || !Number.isFinite(raw)) return null;
+  return Math.max(0, Math.min(100, Math.round(raw)));
+};
+
 const ANALYSIS_PROMPTS = {
   'product-suggestions': {
     needsAllOrders: false,
@@ -120,6 +125,12 @@ Analyze these orders for potential issues: many expensive orders in a short
 timeframe, unusual patterns, spending spikes, or other anomalies.
 Rate the overall risk level.
 
+Consider order outcomes when assessing risk:
+- "confirmed" orders: manually reviewed and approved — positive signal
+- "declined" orders: manually reviewed and rejected — strong negative signal
+- "new" or "unconfirmed" orders: pending review — neutral
+A pattern of declined orders is a much stronger risk signal than many new orders.
+
 IMPORTANT: You are ONLY assessing risk. You do NOT have the authority to
 block, cancel, or modify any orders or customer accounts. Domain logic will
 decide what action to take based on your assessment.
@@ -127,11 +138,17 @@ decide what action to take based on your assessment.
 You MUST respond with valid JSON in this exact format:
 {
   "riskLevel": "low" | "medium" | "high",
+  "riskScore": <number 0-100>,
   "issues": [
     { "type": "spending-spike|velocity|unusual-pattern", "description": "What was detected", "evidence": "Specific data points" }
   ],
   "summary": "Brief overall assessment"
 }
+
+The riskScore is a numeric value from 0 (no risk) to 100 (extreme risk).
+Guidelines: 0-33 corresponds to "low", 34-66 to "medium", 67-100 to "high".
+The riskScore should be more granular than riskLevel — two "medium" assessments
+can have different scores (e.g., 35 vs 60).
 
 ${
   customer
@@ -234,6 +251,13 @@ export const POST = async ({ request }) => {
       `Analysis result keys: ${Object.keys(result.content || {}).join(',')}`,
     );
 
+    // Validate riskScore for potential-issues analyses
+    let content = result.content;
+    if (analysisType === 'potential-issues' && content) {
+      const riskScore = validateRiskScore(content.riskScore);
+      content = { ...content, riskScore };
+    }
+
     const duration = Date.now() - startTime;
     log.info(
       `Analysis complete: ${analysisType} for ${customerId || 'all'}, ${duration}ms`,
@@ -242,7 +266,7 @@ export const POST = async ({ request }) => {
     return json({
       analysisType,
       customerId,
-      result: result.content,
+      result: content,
       usage: result.usage,
       duration: result.duration,
     });

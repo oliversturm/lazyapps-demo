@@ -4,6 +4,7 @@
   import AnalysisResults from './AnalysisResults.svelte';
   import ExplanationDisplay from './ExplanationDisplay.svelte';
   import UsageInfo from './UsageInfo.svelte';
+  import RiskChart from './RiskChart.svelte';
   import { readModelStore } from './readModelStore';
   import { query } from './query.js';
   import { postCommand } from './commands.js';
@@ -32,6 +33,9 @@
   let explanationLoading = false;
   let lastExplainTimestamp = 0;
 
+  // Risk chart expand/collapse state
+  let expandedCustomers = new Set();
+
   // Approach B: notification subscription (D8)
   const ordersEndpoint =
     import.meta.env.VITE_RM_ORDERS_URL || 'http://rm-orders.localhost';
@@ -55,6 +59,45 @@
     'all',
     'LLM-PANEL',
   );
+
+  // Derive per-customer groups for the Risk tab chart
+  const deriveCustomerGroups = (data) => {
+    const byCustomer = {};
+    data.forEach((a) => {
+      if (!byCustomer[a.customerId]) {
+        byCustomer[a.customerId] = {
+          customerId: a.customerId,
+          customerName: a.customerName,
+          items: [],
+        };
+      }
+      byCustomer[a.customerId].items.push(a);
+    });
+    return Object.values(byCustomer).map((group) => {
+      const sorted = group.items.sort((a, b) =>
+        (a.timestamp || '').localeCompare(b.timestamp || ''),
+      );
+      return {
+        ...group,
+        latest: sorted[sorted.length - 1],
+        chartData: sorted
+          .filter((a) => a.riskScore != null)
+          .map((a) => ({ riskScore: a.riskScore, timestamp: a.timestamp })),
+      };
+    });
+  };
+
+  $: customerGroups = deriveCustomerGroups($analysisStore.data || []);
+
+  const toggleCustomer = (customerId) => {
+    const next = new Set(expandedCustomers);
+    if (next.has(customerId)) {
+      next.delete(customerId);
+    } else {
+      next.add(customerId);
+    }
+    expandedCustomers = next;
+  };
 
   // React to explain requests from table buttons (F8)
   $: if ($contextDataStore.explainRequest?.timestamp > lastExplainTimestamp) {
@@ -114,10 +157,7 @@
   $: reputationCount = [...($reputationStore.data || [])].filter((a, _i, arr) =>
     arr.find((x) => x.customerId === a.customerId) === a
   ).length;
-  $: riskCount = [...($analysisStore.data || [])]
-    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-    .filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a)
-    .length;
+  $: riskCount = customerGroups.length;
 
   // Per-context conversation history (R-3.5.6)
   let conversationsByContext = {};
@@ -530,24 +570,37 @@
     <!-- Tab: Risk -->
     {#if activeTab === 'risk'}
       <div class="flex-1 overflow-y-auto p-2 min-h-0">
-        {#if ($analysisStore.data || []).length > 0}
-          {#each [...($analysisStore.data || [])]
-            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-            .filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as analysis}
-            <div class="border rounded p-2 my-1 bg-orange-50 text-xs">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="font-medium">{analysis.customerName}</span>
-                <span class="text-xs px-2 py-0.5 rounded bg-orange-200 text-orange-800">{analysis.analysisType}</span>
-                {#if analysis.result?.riskLevel}
-                  <span class="text-xs px-2 py-0.5 rounded {analysis.result.riskLevel === 'high'
+        {#if customerGroups.length > 0}
+          {#each customerGroups as group}
+            <div class="border rounded my-1 bg-orange-50 text-xs">
+              <button
+                class="w-full p-2 flex items-center gap-2 text-left"
+                on:click={() => toggleCustomer(group.customerId)}
+              >
+                <span class="font-medium">{group.customerName}</span>
+                {#if group.latest.result?.riskLevel}
+                  <span class="text-xs px-2 py-0.5 rounded {group.latest.result.riskLevel === 'high'
                     ? 'bg-red-300 text-red-900'
-                    : analysis.result.riskLevel === 'medium'
+                    : group.latest.result.riskLevel === 'medium'
                       ? 'bg-yellow-300 text-yellow-900'
-                      : 'bg-green-300 text-green-900'}">{analysis.result.riskLevel}</span>
+                      : 'bg-green-300 text-green-900'}">{group.latest.result.riskLevel}</span>
                 {/if}
-              </div>
-              {#if analysis.result?.summary}
-                <div class="text-gray-600">{analysis.result.summary}</div>
+                {#if group.latest.result?.riskScore != null}
+                  <span class="text-gray-500">({group.latest.result.riskScore})</span>
+                {/if}
+                <span class="ml-auto">{expandedCustomers.has(group.customerId) ? '\u25BE' : '\u25B8'}</span>
+              </button>
+
+              {#if expandedCustomers.has(group.customerId)}
+                <div class="px-2 pb-2">
+                  <RiskChart
+                    data={group.chartData}
+                    customerName={group.customerName}
+                  />
+                  {#if group.latest.result?.summary}
+                    <div class="text-gray-600 mt-1">{group.latest.result.summary}</div>
+                  {/if}
+                </div>
               {/if}
             </div>
           {/each}

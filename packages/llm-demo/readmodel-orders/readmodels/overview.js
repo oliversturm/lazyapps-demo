@@ -1,5 +1,8 @@
 import { confirmationRequestsCollectionName } from './confirmationRequests.js';
-import { trendAnalysisSideEffect } from './trendAnalysis.js';
+import {
+  trendAnalysisSideEffect,
+  trendReanalysisSideEffect,
+} from './trendAnalysis.js';
 import {
   reputationRoutingSideEffect,
   reputationReassessmentSideEffect,
@@ -129,7 +132,6 @@ export default {
             trendAnalysisSideEffect(
               storage,
               commands,
-              changeNotification,
               order.customerId,
               order.customerName,
             ),
@@ -143,15 +145,26 @@ export default {
       { aggregateId },
     ) =>
       confirmOrder(storage, changeNotification, aggregateId).then(() =>
-        sideEffects.schedule(
-          reputationReassessmentSideEffect(
-            storage,
-            commands,
-            aggregateId,
-            'ORDER_CONFIRMED',
+        Promise.all([
+          sideEffects.schedule(
+            reputationReassessmentSideEffect(
+              storage,
+              commands,
+              aggregateId,
+              'ORDER_CONFIRMED',
+            ),
+            { name: 'Reputation reassessment', execution: 'liveOnly' },
           ),
-          { name: 'Reputation reassessment', execution: 'liveOnly' },
-        ),
+          sideEffects.schedule(
+            trendReanalysisSideEffect(
+              storage,
+              commands,
+              aggregateId,
+              'ORDER_CONFIRMED',
+            ),
+            { name: 'Trend reanalysis', execution: 'liveOnly' },
+          ),
+        ]),
       ),
 
     ORDER_DECLINED: (
@@ -176,15 +189,26 @@ export default {
           }),
         ),
       ]).then(() =>
-        sideEffects.schedule(
-          reputationReassessmentSideEffect(
-            storage,
-            commands,
-            aggregateId,
-            'ORDER_DECLINED',
+        Promise.all([
+          sideEffects.schedule(
+            reputationReassessmentSideEffect(
+              storage,
+              commands,
+              aggregateId,
+              'ORDER_DECLINED',
+            ),
+            { name: 'Reputation reassessment', execution: 'liveOnly' },
           ),
-          { name: 'Reputation reassessment', execution: 'liveOnly' },
-        ),
+          sideEffects.schedule(
+            trendReanalysisSideEffect(
+              storage,
+              commands,
+              aggregateId,
+              'ORDER_DECLINED',
+            ),
+            { name: 'Trend reanalysis', execution: 'liveOnly' },
+          ),
+        ]),
       ),
   },
 

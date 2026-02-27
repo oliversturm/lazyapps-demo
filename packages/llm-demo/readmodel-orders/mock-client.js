@@ -79,16 +79,43 @@ export const createMockClient = () => {
       systemPrompt?.includes('risk assessment') ||
       systemPrompt?.includes('potential issues')
     ) {
+      const declineMatches = systemPrompt.match(/"status":\s*"declined"/g);
+      const declineCount = declineMatches ? declineMatches.length : 0;
+      const confirmedMatches = systemPrompt.match(
+        /"status":\s*"confirmed"/g,
+      );
+      const confirmedCount = confirmedMatches ? confirmedMatches.length : 0;
+
+      const riskScore =
+        declineCount > 0
+          ? Math.min(100, 50 + declineCount * 20)
+          : confirmedCount >= 3
+            ? Math.max(5, 30 - confirmedCount * 5)
+            : 45;
+
+      const riskLevel =
+        riskScore >= 67 ? 'high' : riskScore >= 34 ? 'medium' : 'low';
+
       return mockResponse({
-        riskLevel: 'medium',
-        issues: [
-          {
-            type: 'velocity',
-            description: 'Multiple orders in short timeframe',
-            evidence: '3 orders in last 10 minutes',
-          },
-        ],
-        summary: 'Moderate ordering velocity detected',
+        riskLevel,
+        riskScore,
+        issues:
+          declineCount > 0
+            ? [
+                {
+                  type: 'velocity',
+                  description: `${declineCount} declined order(s) detected`,
+                  evidence: `Customer has ${declineCount} declined and ${confirmedCount} confirmed orders`,
+                },
+              ]
+            : [
+                {
+                  type: 'velocity',
+                  description: 'Multiple orders in short timeframe',
+                  evidence: '3 orders in last 10 minutes',
+                },
+              ],
+        summary: `Mock risk assessment: score ${riskScore}/100`,
       });
     }
 
