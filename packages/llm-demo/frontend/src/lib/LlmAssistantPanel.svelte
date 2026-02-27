@@ -1,0 +1,613 @@
+<script>
+  import { page } from '$app/stores';
+  import CommandPreview from './CommandPreview.svelte';
+  import AnalysisResults from './AnalysisResults.svelte';
+  import ExplanationDisplay from './ExplanationDisplay.svelte';
+  import UsageInfo from './UsageInfo.svelte';
+  import RiskChart from './RiskChart.svelte';
+  import { readModelStore } from './readModelStore';
+  import { query } from './query.js';
+  import { postCommand } from './commands.js';
+  import { contextDataStore } from './contextDataStore';
+
+  // Props
+  export let contextData = {};
+
+  // State
+  let messages = [];
+  let inputText = '';
+  let loading = false;
+  let collapsed = false;
+  let pendingCommands = null;
+
+  // Tab state
+  let activeTab = 'chat';
+
+  // Analysis state (D7)
+  let selectedAnalysisType = 'product-suggestions';
+  let selectedCustomerId = null;
+  let selectedCustomerName = '';
+  let analysisLoading = false;
+
+  // Explanation state (F8)
+  let explanationLoading = false;
+  let lastExplainTimestamp = 0;
+
+  // Risk chart expand/collapse state
+  let expandedCustomers = new Set();
+
+  // Approach B: notification subscription (D8)
+  const ordersEndpoint =
+    import.meta.env.VITE_RM_ORDERS_URL || 'http://rm-orders.localhost';
+  const socketIoEndpoint =
+    import.meta.env.VITE_CHANGENOTIFIER_URL || 'http://change-notifier.localhost';
+
+  const analysisStore = readModelStore(
+    () => query('LLM-PANEL', fetch)(ordersEndpoint, 'trendAnalysis', 'all'),
+    'orders',
+    socketIoEndpoint,
+    'trendAnalysis',
+    'all',
+    'LLM-PANEL',
+  );
+
+  const reputationStore = readModelStore(
+    () => query('LLM-PANEL', fetch)(ordersEndpoint, 'reputation', 'all'),
+    'orders',
+    socketIoEndpoint,
+    'reputation',
+    'all',
+    'LLM-PANEL',
+  );
+
+  // Derive per-customer groups for the Risk tab chart
+  const deriveCustomerGroups = (data) => {
+    const byCustomer = {};
+    data.forEach((a) => {
+      if (!byCustomer[a.customerId]) {
+        byCustomer[a.customerId] = {
+          customerId: a.customerId,
+          customerName: a.customerName,
+          items: [],
+        };
+      }
+      byCustomer[a.customerId].items.push(a);
+    });
+    return Object.values(byCustomer).map((group) => {
+      const sorted = group.items.sort(
+        (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
+      );
+      return {
+        ...group,
+        latest: sorted[sorted.length - 1],
+        chartData: sorted
+          .filter((a) => a.riskScore != null)
+          .map((a) => ({ riskScore: a.riskScore, timestamp: a.timestamp })),
+      };
+    });
+  };
+
+  $: customerGroups = deriveCustomerGroups($analysisStore.data || []);
+
+  const toggleCustomer = (customerId) => {
+    const next = new Set(expandedCustomers);
+    if (next.has(customerId)) {
+      next.delete(customerId);
+    } else {
+      next.add(customerId);
+    }
+    expandedCustomers = next;
+  };
+
+  // React to explain requests from table buttons (F8)
+  $: if ($contextDataStore.explainRequest?.timestamp > lastExplainTimestamp) {
+    lastExplainTimestamp = $contextDataStore.explainRequest.timestamp;
+    handleExplainRequest($contextDataStore.explainRequest);
+  }
+
+  const handleExplainRequest = async ({ aggregateId, aggregateName, label }) => {
+    addMessage({
+      role: 'user',
+      content: `Explain the history of ${aggregateName} "${label}"`,
+    });
+
+    explanationLoading = true;
+    try {
+      const response = await fetch(`/api/llm/explain-history`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ aggregateId, aggregateName }),
+      });
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      const data = await response.json();
+
+      addMessage({
+        role: 'assistant',
+        type: 'explanation',
+        content: data.explanation,
+        events: data.events,
+        keyEvents: data.keyEvents,
+        summary: data.summary,
+        reputation: data.reputation,
+        usage: data.usage,
+        duration: data.duration,
+      });
+    } catch (error) {
+      addMessage({ role: 'assistant', type: 'error', content: error.message });
+    }
+    explanationLoading = false;
+  };
+
+  // Context detection from route
+  $: currentPage = $page.url.pathname.startsWith('/orders')
+    ? 'orders'
+    : $page.url.pathname.startsWith('/orderConfirmationRequests')
+      ? 'confirmations'
+      : 'customers';
+
+  $: contextLabel = {
+    customers: 'Customers',
+    orders: 'Orders',
+    confirmations: 'Confirmations',
+  }[currentPage];
+
+  // Tab badge counts
+  $: reputationCount = [...($reputationStore.data || [])].filter((a, _i, arr) =>
+    arr.find((x) => x.customerId === a.customerId) === a
+  ).length;
+  $: riskCount = customerGroups.length;
+
+  // Per-context conversation history (R-3.5.6)
+  let conversationsByContext = {};
+  $: {
+    if (!conversationsByContext[currentPage]) {
+      conversationsByContext[currentPage] = [];
+    }
+    messages = conversationsByContext[currentPage];
+  }
+
+  // Persist collapsed state (R-9.6.5)
+  if (typeof localStorage !== 'undefined') {
+    collapsed = localStorage.getItem('llm-panel-collapsed') === 'true';
+  }
+  $: if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('llm-panel-collapsed', collapsed);
+  }
+
+  const addMessage = (msg, targetContext) => {
+    const ctx = targetContext || currentPage;
+    if (!conversationsByContext[ctx]) {
+      conversationsByContext[ctx] = [];
+    }
+    conversationsByContext[ctx] = [
+      ...conversationsByContext[ctx],
+      msg,
+    ];
+    if (ctx === currentPage) {
+      messages = conversationsByContext[ctx];
+    }
+  };
+
+  const clearChat = () => {
+    conversationsByContext[currentPage] = [];
+    messages = [];
+    pendingCommands = null;
+  };
+
+  const sendMessage = async () => {
+    if (!inputText.trim() || loading) return;
+
+    const text = inputText.trim();
+    inputText = '';
+
+    // Capture history BEFORE adding the new message to avoid duplication —
+    // the server appends the current message from `text` separately.
+    const history = messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map(({ role, content }) => ({ role, content }));
+
+    addMessage({ role: 'user', content: text });
+    loading = true;
+
+    try {
+      const response = await fetch(`/api/llm/generate-commands`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          context: {
+            page: currentPage,
+            customers: contextData.customers || [],
+            orders: contextData.orders || [],
+          },
+          conversationHistory: history,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      const data = await response.json();
+
+      if (data.commands && data.commands.length > 0) {
+        addMessage({
+          role: 'assistant',
+          type: 'command-preview',
+          content: `Generated ${data.commands.length} command(s)`,
+          commands: data.commands,
+          usage: data.usage,
+          duration: data.duration,
+        });
+        pendingCommands = data.commands;
+      } else {
+        addMessage({
+          role: 'assistant',
+          content: data.explanation || 'No commands generated.',
+          usage: data.usage,
+          duration: data.duration,
+        });
+      }
+    } catch (error) {
+      addMessage({
+        role: 'assistant',
+        type: 'error',
+        content: `Error: ${error.message}`,
+      });
+    } finally {
+      loading = false;
+    }
+  };
+
+  // Analysis trigger (D7)
+  const runAnalysis = async () => {
+    analysisLoading = true;
+
+    try {
+      const response = await fetch(`/api/llm/analyze-trends`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          analysisType: selectedAnalysisType,
+          customerId: selectedCustomerId || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      const data = await response.json();
+
+      addMessage({
+        role: 'assistant',
+        type: 'analysis',
+        content: data.error
+          ? `Analysis error: ${data.error}`
+          : `${selectedAnalysisType} analysis${selectedCustomerName ? ` for ${selectedCustomerName}` : ''}`,
+        analysisType: data.analysisType || selectedAnalysisType,
+        result: data.result,
+        usage: data.usage,
+        duration: data.duration,
+      });
+
+      // Record potential-issues analyses so they appear in the Risk tab
+      if (
+        selectedAnalysisType === 'potential-issues' &&
+        selectedCustomerId &&
+        data.result
+      ) {
+        postCommand({
+          aggregateName: 'customer',
+          aggregateId: selectedCustomerId,
+          command: 'RECORD_TREND_ANALYSIS',
+          payload: {
+            analysisType: selectedAnalysisType,
+            result: data.result,
+            customerName: selectedCustomerName,
+            orderCount: 0,
+            trigger: 'manual',
+          },
+        });
+      }
+    } catch (error) {
+      addMessage({
+        role: 'assistant',
+        type: 'error',
+        content: `Analysis error: ${error.message}`,
+      });
+    } finally {
+      analysisLoading = false;
+    }
+  };
+
+  const selectCustomer = (customer) => {
+    selectedCustomerId = customer.id;
+    selectedCustomerName = customer.name;
+  };
+
+  const handleKeydown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  let messagesContainer;
+  let prevMessageCount = 0;
+  $: if (messages.length > prevMessageCount && messagesContainer) {
+    // Scroll to bottom only when new messages are added
+    prevMessageCount = messages.length;
+    setTimeout(() => {
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }, 0);
+  }
+</script>
+
+{#if collapsed}
+  <div
+    class="w-[50px] flex flex-col items-center py-4 bg-blue-50 border rounded cursor-pointer hover:bg-blue-100"
+    on:click={() => (collapsed = false)}
+    on:keydown={(e) => e.key === 'Enter' && (collapsed = false)}
+    role="button"
+    tabindex="0"
+    title="Expand LLM Assistant"
+  >
+    <span class="text-lg">🤖</span>
+    <span class="text-xs [writing-mode:vertical-lr] mt-2 text-gray-500">Assistant</span>
+  </div>
+{:else}
+  <div class="w-[350px] flex-shrink-0 border rounded bg-white flex flex-col h-full overflow-hidden">
+    <!-- Header -->
+    <div class="flex items-center gap-2 p-2 bg-blue-50 border-b">
+      <span class="font-bold text-sm flex-1">LLM Assistant</span>
+      <span class="text-xs px-2 py-0.5 bg-blue-200 rounded">{contextLabel}</span>
+      <button
+        class="text-xs px-1 hover:bg-blue-200 rounded"
+        on:click={clearChat}
+        title="Clear chat"
+      >Clear</button>
+      <button
+        class="text-xs px-1 hover:bg-blue-200 rounded"
+        on:click={() => (collapsed = true)}
+        title="Collapse panel"
+      >—</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b text-xs">
+      <button
+        class="flex-1 py-1.5 text-center {activeTab === 'chat'
+          ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+          : 'text-gray-500 hover:text-gray-700'}"
+        on:click={() => (activeTab = 'chat')}
+      >Chat</button>
+      <button
+        class="flex-1 py-1.5 text-center {activeTab === 'reputation'
+          ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+          : 'text-gray-500 hover:text-gray-700'}"
+        on:click={() => (activeTab = 'reputation')}
+      >Reputation{#if reputationCount > 0}<span class="ml-1 px-1.5 py-0.5 bg-blue-100 rounded-full text-blue-600">{reputationCount}</span>{/if}</button>
+      <button
+        class="flex-1 py-1.5 text-center {activeTab === 'risk'
+          ? 'border-b-2 border-blue-500 font-bold text-blue-600'
+          : 'text-gray-500 hover:text-gray-700'}"
+        on:click={() => (activeTab = 'risk')}
+      >Risk{#if riskCount > 0}<span class="ml-1 px-1.5 py-0.5 bg-blue-100 rounded-full text-blue-600">{riskCount}</span>{/if}</button>
+    </div>
+
+    <!-- Tab: Chat -->
+    {#if activeTab === 'chat'}
+      <!-- Customer chips for analysis (D7) -->
+      {#if currentPage === 'customers' && contextData.customers?.length > 0}
+        <div class="px-2 pt-2 flex flex-wrap gap-1">
+          {#each contextData.customers as customer}
+            <button
+              class="text-xs px-2 py-0.5 rounded {selectedCustomerId === customer.id
+                ? 'bg-blue-400 text-white'
+                : 'bg-gray-100 hover:bg-gray-200'}"
+              on:click={() => selectCustomer(customer)}
+            >{customer.name}</button>
+          {/each}
+        </div>
+      {/if}
+
+      <!-- Quick Analysis section (D7) -->
+      {#if currentPage === 'customers' || currentPage === 'orders'}
+        <div class="border-b mx-2 pt-2 pb-2">
+          <div class="text-xs font-bold mb-1">Quick Analysis</div>
+          <select
+            bind:value={selectedAnalysisType}
+            class="text-xs border rounded p-1 w-full"
+          >
+            <option value="product-suggestions">Product Suggestions</option>
+            <option value="interest-range">Interest Categories</option>
+            <option value="erroneous-orders">Error Detection</option>
+            <option value="potential-issues">Risk Assessment</option>
+          </select>
+
+          {#if currentPage === 'customers' && selectedCustomerId}
+            <button
+              class="text-xs mt-1 px-2 py-1 bg-blue-200 rounded hover:bg-blue-300 w-full"
+              on:click={runAnalysis}
+              disabled={analysisLoading}
+            >
+              {analysisLoading ? 'Analyzing...' : `Analyze ${selectedCustomerName}`}
+            </button>
+          {:else if currentPage === 'orders'}
+            <button
+              class="text-xs mt-1 px-2 py-1 bg-blue-200 rounded hover:bg-blue-300 w-full"
+              on:click={runAnalysis}
+              disabled={analysisLoading}
+            >
+              {analysisLoading ? 'Analyzing...' : 'Analyze All Orders'}
+            </button>
+          {:else if currentPage === 'customers'}
+            <div class="text-xs text-gray-400 mt-1">Select a customer above</div>
+          {/if}
+        </div>
+      {/if}
+
+      <!-- Messages -->
+      <div
+        class="flex-1 overflow-y-auto p-2 space-y-2 min-h-0"
+        bind:this={messagesContainer}
+      >
+        {#each messages as msg}
+          <div class="text-sm {msg.role === 'user' ? 'text-right' : ''}">
+            {#if msg.role === 'user'}
+              <div class="inline-block bg-blue-100 rounded px-2 py-1 max-w-[90%] text-left">
+                {msg.content}
+              </div>
+            {:else if msg.type === 'command-preview'}
+              <div class="bg-gray-50 rounded px-2 py-1">
+                <div class="text-xs text-gray-500 mb-1">{msg.content}</div>
+                <CommandPreview
+                  commands={msg.commands}
+                  initialStatuses={msg.statuses}
+                  onStatusChange={(s) => { msg.statuses = s; }}
+                  onDone={() => (pendingCommands = null)}
+                />
+                <UsageInfo usage={msg.usage} duration={msg.duration} />
+              </div>
+            {:else if msg.type === 'analysis'}
+              <div class="bg-gray-50 rounded px-2 py-1">
+                <div class="text-xs text-gray-500 mb-1">
+                  {#if msg.role === 'system'}
+                    ⚡ {msg.content}
+                  {:else}
+                    {msg.content}
+                  {/if}
+                </div>
+                {#if msg.result}
+                  <AnalysisResults
+                    analysisType={msg.analysisType}
+                    result={msg.result}
+                    usage={msg.usage}
+                    duration={msg.duration}
+                  />
+                {:else}
+                  <div class="text-xs text-gray-400">No results</div>
+                {/if}
+              </div>
+            {:else if msg.type === 'explanation'}
+              <ExplanationDisplay
+                explanation={msg.content}
+                events={msg.events}
+                keyEvents={msg.keyEvents}
+                reputation={msg.reputation}
+                summary={msg.summary}
+                usage={msg.usage}
+                duration={msg.duration}
+              />
+            {:else if msg.type === 'error'}
+              <div class="bg-red-50 text-red-700 rounded px-2 py-1">
+                {msg.content}
+              </div>
+            {:else}
+              <div class="bg-gray-100 rounded px-2 py-1">
+                {msg.content}
+                <UsageInfo usage={msg.usage} duration={msg.duration} />
+              </div>
+            {/if}
+          </div>
+        {/each}
+
+        {#if loading}
+          <div class="text-sm text-gray-400">Thinking...</div>
+        {/if}
+      </div>
+
+      <!-- Input -->
+      <div class="border-t p-2">
+        <div class="flex gap-2">
+          <input
+            type="text"
+            class="flex-1 text-sm border rounded px-2 py-1"
+            placeholder="Type a command..."
+            bind:value={inputText}
+            on:keydown={handleKeydown}
+            disabled={loading}
+          />
+          <button
+            class="text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            on:click={sendMessage}
+            disabled={loading || !inputText.trim()}
+          >Send</button>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Tab: Reputation -->
+    {#if activeTab === 'reputation'}
+      <div class="flex-1 overflow-y-auto p-2 min-h-0">
+        {#if $reputationStore.data?.length > 0}
+          {#each [...$reputationStore.data].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
+            <div class="border rounded p-2 my-1 bg-blue-50 text-xs">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-medium">{assessment.customerName}</span>
+                <span class="text-xs px-2 py-0.5 rounded {assessment.reputation === 'good'
+                  ? 'bg-green-300 text-green-900'
+                  : assessment.reputation === 'poor'
+                    ? 'bg-red-300 text-red-900'
+                    : 'bg-yellow-300 text-yellow-900'}">{assessment.reputation}</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700">{assessment.path}</span>
+              </div>
+              <div class="text-gray-600">{assessment.reasoning}</div>
+              {#if assessment.failSafe}
+                <div class="text-orange-600 text-xs mt-1 italic">Default assessment (LLM unavailable)</div>
+              {/if}
+            </div>
+          {/each}
+        {:else}
+          <div class="text-xs text-gray-400 p-2">No reputation assessments yet.</div>
+        {/if}
+      </div>
+    {/if}
+
+    <!-- Tab: Risk -->
+    {#if activeTab === 'risk'}
+      <div class="flex-1 overflow-y-auto p-2 min-h-0">
+        {#if customerGroups.length > 0}
+          {#each customerGroups as group}
+            <div class="border rounded my-1 bg-orange-50 text-xs">
+              <button
+                class="w-full p-2 flex items-center gap-2 text-left"
+                on:click={() => toggleCustomer(group.customerId)}
+              >
+                <span class="font-medium">{group.customerName}</span>
+                {#if group.latest.result?.riskLevel}
+                  <span class="text-xs px-2 py-0.5 rounded {group.latest.result.riskLevel === 'high'
+                    ? 'bg-red-300 text-red-900'
+                    : group.latest.result.riskLevel === 'medium'
+                      ? 'bg-yellow-300 text-yellow-900'
+                      : 'bg-green-300 text-green-900'}">{group.latest.result.riskLevel}</span>
+                {/if}
+                {#if group.latest.result?.riskScore != null}
+                  <span class="text-gray-500">({group.latest.result.riskScore})</span>
+                {/if}
+                <span class="ml-auto">{expandedCustomers.has(group.customerId) ? '\u25BE' : '\u25B8'}</span>
+              </button>
+
+              {#if expandedCustomers.has(group.customerId)}
+                <div class="px-2 pb-2">
+                  <RiskChart
+                    data={group.chartData}
+                    customerName={group.customerName}
+                  />
+                  {#if group.latest.result?.summary}
+                    <div class="text-gray-600 mt-1">{group.latest.result.summary}</div>
+                  {/if}
+                </div>
+              {/if}
+            </div>
+          {/each}
+        {:else}
+          <div class="text-xs text-gray-400 p-2">No risk assessments yet.</div>
+        {/if}
+      </div>
+    {/if}
+  </div>
+{/if}

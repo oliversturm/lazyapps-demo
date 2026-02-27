@@ -8,6 +8,7 @@ import { SystemContext } from '../components/SystemContext';
 const applyChange = (data, changeInfo) => {
   switch (changeInfo.changeKind) {
     case 'addRow':
+      if (data.some((row) => row.id === changeInfo.details.id)) return data;
       return data.concat(changeInfo.details);
 
     case 'updateRow':

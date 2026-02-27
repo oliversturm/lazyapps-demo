@@ -159,3 +159,6 @@ scratch.js
 .DS_Store
 command-records/
 *~
+
+# E2E test artifacts
+tests/e2e-llm/test-results/

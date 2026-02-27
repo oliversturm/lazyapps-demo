@@ -8,7 +8,7 @@
     "test:e2e": "./tests/e2e/run.sh",
     "use-branch": "node scripts/use-branch-packages.js",
     "use-released": "node scripts/use-released-packages.js",
-    "orch:build": "docker compose -f packages/orchestrated/compose.yml build",
+    "orch:build": "docker compose -f packages/orchestrated/compose.yml build --no-cache",
     "orch:start": "docker compose -f packages/orchestrated/compose.yml --profile aspire up -d",
     "orch:aspire": "docker compose -f packages/orchestrated/compose.yml --profile aspire up -d",
     "orch:grafana": "OTLP_HOST=grafana OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile grafana up -d",
@@ -16,6 +16,12 @@
     "orch:signoz": "OTLP_HOST=signoz-otel-collector OTLP_PORT=4317 docker compose -f packages/orchestrated/compose.yml --profile signoz up -d",
     "orch:down": "docker compose -f packages/orchestrated/compose.yml --profile aspire --profile grafana --profile jaeger --profile signoz down -v",
     "orch:logs": "docker compose -f packages/orchestrated/compose.yml logs -f | pnpm exec log-highlight",
+		"llm:build": "docker compose -f packages/llm-demo/compose.yml build --no-cache",
+    "llm:start": "docker compose -f packages/llm-demo/compose.yml up -d",
+    "llm:down": "docker compose -f packages/llm-demo/compose.yml down -v",
+    "llm:logs": "docker compose -f packages/llm-demo/compose.yml logs -f | pnpm exec log-highlight",
+    "llm:seed": "packages/llm-demo/seed-data.sh",
+    "llm:test:e2e": "./tests/e2e-llm/run.sh",
     "mono:start-services": "pnpm --filter @lazyapps/demo-monolith run start-mongo && pnpm --filter @lazyapps/demo-monolith run start-aspire",
     "mono:start": "pnpm --filter @lazyapps/demo-monolith run start-highlight",
     "mono:stop-services": "pnpm --filter @lazyapps/demo-monolith run stop-services"
@@ -31,6 +37,7 @@
     "url": "https://github.com/oliversturm/lazyapps-demo/issues"
   },
   "homepage": "https://github.com/oliversturm/lazyapps-demo#readme",
+  "packageManager": "pnpm@10.30.0",
   "devDependencies": {
     "@lazyapps/log-highlight": "^0.1.1",
     "vitest": "^2.1.8"
