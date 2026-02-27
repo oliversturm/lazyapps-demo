@@ -74,8 +74,8 @@
       byCustomer[a.customerId].items.push(a);
     });
     return Object.values(byCustomer).map((group) => {
-      const sorted = group.items.sort((a, b) =>
-        (a.timestamp || '').localeCompare(b.timestamp || ''),
+      const sorted = group.items.sort(
+        (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
       );
       return {
         ...group,
@@ -544,7 +544,7 @@
     {#if activeTab === 'reputation'}
       <div class="flex-1 overflow-y-auto p-2 min-h-0">
         {#if $reputationStore.data?.length > 0}
-          {#each [...$reputationStore.data].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
+          {#each [...$reputationStore.data].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).filter((a, _i, arr) => arr.find((x) => x.customerId === a.customerId) === a) as assessment}
             <div class="border rounded p-2 my-1 bg-blue-50 text-xs">
               <div class="flex items-center gap-2 mb-1">
                 <span class="font-medium">{assessment.customerName}</span>
