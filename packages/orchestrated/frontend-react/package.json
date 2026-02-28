@@ -11,8 +11,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.0",
     "eslint": "^8.46.0",
     "eslint-plugin-react": "^7.33.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.2.0",
     "vitest": "^2.1.8"
   },
   "type": "module",

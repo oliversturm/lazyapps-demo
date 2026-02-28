@@ -59,10 +59,17 @@ if (snapshotVersions.size === 0) {
   process.exit(1);
 }
 
-// Update package.json files
+// Build sorted overrides object from all snapshot versions
+const overridesObj = Object.fromEntries(
+  [...snapshotVersions].sort(([a], [b]) => a.localeCompare(b))
+);
+
+// Update package.json files: direct dependencies + overrides
 let totalUpdates = 0;
 for (const { path: pkgPath, content } of packageJsonData) {
   let modified = false;
+
+  // Update direct dependency versions
   for (const depType of ['dependencies', 'devDependencies']) {
     if (content[depType]) {
       for (const [name, version] of snapshotVersions) {
@@ -74,6 +81,26 @@ for (const { path: pkgPath, content } of packageJsonData) {
       }
     }
   }
+
+  const isRoot = pkgPath === 'package.json';
+  const hasLazyappsDeps = hasAnyLazyappsDep(content);
+
+  // Root package.json: set pnpm.overrides for ALL snapshot packages
+  if (isRoot) {
+    if (!content.pnpm) content.pnpm = {};
+    content.pnpm.overrides = { ...overridesObj };
+    modified = true;
+    console.log(`Set pnpm.overrides in root (${snapshotVersions.size} packages)`);
+  }
+
+  // Sub-packages with @lazyapps/* deps: set npm overrides for ALL snapshot packages
+  // (needed for orchestrated services that use npm install in Docker)
+  if (!isRoot && hasLazyappsDeps) {
+    content.overrides = { ...overridesObj };
+    modified = true;
+    console.log(`Set npm overrides in ${pkgPath} (${snapshotVersions.size} packages)`);
+  }
+
   if (modified) {
     writeFileSync(pkgPath, JSON.stringify(content, null, 2) + '\n');
     console.log(`Updated: ${pkgPath}`);
@@ -94,6 +121,22 @@ if (unchanged.length > 0) {
 }
 console.log(`\nTotal dependency entries updated: ${totalUpdates}`);
 console.log('\nRun `pnpm install` or `npm install` to fetch the new versions.');
+
+function hasAnyLazyappsDep(pkgJson) {
+  for (const depType of ['dependencies', 'devDependencies']) {
+    if (pkgJson[depType]) {
+      for (const name of Object.keys(pkgJson[depType])) {
+        if (
+          name.startsWith('@lazyapps/') &&
+          !name.startsWith('@lazyapps/demo')
+        ) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
 
 function collectLazyappsDeps(pkgJson, set) {
   for (const depType of ['dependencies', 'devDependencies']) {

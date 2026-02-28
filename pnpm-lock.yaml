@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@lazyapps/command-processor': 0.2.0-branch-admin-replay-20260220155141
+  '@lazyapps/aggregatestore-inmemory': 0.2.0-branch-admin-replay-20260220155141
+
 importers:
 
   .:
@@ -13,16 +17,22 @@ importers:
         version: 0.1.1
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@25.2.1)
+        version: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
 
   packages/monolith:
     dependencies:
+      '@lazyapps/admin-api':
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
+      '@lazyapps/admin-ui':
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/aggregatestore-inmemory':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
+        specifier: 1.0.0-branch-admin-replay-20260220155141
+        version: 1.0.0-branch-admin-replay-20260220155141(@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141)(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)))(body-parser@1.20.4)(cors@2.8.6)(express@4.22.1)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
@@ -30,35 +40,38 @@ importers:
         specifier: ^0.1.3
         version: 0.1.3
       '@lazyapps/eventbus-mqemitter-redis':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/eventstore-mongodb':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/express':
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
       '@lazyapps/mqemitter':
-        specifier: ^0.2.0
-        version: 0.2.0(mqemitter@5.0.0)
+        specifier: 0.3.0-branch-admin-replay-20260220155141
+        version: 0.3.0-branch-admin-replay-20260220155141(mqemitter@5.0.0)
       '@lazyapps/observability':
         specifier: ^0.3.0
         version: 0.3.0
+      '@lazyapps/readmodel-backup-mongodb':
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@sveltejs/adapter-auto':
         specifier: ^2.1.0
-        version: 2.1.1(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))
+        version: 2.1.1(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)))
       '@sveltejs/kit':
         specifier: ^1.22.4
-        version: 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+        version: 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       '@sveltejs/vite-plugin-svelte':
         specifier: ^2.4.4
-        version: 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+        version: 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       mqemitter:
         specifier: ^5.0.0
         version: 5.0.0
@@ -79,11 +92,14 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^4.4.9
-        version: 4.5.14(@types/node@25.2.1)
+        version: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
       yup:
         specifier: ^1.2.0
         version: 1.7.1
     devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.2.0
+        version: 4.2.0
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -99,21 +115,27 @@ importers:
       npm-run-all2:
         specifier: ^6.2.3
         version: 6.2.6
+      postcss:
+        specifier: ^8.5.6
+        version: 8.5.6
       prettier:
         specifier: ^3.0.1
         version: 3.8.1
       prettier-plugin-svelte:
         specifier: ^3.0.3
         version: 3.4.1(prettier@3.8.1)(svelte@4.2.20)
+      tailwindcss:
+        specifier: ^4.2.0
+        version: 4.2.0
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@25.2.1)
+        version: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
 
   packages/orchestrated/change-notifier:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: 1.0.0-branch-admin-replay-20260220155141
+        version: 1.0.0-branch-admin-replay-20260220155141(@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141)(body-parser@1.20.4)(cors@2.8.6)(express@4.22.1)(vite@5.4.21(@types/node@25.2.1)(lightningcss@1.31.1))
       '@lazyapps/change-notifier-socket-io':
         specifier: ^0.1.3
         version: 0.1.3
@@ -129,25 +151,28 @@ importers:
         version: 8.57.1
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@25.2.1)
+        version: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
 
   packages/orchestrated/command-processor:
     dependencies:
+      '@lazyapps/admin-api':
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/aggregatestore-inmemory':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: 1.0.0-branch-admin-replay-20260220155141
+        version: 1.0.0-branch-admin-replay-20260220155141(@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141)(body-parser@1.20.4)(cors@2.8.6)(express@4.22.1)(vite@5.4.21(@types/node@25.2.1)(lightningcss@1.31.1))
       '@lazyapps/eventbus-rabbitmq':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/eventstore-mongodb':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/express':
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -160,7 +185,7 @@ importers:
         version: 8.57.1
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@25.2.1)
+        version: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
 
   packages/orchestrated/frontend-react:
     dependencies:
@@ -169,7 +194,7 @@ importers:
         version: 1.9.7(react-redux@8.1.3(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(redux@4.2.1))(react@18.3.1)
       '@vitejs/plugin-react':
         specifier: ^4.0.4
-        version: 4.7.0(vite@4.5.14(@types/node@25.2.1))
+        version: 4.7.0(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       formik:
         specifier: ^2.4.3
         version: 2.4.9(@types/react@18.3.28)(react@18.3.1)
@@ -208,32 +233,41 @@ importers:
         version: 9.0.1
       vite:
         specifier: ^4.4.9
-        version: 4.5.14(@types/node@25.2.1)
+        version: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
       yup:
         specifier: ^1.2.0
         version: 1.7.1
     devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.2.0
+        version: 4.2.0
       eslint:
         specifier: ^8.46.0
         version: 8.57.1
       eslint-plugin-react:
         specifier: ^7.33.1
         version: 7.37.5(eslint@8.57.1)
+      postcss:
+        specifier: ^8.5.6
+        version: 8.5.6
+      tailwindcss:
+        specifier: ^4.2.0
+        version: 4.2.0
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@25.2.1)
+        version: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
 
   packages/orchestrated/frontend-svelte:
     dependencies:
       '@sveltejs/adapter-auto':
         specifier: ^2.1.0
-        version: 2.1.1(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))
+        version: 2.1.1(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)))
       '@sveltejs/kit':
         specifier: ^1.22.4
-        version: 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+        version: 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       '@sveltejs/vite-plugin-svelte':
         specifier: ^2.4.4
-        version: 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+        version: 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       nanoid:
         specifier: ^5.0.7
         version: 5.1.6
@@ -251,11 +285,14 @@ importers:
         version: 9.0.1
       vite:
         specifier: ^4.4.9
-        version: 4.5.14(@types/node@25.2.1)
+        version: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
       yup:
         specifier: ^1.2.0
         version: 1.7.1
     devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.2.0
+        version: 4.2.0
       eslint:
         specifier: ^8.46.0
         version: 8.57.1
@@ -265,21 +302,30 @@ importers:
       eslint-plugin-svelte:
         specifier: ^2.32.4
         version: 2.46.1(eslint@8.57.1)(svelte@4.2.20)
+      postcss:
+        specifier: ^8.5.6
+        version: 8.5.6
       prettier:
         specifier: ^3.0.1
         version: 3.8.1
       prettier-plugin-svelte:
         specifier: ^3.0.3
         version: 3.4.1(prettier@3.8.1)(svelte@4.2.20)
+      tailwindcss:
+        specifier: ^4.2.0
+        version: 4.2.0
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@25.2.1)
+        version: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
 
   packages/orchestrated/readmodel-customers:
     dependencies:
+      '@lazyapps/admin-api':
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: 1.0.0-branch-admin-replay-20260220155141
+        version: 1.0.0-branch-admin-replay-20260220155141(@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141)(body-parser@1.20.4)(cors@2.8.6)(express@4.22.1)(vite@5.4.21(@types/node@25.2.1)(lightningcss@1.31.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
@@ -287,36 +333,42 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/eventbus-rabbitmq':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/express':
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
       '@lazyapps/observability':
         specifier: ^0.3.0
         version: 0.3.0
+      '@lazyapps/readmodel-backup-mongodb':
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/readmodels':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
     devDependencies:
       eslint:
         specifier: ^8.46.0
         version: 8.57.1
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@25.2.1)
+        version: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
 
   packages/orchestrated/readmodel-orders:
     dependencies:
+      '@lazyapps/admin-api':
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: 1.0.0-branch-admin-replay-20260220155141
+        version: 1.0.0-branch-admin-replay-20260220155141(@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141)(body-parser@1.20.4)(cors@2.8.6)(express@4.22.1)(vite@5.4.21(@types/node@25.2.1)(lightningcss@1.31.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
@@ -324,23 +376,26 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/eventbus-rabbitmq':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/express':
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
       '@lazyapps/observability':
         specifier: ^0.3.0
         version: 0.3.0
+      '@lazyapps/readmodel-backup-mongodb':
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/readmodels':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/readmodelstorage-mongodb':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-admin-replay-20260220155141
+        version: 0.2.0-branch-admin-replay-20260220155141
       express-graphql:
         specifier: ^0.12.0
         version: 0.12.0(graphql@15.10.1)
@@ -362,9 +417,13 @@ importers:
         version: 8.57.1
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@25.2.1)
+        version: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
 
 packages:
+
+  '@alloc/quick-lru@5.2.0':
+    resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
+    engines: {node: '>=10'}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -853,18 +912,38 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@lazyapps/aggregatestore-inmemory@0.1.2':
-    resolution: {integrity: sha512-T7A8IAAmR65Lb8RY5KfIX9qbE6o/YrMWU2/2KoBP1nIMH/mWXv1NUn2dVKtN+gbJyfFcsewtosvLd3/1Eh8Xmg==}
+  '@lazyapps/admin-api@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-CWPkRYxtjV6VBsdF6iWivObSBmoMweiuo65m66ZzAvAod5tEB6TcGj8mIpOjP3+YbcN5Ww5EWdGh4LR+nMJsrg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/bootstrap@0.2.0':
-    resolution: {integrity: sha512-zgZGtJQ094BEmYfV47xlhmWsAoEeLfZ7GYYWugWaW3hYY3tHPsrmcyt98R9D/9TqaxoIKUutavBUX8tYcJMb5w==}
+  '@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-sSD/xsYovb3bAUhcVRxZaJ0UBreEdqk+Vv2WiXiVcaAEAAcrkPpmqeJ3s1oUQzKCGuEK1V8NjnrVdLmsxLu4Ow==}
+    engines: {node: '>=18.20.3 || >=20.18.0'}
+
+  '@lazyapps/aggregatestore-inmemory@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-kofJF2nocFf+rQdJo1KjMkISXOyzcHnmDBkY7H8JGy6HLdMwJr/9Oh4LYFvChs4q4FOk4UBSV/fpfh46gFbrjA==}
+    engines: {node: '>=18.20.3 || >=20.18.0'}
+
+  '@lazyapps/bootstrap@1.0.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-OQp7Pc0KDkFP1UcxXhq1FT+xmUqaPSiSoq4P7N3EHlSi2GHWXpAwEqQDgTziZPGN3voGyhhGAQoMZxSRF0V3Xw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
     peerDependencies:
+      '@lazyapps/admin-ui': 0.2.0-branch-admin-replay-20260220155141
       '@sveltejs/kit': '>=2.0.0'
+      body-parser: '>=1.20.0'
+      cors: '>=2.8.0'
+      express: '>=4.18.0'
       vite: '>=5.0.0'
     peerDependenciesMeta:
+      '@lazyapps/admin-ui':
+        optional: true
       '@sveltejs/kit':
+        optional: true
+      body-parser:
+        optional: true
+      cors:
+        optional: true
+      express:
         optional: true
       vite:
         optional: true
@@ -877,28 +956,28 @@ packages:
     resolution: {integrity: sha512-QQ6zTWdhPOTd9RabneCu6JmA/8qVkDtju+GCBvr5Ataeo/d2Jzas4pXb8uIZNw1KicMFlTg7dJVbhI0AXxo4vg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/command-processor@0.1.2':
-    resolution: {integrity: sha512-pf/5oVlWxCfYusbzyH+bE5NPhe0yhX/D8HsDnagcyWFYbXO8pKcvI4CTRU6EcsTV05c4tLie+zmQZKqdB2YS8g==}
+  '@lazyapps/command-processor@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-UuCTUKgqr13Dqp7OpUgtcnKp12kxyeJ1qPnhDKepoofWRAYQVQkeXJXTj7miomupeJutnaTbqaI9QgVQFgcMww==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/command-sender-fetch@0.1.2':
     resolution: {integrity: sha512-U6rMhQfR3ObZ5pxRKhf4gaFy76gy+pXP0eYecLDOvNz6W+hxgV/jwMoiN+dFbYBaHuk/Anm9K1kyzphUp/u/Ng==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.2':
-    resolution: {integrity: sha512-bhqp5mpZsXgR18zQULTRNP2qbHd3O/cjJ6e9l2QvQqRH0kXm4qgRegPujVUk0l0c3gZRfyRV0XMKT/pEM0TZfQ==}
+  '@lazyapps/eventbus-mqemitter-redis@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-eB/lAgOYyk3pbviildFn6WaaKWiR9R+UJ303PSUSmTnSHyk763kZueOoLOYAciTqxUToSoLq+eUvKUmuy1CbmQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventbus-rabbitmq@0.1.2':
-    resolution: {integrity: sha512-6qbFrU4wdvk+5O8dfy9gQb9Falz1LdXZMlmtUWQebNlHJZBrdKGdq7kfBIpgpqjnyMKIs0UNh3+D9LTL9SI0wg==}
+  '@lazyapps/eventbus-rabbitmq@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-39bHdizkwaaMHCnMe5V8L1SAN4LVh0BgWHvt2Y6Qd6dCK9TL5VL9Q/hguNSrnMbMpRFheax/FtsDUCVvPgxH+w==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventstore-mongodb@0.1.3':
-    resolution: {integrity: sha512-GwdzKTaMsoGjgOmILijGExlQbeZ4PnGFrjZ3nsvc1Gk5OXO327HQOZN/tnx2mVZUQgvNRA9CT5YCCbQPZVCAgw==}
+  '@lazyapps/eventstore-mongodb@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-Rv688t9Bb9ZLeKSHjX5uyFFWcOt46ZJVvUjTFUjxvUxXTKiklTknTrZtZZrylBFhma4vFRsIoOCrM7gZJBGaQw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/express@0.1.4':
-    resolution: {integrity: sha512-bU2hwqItX3O0mT1hI3CHRaBArOa9WCjymhZnowLoukZ8ia4ajVPkNUFk6qdDByuGLAjYVWVGFP1rcuKmeoaXDg==}
+  '@lazyapps/express@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-pzm4d2f4IYVmgIgHgqjD3foKA6RHydktA4flrOIp0Bh8zKgHqliQScGFKvI5WKEPnhYKAMS5Ls4g+dGJAjaaAQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/log-highlight@0.1.1':
@@ -910,20 +989,24 @@ packages:
     resolution: {integrity: sha512-HwF//sp1kMfYQn0DR1jPbdPm10SRiRQ3a/rBic2pCy4xTdwXr182fwYH1Tur88Lk8IN8hraOyz52psxjc22q6A==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/mqemitter@0.2.0':
-    resolution: {integrity: sha512-g4Qtq4Mej4qCXL50lHTEt0/P6oVafJsSnURV/i4gXLqnbEQc3J2/EH8zhDM8y3CRJDVgdGPEFy9N9wHYrMxWHw==}
+  '@lazyapps/mqemitter@0.3.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-O+nmQd47RP7EoSfOz/CnsRHXep/Y6iykvKGmSzQ1eJI39ORemfSE1pQhl267jqik5UsLzY+ZKyB9WsrGpbOF7A==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/observability@0.3.0':
     resolution: {integrity: sha512-KQL2TC0WnU0aeF0sp/yNcp3Fx91l5dtx0w+Fz1hNLbsmEvUN/8tf93ZZc4K1qXlMjMBSmljgmPB5TmcYoKfjrg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/readmodels@0.1.2':
-    resolution: {integrity: sha512-52SvjIIZQyMplLoKuZxJMzib8d0flRbvT/B4jlr5z8Mkd0ghV2zT8xWclq5i6DIME+aYuC7Qn1ABfmPZzfj/KQ==}
+  '@lazyapps/readmodel-backup-mongodb@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-+zBFV3J8OrWSkg6NdM9WJBFYh6Acp0DAPkA0qGdsZaKWj0xvZA4gDea8PFaeK8crRpHfP+xQURfO8NW9P9Ux+A==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/readmodelstorage-mongodb@0.1.2':
-    resolution: {integrity: sha512-wfsL7oymQRkw48P+4zNeUJr9Zu1TkhHtWSXPhOn6lCq1dOqpgw3oYESM0Dvnz8xSl/TwLKGEdWOnyekaH2NK1Q==}
+  '@lazyapps/readmodels@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-3ODqydwyTke8Nz30YFfTIIaUOpsx+XfNH7zONbpro49EU5L5vHwyUkYaezXoKm92V0r46QDHfn3yxZjvarzjNw==}
+    engines: {node: '>=18.20.3 || >=20.18.0'}
+
+  '@lazyapps/readmodelstorage-mongodb@0.2.0-branch-admin-replay-20260220155141':
+    resolution: {integrity: sha512-tmrN5agFlm9tOlg9+QU09Kh7vYM7Fu9c9getqwK04Rw2FCTAinjdTN2xTksLzV0GUX82zUADlVcYF9Ijk4s80g==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@mongodb-js/saslprep@1.4.5':
@@ -1238,66 +1321,79 @@ packages:
     resolution: {integrity: sha512-F8sWbhZ7tyuEfsmOxwc2giKDQzN3+kuBLPwwZGyVkLlKGdV1nvnNwYD0fKQ8+XS6hp9nY7B+ZeK01EBUE7aHaw==}
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.57.1':
     resolution: {integrity: sha512-rGfNUfn0GIeXtBP1wL5MnzSj98+PZe/AXaGBCRmT0ts80lU5CATYGxXukeTX39XBKsxzFpEeK+Mrp9faXOlmrw==}
     cpu: [arm]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.57.1':
     resolution: {integrity: sha512-MMtej3YHWeg/0klK2Qodf3yrNzz6CGjo2UntLvk2RSPlhzgLvYEB3frRvbEF2wRKh1Z2fDIg9KRPe1fawv7C+g==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.57.1':
     resolution: {integrity: sha512-1a/qhaaOXhqXGpMFMET9VqwZakkljWHLmZOX48R0I/YLbhdxr1m4gtG1Hq7++VhVUmf+L3sTAf9op4JlhQ5u1Q==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-loong64-gnu@4.57.1':
     resolution: {integrity: sha512-QWO6RQTZ/cqYtJMtxhkRkidoNGXc7ERPbZN7dVW5SdURuLeVU7lwKMpo18XdcmpWYd0qsP1bwKPf7DNSUinhvA==}
     cpu: [loong64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-loong64-musl@4.57.1':
     resolution: {integrity: sha512-xpObYIf+8gprgWaPP32xiN5RVTi/s5FCR+XMXSKmhfoJjrpRAjCuuqQXyxUa/eJTdAE6eJ+KDKaoEqjZQxh3Gw==}
     cpu: [loong64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-ppc64-gnu@4.57.1':
     resolution: {integrity: sha512-4BrCgrpZo4hvzMDKRqEaW1zeecScDCR+2nZ86ATLhAoJ5FQ+lbHVD3ttKe74/c7tNT9c6F2viwB3ufwp01Oh2w==}
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-ppc64-musl@4.57.1':
     resolution: {integrity: sha512-NOlUuzesGauESAyEYFSe3QTUguL+lvrN1HtwEEsU2rOwdUDeTMJdO5dUYl/2hKf9jWydJrO9OL/XSSf65R5+Xw==}
     cpu: [ppc64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-riscv64-gnu@4.57.1':
     resolution: {integrity: sha512-ptA88htVp0AwUUqhVghwDIKlvJMD/fmL/wrQj99PRHFRAG6Z5nbWoWG4o81Nt9FT+IuqUQi+L31ZKAFeJ5Is+A==}
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-musl@4.57.1':
     resolution: {integrity: sha512-S51t7aMMTNdmAMPpBg7OOsTdn4tySRQvklmL3RpDRyknk87+Sp3xaumlatU+ppQ+5raY7sSTcC2beGgvhENfuw==}
     cpu: [riscv64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-s390x-gnu@4.57.1':
     resolution: {integrity: sha512-Bl00OFnVFkL82FHbEqy3k5CUCKH6OEJL54KCyx2oqsmZnFTR8IoNqBF+mjQVcRCT5sB6yOvK8A37LNm/kPJiZg==}
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.57.1':
     resolution: {integrity: sha512-ABca4ceT4N+Tv/GtotnWAeXZUZuM/9AQyCyKYyKnpk4yoA7QIAuBt6Hkgpw8kActYlew2mvckXkvx0FfoInnLg==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.57.1':
     resolution: {integrity: sha512-HFps0JeGtuOR2convgRRkHCekD7j+gdAuXM+/i6kGzQtFhlCtQkpwtNzkNj6QhCDp7DRJ7+qC/1Vg2jt5iSOFw==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-openbsd-x64@4.57.1':
     resolution: {integrity: sha512-H+hXEv9gdVQuDTgnqD+SQffoWoc0Of59AStSzTEj/feWTBAnSfSD3+Dql1ZruJQxmykT/JVY0dE8Ka7z0DH1hw==}
@@ -1359,6 +1455,98 @@ packages:
     peerDependencies:
       svelte: ^3.54.0 || ^4.0.0 || ^5.0.0-next.0
       vite: ^4.0.0
+
+  '@tailwindcss/node@4.2.0':
+    resolution: {integrity: sha512-Yv+fn/o2OmL5fh/Ir62VXItdShnUxfpkMA4Y7jdeC8O81WPB8Kf6TT6GSHvnqgSwDzlB5iT7kDpeXxLsUS0T6Q==}
+
+  '@tailwindcss/oxide-android-arm64@4.2.0':
+    resolution: {integrity: sha512-F0QkHAVaW/JNBWl4CEKWdZ9PMb0khw5DCELAOnu+RtjAfx5Zgw+gqCHFvqg3AirU1IAd181fwOtJQ5I8Yx5wtw==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [android]
+
+  '@tailwindcss/oxide-darwin-arm64@4.2.0':
+    resolution: {integrity: sha512-I0QylkXsBsJMZ4nkUNSR04p6+UptjcwhcVo3Zu828ikiEqHjVmQL9RuQ6uT/cVIiKpvtVA25msu/eRV97JeNSA==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@tailwindcss/oxide-darwin-x64@4.2.0':
+    resolution: {integrity: sha512-6TmQIn4p09PBrmnkvbYQ0wbZhLtbaksCDx7Y7R3FYYx0yxNA7xg5KP7dowmQ3d2JVdabIHvs3Hx4K3d5uCf8xg==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@tailwindcss/oxide-freebsd-x64@4.2.0':
+    resolution: {integrity: sha512-qBudxDvAa2QwGlq9y7VIzhTvp2mLJ6nD/G8/tI70DCDoneaUeLWBJaPcbfzqRIWraj+o969aDQKvKW9dvkUizw==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@tailwindcss/oxide-linux-arm-gnueabihf@4.2.0':
+    resolution: {integrity: sha512-7XKkitpy5NIjFZNUQPeUyNJNJn1CJeV7rmMR+exHfTuOsg8rxIO9eNV5TSEnqRcaOK77zQpsyUkBWmPy8FgdSg==}
+    engines: {node: '>= 20'}
+    cpu: [arm]
+    os: [linux]
+
+  '@tailwindcss/oxide-linux-arm64-gnu@4.2.0':
+    resolution: {integrity: sha512-Mff5a5Q3WoQR01pGU1gr29hHM1N93xYrKkGXfPw/aRtK4bOc331Ho4Tgfsm5WDGvpevqMpdlkCojT3qlCQbCpA==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tailwindcss/oxide-linux-arm64-musl@4.2.0':
+    resolution: {integrity: sha512-XKcSStleEVnbH6W/9DHzZv1YhjE4eSS6zOu2eRtYAIh7aV4o3vIBs+t/B15xlqoxt6ef/0uiqJVB6hkHjWD/0A==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@tailwindcss/oxide-linux-x64-gnu@4.2.0':
+    resolution: {integrity: sha512-/hlXCBqn9K6fi7eAM0RsobHwJYa5V/xzWspVTzxnX+Ft9v6n+30Pz8+RxCn7sQL/vRHHLS30iQPrHQunu6/vJA==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tailwindcss/oxide-linux-x64-musl@4.2.0':
+    resolution: {integrity: sha512-lKUaygq4G7sWkhQbfdRRBkaq4LY39IriqBQ+Gk6l5nKq6Ay2M2ZZb1tlIyRNgZKS8cbErTwuYSor0IIULC0SHw==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@tailwindcss/oxide-wasm32-wasi@4.2.0':
+    resolution: {integrity: sha512-xuDjhAsFdUuFP5W9Ze4k/o4AskUtI8bcAGU4puTYprr89QaYFmhYOPfP+d1pH+k9ets6RoE23BXZM1X1jJqoyw==}
+    engines: {node: '>=14.0.0'}
+    cpu: [wasm32]
+    bundledDependencies:
+      - '@napi-rs/wasm-runtime'
+      - '@emnapi/core'
+      - '@emnapi/runtime'
+      - '@tybys/wasm-util'
+      - '@emnapi/wasi-threads'
+      - tslib
+
+  '@tailwindcss/oxide-win32-arm64-msvc@4.2.0':
+    resolution: {integrity: sha512-2UU/15y1sWDEDNJXxEIrfWKC2Yb4YgIW5Xz2fKFqGzFWfoMHWFlfa1EJlGO2Xzjkq/tvSarh9ZTjvbxqWvLLXA==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@tailwindcss/oxide-win32-x64-msvc@4.2.0':
+    resolution: {integrity: sha512-CrFadmFoc+z76EV6LPG1jx6XceDsaCG3lFhyLNo/bV9ByPrE+FnBPckXQVP4XRkN76h3Fjt/a+5Er/oA/nCBvQ==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [win32]
+
+  '@tailwindcss/oxide@4.2.0':
+    resolution: {integrity: sha512-AZqQzADaj742oqn2xjl5JbIOzZB/DGCYF/7bpvhA8KvjUj9HJkag6bBuwZvH1ps6dfgxNHyuJVlzSr2VpMgdTQ==}
+    engines: {node: '>= 20'}
+
+  '@tailwindcss/postcss@4.2.0':
+    resolution: {integrity: sha512-u6YBacGpOm/ixPfKqfgrJEjMfrYmPD7gEFRoygS/hnQaRtV0VCBdpkx5Ouw9pnaLRwwlgGCuJw8xLpaR0hOrQg==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -1871,6 +2059,10 @@ packages:
     resolution: {integrity: sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
 
+  detect-libc@2.1.2:
+    resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
+    engines: {node: '>=8'}
+
   devalue@4.3.3:
     resolution: {integrity: sha512-UH8EL6H2ifcY8TbD2QsxwCC/pr5xSwPvv85LrLXVihmHVC3T3YqTCIwnR5ak0yO1KYqlxrPVOA/JVZJYPy2ATg==}
 
@@ -1925,6 +2117,10 @@ packages:
   engine.io@6.6.5:
     resolution: {integrity: sha512-2RZdgEbXmp5+dVbRm0P7HQUImZpICccJy7rN7Tv+SFa55pH+lxnuw6/K1ZxxBfHoYpSkHLAO92oa8O4SwFXA2A==}
     engines: {node: '>=10.2.0'}
+
+  enhanced-resolve@5.19.0:
+    resolution: {integrity: sha512-phv3E1Xl4tQOShqSte26C7Fl84EwUdZsyOuSSk9qtAGyyQs2s3jJzComh+Abf4g187lUUAvH+H26omrqia2aGg==}
+    engines: {node: '>=10.13.0'}
 
   es-abstract@1.24.1:
     resolution: {integrity: sha512-zHXBLhP+QehSSbsS9Pt23Gg964240DPd6QCf8WpkqEXxQ7fhdZzYsocOr5u7apWonsS5EjZDmTF+/slGMyasvw==}
@@ -2263,6 +2459,9 @@ packages:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
 
+  graceful-fs@4.2.11:
+    resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
@@ -2543,6 +2742,10 @@ packages:
     resolution: {integrity: sha512-H0dkQoCa3b2VEeKQBOxFph+JAbcrQdE7KC0UkqwpLmv2EC4P41QXP+rqo9wYodACiG5/WM5s9oDApTU8utwj9g==}
     engines: {node: '>= 0.4'}
 
+  jiti@2.6.1:
+    resolution: {integrity: sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==}
+    hasBin: true
+
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -2614,6 +2817,80 @@ packages:
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
+
+  lightningcss-android-arm64@1.31.1:
+    resolution: {integrity: sha512-HXJF3x8w9nQ4jbXRiNppBCqeZPIAfUo8zE/kOEGbW5NZvGc/K7nMxbhIr+YlFlHW5mpbg/YFPdbnCh1wAXCKFg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [android]
+
+  lightningcss-darwin-arm64@1.31.1:
+    resolution: {integrity: sha512-02uTEqf3vIfNMq3h/z2cJfcOXnQ0GRwQrkmPafhueLb2h7mqEidiCzkE4gBMEH65abHRiQvhdcQ+aP0D0g67sg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  lightningcss-darwin-x64@1.31.1:
+    resolution: {integrity: sha512-1ObhyoCY+tGxtsz1lSx5NXCj3nirk0Y0kB/g8B8DT+sSx4G9djitg9ejFnjb3gJNWo7qXH4DIy2SUHvpoFwfTA==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  lightningcss-freebsd-x64@1.31.1:
+    resolution: {integrity: sha512-1RINmQKAItO6ISxYgPwszQE1BrsVU5aB45ho6O42mu96UiZBxEXsuQ7cJW4zs4CEodPUioj/QrXW1r9pLUM74A==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [freebsd]
+
+  lightningcss-linux-arm-gnueabihf@1.31.1:
+    resolution: {integrity: sha512-OOCm2//MZJ87CdDK62rZIu+aw9gBv4azMJuA8/KB74wmfS3lnC4yoPHm0uXZ/dvNNHmnZnB8XLAZzObeG0nS1g==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm]
+    os: [linux]
+
+  lightningcss-linux-arm64-gnu@1.31.1:
+    resolution: {integrity: sha512-WKyLWztD71rTnou4xAD5kQT+982wvca7E6QoLpoawZ1gP9JM0GJj4Tp5jMUh9B3AitHbRZ2/H3W5xQmdEOUlLg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  lightningcss-linux-arm64-musl@1.31.1:
+    resolution: {integrity: sha512-mVZ7Pg2zIbe3XlNbZJdjs86YViQFoJSpc41CbVmKBPiGmC4YrfeOyz65ms2qpAobVd7WQsbW4PdsSJEMymyIMg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  lightningcss-linux-x64-gnu@1.31.1:
+    resolution: {integrity: sha512-xGlFWRMl+0KvUhgySdIaReQdB4FNudfUTARn7q0hh/V67PVGCs3ADFjw+6++kG1RNd0zdGRlEKa+T13/tQjPMA==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  lightningcss-linux-x64-musl@1.31.1:
+    resolution: {integrity: sha512-eowF8PrKHw9LpoZii5tdZwnBcYDxRw2rRCyvAXLi34iyeYfqCQNA9rmUM0ce62NlPhCvof1+9ivRaTY6pSKDaA==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  lightningcss-win32-arm64-msvc@1.31.1:
+    resolution: {integrity: sha512-aJReEbSEQzx1uBlQizAOBSjcmr9dCdL3XuC/6HLXAxmtErsj2ICo5yYggg1qOODQMtnjNQv2UHb9NpOuFtYe4w==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  lightningcss-win32-x64-msvc@1.31.1:
+    resolution: {integrity: sha512-I9aiFrbd7oYHwlnQDqr1Roz+fTz61oDDJX7n9tYF9FJymH1cIN1DtKw3iYt6b8WZgEjoNwVSncwF4wx/ZedMhw==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [win32]
+
+  lightningcss@1.31.1:
+    resolution: {integrity: sha512-l51N2r93WmGUye3WuFoN5k10zyvrVs0qfKBhyC5ogUQ6Ew6JUSswh78mbSO+IU3nTWsyOArqPCcShdQSadghBQ==}
+    engines: {node: '>= 12.0.0'}
 
   lilconfig@2.1.0:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
@@ -3565,6 +3842,13 @@ packages:
     resolution: {integrity: sha512-eeEgGc2DtiUil5ANdtd8vPwt9AgaMdnuUFnPft9F5oMvU/FHu5IHFic+p1dR/UOB7XU2mX2yHW+NcTch4DCh5Q==}
     engines: {node: '>=16'}
 
+  tailwindcss@4.2.0:
+    resolution: {integrity: sha512-yYzTZ4++b7fNYxFfpnberEEKu43w44aqDMNM9MHMmcKuCH7lL8jJ4yJ7LGHv7rSwiqM0nkiobF9I6cLlpS2P7Q==}
+
+  tapable@2.3.0:
+    resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
+    engines: {node: '>=6'}
+
   tentacoli@0.5.1:
     resolution: {integrity: sha512-2EXz+sA2wuVIO3ietM12p5wuhpHry9d5a/82Ga5zlYKpX39Z2UY0JINMI7wpXuCHENTqXJIOYCk2gnWqSZYrpw==}
 
@@ -4000,6 +4284,8 @@ packages:
     resolution: {integrity: sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==}
 
 snapshots:
+
+  '@alloc/quick-lru@5.2.0': {}
 
   '@ampproject/remapping@2.3.0':
     dependencies:
@@ -4448,19 +4734,31 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@lazyapps/aggregatestore-inmemory@0.1.2':
+  '@lazyapps/admin-api@0.2.0-branch-admin-replay-20260220155141':
+    dependencies:
+      '@lazyapps/logger': 0.2.0
+      nanoid: 5.1.6
+
+  '@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141': {}
+
+  '@lazyapps/aggregatestore-inmemory@0.2.0-branch-admin-replay-20260220155141':
     dependencies:
       '@lazyapps/logger': 0.2.0
 
-  '@lazyapps/bootstrap@0.2.0(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@1.0.0-branch-admin-replay-20260220155141(@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141)(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)))(body-parser@1.20.4)(cors@2.8.6)(express@4.22.1)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.1.2
+      '@lazyapps/admin-api': 0.2.0-branch-admin-replay-20260220155141
+      '@lazyapps/command-processor': 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/logger': 0.2.0
-      '@lazyapps/readmodels': 0.1.2
+      '@lazyapps/readmodels': 0.2.0-branch-admin-replay-20260220155141
       '@opentelemetry/api': 1.9.0
     optionalDependencies:
-      '@sveltejs/kit': 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
-      vite: 4.5.14(@types/node@25.2.1)
+      '@lazyapps/admin-ui': 0.2.0-branch-admin-replay-20260220155141
+      '@sveltejs/kit': 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
+      body-parser: 1.20.4
+      cors: 2.8.6
+      express: 4.22.1
+      vite: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
       - '@mongodb-js/zstd'
@@ -4469,14 +4767,19 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/bootstrap@0.2.0(vite@5.4.21(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@1.0.0-branch-admin-replay-20260220155141(@lazyapps/admin-ui@0.2.0-branch-admin-replay-20260220155141)(body-parser@1.20.4)(cors@2.8.6)(express@4.22.1)(vite@5.4.21(@types/node@25.2.1)(lightningcss@1.31.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.1.2
+      '@lazyapps/admin-api': 0.2.0-branch-admin-replay-20260220155141
+      '@lazyapps/command-processor': 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/logger': 0.2.0
-      '@lazyapps/readmodels': 0.1.2
+      '@lazyapps/readmodels': 0.2.0-branch-admin-replay-20260220155141
       '@opentelemetry/api': 1.9.0
     optionalDependencies:
-      vite: 5.4.21(@types/node@25.2.1)
+      '@lazyapps/admin-ui': 0.2.0-branch-admin-replay-20260220155141
+      body-parser: 1.20.4
+      cors: 2.8.6
+      express: 4.22.1
+      vite: 5.4.21(@types/node@25.2.1)(lightningcss@1.31.1)
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
       - '@mongodb-js/zstd'
@@ -4511,11 +4814,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@lazyapps/command-processor@0.1.2':
+  '@lazyapps/command-processor@0.2.0-branch-admin-replay-20260220155141':
     dependencies:
-      '@lazyapps/aggregatestore-inmemory': 0.1.2
-      '@lazyapps/eventbus-mqemitter-redis': 0.1.2
-      '@lazyapps/eventstore-mongodb': 0.1.3
+      '@lazyapps/aggregatestore-inmemory': 0.2.0-branch-admin-replay-20260220155141
+      '@lazyapps/eventbus-mqemitter-redis': 0.2.0-branch-admin-replay-20260220155141
+      '@lazyapps/eventstore-mongodb': 0.2.0-branch-admin-replay-20260220155141
       '@lazyapps/logger': 0.2.0
       '@opentelemetry/api': 1.9.0
       nanoid: 5.1.6
@@ -4534,7 +4837,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.2':
+  '@lazyapps/eventbus-mqemitter-redis@0.2.0-branch-admin-replay-20260220155141':
     dependencies:
       '@lazyapps/logger': 0.2.0
       mqemitter-redis: 5.1.0
@@ -4542,13 +4845,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@lazyapps/eventbus-rabbitmq@0.1.2':
+  '@lazyapps/eventbus-rabbitmq@0.2.0-branch-admin-replay-20260220155141':
     dependencies:
       '@lazyapps/logger': 0.2.0
       amqplib: 0.10.9
       p-retry: 6.2.1
 
-  '@lazyapps/eventstore-mongodb@0.1.3':
+  '@lazyapps/eventstore-mongodb@0.2.0-branch-admin-replay-20260220155141':
     dependencies:
       '@lazyapps/logger': 0.2.0
       mongodb: 5.9.2
@@ -4560,7 +4863,7 @@ snapshots:
       - mongodb-client-encryption
       - snappy
 
-  '@lazyapps/express@0.1.4':
+  '@lazyapps/express@0.2.0-branch-admin-replay-20260220155141':
     dependencies:
       '@lazyapps/logger': 0.2.0
       body-parser: 1.20.4
@@ -4584,7 +4887,7 @@ snapshots:
       loglevel: 1.9.2
       loglevel-plugin-prefix: 0.8.4
 
-  '@lazyapps/mqemitter@0.2.0(mqemitter@5.0.0)':
+  '@lazyapps/mqemitter@0.3.0-branch-admin-replay-20260220155141(mqemitter@5.0.0)':
     dependencies:
       '@lazyapps/logger': 0.2.0
       '@opentelemetry/api': 1.9.0
@@ -4614,14 +4917,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@lazyapps/readmodels@0.1.2':
+  '@lazyapps/readmodel-backup-mongodb@0.2.0-branch-admin-replay-20260220155141':
+    dependencies:
+      '@lazyapps/logger': 0.2.0
+
+  '@lazyapps/readmodels@0.2.0-branch-admin-replay-20260220155141':
     dependencies:
       '@lazyapps/logger': 0.2.0
       '@opentelemetry/api': 1.9.0
       lodash: 4.17.23
       promise-queue: 2.2.5
 
-  '@lazyapps/readmodelstorage-mongodb@0.1.2':
+  '@lazyapps/readmodelstorage-mongodb@0.2.0-branch-admin-replay-20260220155141':
     dependencies:
       '@lazyapps/logger': 0.2.0
       mongodb: 5.9.2
@@ -5059,14 +5366,14 @@ snapshots:
 
   '@socket.io/component-emitter@3.1.2': {}
 
-  '@sveltejs/adapter-auto@2.1.1(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))':
+  '@sveltejs/adapter-auto@2.1.1(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)))':
     dependencies:
-      '@sveltejs/kit': 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+      '@sveltejs/kit': 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       import-meta-resolve: 4.2.0
 
-  '@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))':
+  '@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+      '@sveltejs/vite-plugin-svelte': 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       '@types/cookie': 0.5.4
       cookie: 0.5.0
       devalue: 4.3.3
@@ -5080,32 +5387,101 @@ snapshots:
       svelte: 4.2.20
       tiny-glob: 0.2.9
       undici: 5.29.0
-      vite: 4.5.14(@types/node@25.2.1)
+      vite: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte-inspector@1.0.4(@sveltejs/vite-plugin-svelte@2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))':
+  '@sveltejs/vite-plugin-svelte-inspector@1.0.4(@sveltejs/vite-plugin-svelte@2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)))(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+      '@sveltejs/vite-plugin-svelte': 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       debug: 4.4.3
       svelte: 4.2.20
-      vite: 4.5.14(@types/node@25.2.1)
+      vite: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))':
+  '@sveltejs/vite-plugin-svelte@2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 1.0.4(@sveltejs/vite-plugin-svelte@2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+      '@sveltejs/vite-plugin-svelte-inspector': 1.0.4(@sveltejs/vite-plugin-svelte@2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)))(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
       debug: 4.4.3
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.21
       svelte: 4.2.20
       svelte-hmr: 0.15.3(svelte@4.2.20)
-      vite: 4.5.14(@types/node@25.2.1)
-      vitefu: 0.2.5(vite@4.5.14(@types/node@25.2.1))
+      vite: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
+      vitefu: 0.2.5(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))
     transitivePeerDependencies:
       - supports-color
+
+  '@tailwindcss/node@4.2.0':
+    dependencies:
+      '@jridgewell/remapping': 2.3.5
+      enhanced-resolve: 5.19.0
+      jiti: 2.6.1
+      lightningcss: 1.31.1
+      magic-string: 0.30.21
+      source-map-js: 1.2.1
+      tailwindcss: 4.2.0
+
+  '@tailwindcss/oxide-android-arm64@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-darwin-arm64@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-darwin-x64@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-freebsd-x64@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-linux-arm-gnueabihf@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-linux-arm64-gnu@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-linux-arm64-musl@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-linux-x64-gnu@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-linux-x64-musl@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-wasm32-wasi@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-win32-arm64-msvc@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide-win32-x64-msvc@4.2.0':
+    optional: true
+
+  '@tailwindcss/oxide@4.2.0':
+    optionalDependencies:
+      '@tailwindcss/oxide-android-arm64': 4.2.0
+      '@tailwindcss/oxide-darwin-arm64': 4.2.0
+      '@tailwindcss/oxide-darwin-x64': 4.2.0
+      '@tailwindcss/oxide-freebsd-x64': 4.2.0
+      '@tailwindcss/oxide-linux-arm-gnueabihf': 4.2.0
+      '@tailwindcss/oxide-linux-arm64-gnu': 4.2.0
+      '@tailwindcss/oxide-linux-arm64-musl': 4.2.0
+      '@tailwindcss/oxide-linux-x64-gnu': 4.2.0
+      '@tailwindcss/oxide-linux-x64-musl': 4.2.0
+      '@tailwindcss/oxide-wasm32-wasi': 4.2.0
+      '@tailwindcss/oxide-win32-arm64-msvc': 4.2.0
+      '@tailwindcss/oxide-win32-x64-msvc': 4.2.0
+
+  '@tailwindcss/postcss@4.2.0':
+    dependencies:
+      '@alloc/quick-lru': 5.2.0
+      '@tailwindcss/node': 4.2.0
+      '@tailwindcss/oxide': 4.2.0
+      postcss: 8.5.6
+      tailwindcss: 4.2.0
 
   '@types/babel__core@7.20.5':
     dependencies:
@@ -5172,7 +5548,7 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
-  '@vitejs/plugin-react@4.7.0(vite@4.5.14(@types/node@25.2.1))':
+  '@vitejs/plugin-react@4.7.0(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1))':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
@@ -5180,7 +5556,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.27
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: 4.5.14(@types/node@25.2.1)
+      vite: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -5191,13 +5567,13 @@ snapshots:
       chai: 5.3.3
       tinyrainbow: 1.2.0
 
-  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@25.2.1))':
+  '@vitest/mocker@2.1.9(vite@5.4.21(@types/node@25.2.1)(lightningcss@1.31.1))':
     dependencies:
       '@vitest/spy': 2.1.9
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 5.4.21(@types/node@25.2.1)
+      vite: 5.4.21(@types/node@25.2.1)(lightningcss@1.31.1)
 
   '@vitest/pretty-format@2.1.9':
     dependencies:
@@ -5652,6 +6028,8 @@ snapshots:
 
   destroy@1.2.0: {}
 
+  detect-libc@2.1.2: {}
+
   devalue@4.3.3: {}
 
   dir-glob@3.0.1:
@@ -5728,6 +6106,11 @@ snapshots:
       - bufferutil
       - supports-color
       - utf-8-validate
+
+  enhanced-resolve@5.19.0:
+    dependencies:
+      graceful-fs: 4.2.11
+      tapable: 2.3.0
 
   es-abstract@1.24.1:
     dependencies:
@@ -6288,6 +6671,8 @@ snapshots:
 
   gopd@1.2.0: {}
 
+  graceful-fs@4.2.11: {}
+
   graphemer@1.4.0: {}
 
   graphql-import@1.0.2(graphql@15.10.1):
@@ -6595,6 +6980,8 @@ snapshots:
       has-symbols: 1.1.0
       set-function-name: 2.0.2
 
+  jiti@2.6.1: {}
+
   js-tokens@4.0.0: {}
 
   js-yaml@4.1.1:
@@ -6685,6 +7072,55 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  lightningcss-android-arm64@1.31.1:
+    optional: true
+
+  lightningcss-darwin-arm64@1.31.1:
+    optional: true
+
+  lightningcss-darwin-x64@1.31.1:
+    optional: true
+
+  lightningcss-freebsd-x64@1.31.1:
+    optional: true
+
+  lightningcss-linux-arm-gnueabihf@1.31.1:
+    optional: true
+
+  lightningcss-linux-arm64-gnu@1.31.1:
+    optional: true
+
+  lightningcss-linux-arm64-musl@1.31.1:
+    optional: true
+
+  lightningcss-linux-x64-gnu@1.31.1:
+    optional: true
+
+  lightningcss-linux-x64-musl@1.31.1:
+    optional: true
+
+  lightningcss-win32-arm64-msvc@1.31.1:
+    optional: true
+
+  lightningcss-win32-x64-msvc@1.31.1:
+    optional: true
+
+  lightningcss@1.31.1:
+    dependencies:
+      detect-libc: 2.1.2
+    optionalDependencies:
+      lightningcss-android-arm64: 1.31.1
+      lightningcss-darwin-arm64: 1.31.1
+      lightningcss-darwin-x64: 1.31.1
+      lightningcss-freebsd-x64: 1.31.1
+      lightningcss-linux-arm-gnueabihf: 1.31.1
+      lightningcss-linux-arm64-gnu: 1.31.1
+      lightningcss-linux-arm64-musl: 1.31.1
+      lightningcss-linux-x64-gnu: 1.31.1
+      lightningcss-linux-x64-musl: 1.31.1
+      lightningcss-win32-arm64-msvc: 1.31.1
+      lightningcss-win32-x64-msvc: 1.31.1
 
   lilconfig@2.1.0: {}
 
@@ -7748,6 +8184,10 @@ snapshots:
       magic-string: 0.30.21
       periscopic: 3.1.0
 
+  tailwindcss@4.2.0: {}
+
+  tapable@2.3.0: {}
+
   tentacoli@0.5.1:
     dependencies:
       fastq: 1.20.1
@@ -7933,13 +8373,13 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite-node@2.1.9(@types/node@25.2.1):
+  vite-node@2.1.9(@types/node@25.2.1)(lightningcss@1.31.1):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 1.1.2
-      vite: 5.4.21(@types/node@25.2.1)
+      vite: 5.4.21(@types/node@25.2.1)(lightningcss@1.31.1)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -7951,7 +8391,7 @@ snapshots:
       - supports-color
       - terser
 
-  vite@4.5.14(@types/node@25.2.1):
+  vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1):
     dependencies:
       esbuild: 0.18.20
       postcss: 8.5.6
@@ -7959,8 +8399,9 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.2.1
       fsevents: 2.3.3
+      lightningcss: 1.31.1
 
-  vite@5.4.21(@types/node@25.2.1):
+  vite@5.4.21(@types/node@25.2.1)(lightningcss@1.31.1):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.5.6
@@ -7968,15 +8409,16 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.2.1
       fsevents: 2.3.3
+      lightningcss: 1.31.1
 
-  vitefu@0.2.5(vite@4.5.14(@types/node@25.2.1)):
+  vitefu@0.2.5(vite@4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)):
     optionalDependencies:
-      vite: 4.5.14(@types/node@25.2.1)
+      vite: 4.5.14(@types/node@25.2.1)(lightningcss@1.31.1)
 
-  vitest@2.1.9(@types/node@25.2.1):
+  vitest@2.1.9(@types/node@25.2.1)(lightningcss@1.31.1):
     dependencies:
       '@vitest/expect': 2.1.9
-      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@25.2.1))
+      '@vitest/mocker': 2.1.9(vite@5.4.21(@types/node@25.2.1)(lightningcss@1.31.1))
       '@vitest/pretty-format': 2.1.9
       '@vitest/runner': 2.1.9
       '@vitest/snapshot': 2.1.9
@@ -7992,8 +8434,8 @@ snapshots:
       tinyexec: 0.3.2
       tinypool: 1.1.1
       tinyrainbow: 1.2.0
-      vite: 5.4.21(@types/node@25.2.1)
-      vite-node: 2.1.9(@types/node@25.2.1)
+      vite: 5.4.21(@types/node@25.2.1)(lightningcss@1.31.1)
+      vite-node: 2.1.9(@types/node@25.2.1)(lightningcss@1.31.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.2.1

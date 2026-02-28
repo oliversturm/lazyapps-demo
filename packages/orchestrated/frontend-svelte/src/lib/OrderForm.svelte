@@ -24,8 +24,7 @@
           aggregateId: orderId,
           command: 'CREATE',
           payload: { customerId, text: data.text, value: data.value },
-        });
-        goto('/customers');
+        }).then(() => goto('/customers'));
       }
     });
   };

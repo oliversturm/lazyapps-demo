@@ -15,17 +15,21 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@lazyapps/admin-api": "^0.1.0",
-    "@lazyapps/bootstrap": "^0.2.0",
+    "@lazyapps/admin-api": "0.2.0-branch-admin-replay-20260220155141",
+    "@lazyapps/bootstrap": "1.0.0-branch-admin-replay-20260220155141",
     "@lazyapps/change-notification-sender-fetch": "^0.1.2",
     "@lazyapps/command-sender-fetch": "^0.1.2",
-    "@lazyapps/eventbus-rabbitmq": "^0.1.2",
-    "@lazyapps/express": "^0.1.4",
+    "@lazyapps/eventbus-rabbitmq": "0.2.0-branch-admin-replay-20260220155141",
+    "@lazyapps/express": "0.2.0-branch-admin-replay-20260220155141",
     "@lazyapps/logger": "^0.2.0",
     "@lazyapps/observability": "^0.3.0",
-    "@lazyapps/readmodel-backup-mongodb": "^0.1.0",
-    "@lazyapps/readmodels": "^0.1.2",
-    "@lazyapps/readmodelstorage-mongodb": "^0.1.2"
+    "@lazyapps/readmodel-backup-mongodb": "0.2.0-branch-admin-replay-20260220155141",
+    "@lazyapps/readmodels": "0.2.0-branch-admin-replay-20260220155141",
+    "@lazyapps/readmodelstorage-mongodb": "0.2.0-branch-admin-replay-20260220155141"
   },
-  "type": "module"
+  "type": "module",
+  "overrides": {
+    "@lazyapps/command-processor": "0.2.0-branch-admin-replay-20260220155141",
+    "@lazyapps/aggregatestore-inmemory": "0.2.0-branch-admin-replay-20260220155141"
+  }
 }

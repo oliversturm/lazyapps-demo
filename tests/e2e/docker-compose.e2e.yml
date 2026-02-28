@@ -2,31 +2,68 @@ services:
   # Monolith stack
   mongo-monolith:
     image: mongo:latest
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   monolith:
     build:
       dockerfile: tests/e2e/Dockerfile.monolith
       context: ../..
     depends_on:
-      - mongo-monolith
+      mongo-monolith:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3005/api/admin/replayStatus/_healthcheck',r=>{r.resume();if(r.statusCode>=500){process.exit(1)}require('http').get('http://localhost:5173/',r2=>{r2.resume();process.exit(r2.statusCode>=400?1:0)}).on('error',()=>process.exit(1))}).on('error',()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
     environment:
       MONGO_URL: 'mongodb://mongo-monolith:27017'
       VITE_CHANGENOTIFIER_URL: 'http://monolith:53008'
       SVELTE_HOST: '0.0.0.0'
       LOG_LEVEL: 'warn'
+      ADMIN_PORT: '3005'
+      ORIGIN: 'http://monolith:3005'
+      ADMIN_COMMAND_PROCESSOR_URL: 'http://monolith:3005'
+      ADMIN_READ_MODEL_SERVICES: '{"monolith":"http://monolith:3005"}'
 
   # Orchestrated stack
   mongo:
     image: mongo:latest
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   rabbit:
     image: rabbitmq:latest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
 
   command-processor:
     build: ../../packages/orchestrated/command-processor
     depends_on:
-      - mongo
-      - rabbit
+      mongo:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:80/',r=>{r.resume();process.exit(0)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     environment:
       EXPRESS_PORT: '80'
       MONGO_URL: 'mongodb://mongo:27017'
@@ -36,9 +73,18 @@ services:
   readmodel-customers:
     build: ../../packages/orchestrated/readmodel-customers
     depends_on:
-      - mongo
-      - rabbit
-      - change-notifier
+      mongo:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+      change-notifier:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:80/',r=>{r.resume();process.exit(0)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     environment:
       EXPRESS_PORT: '80'
       MONGO_URL: 'mongodb://mongo:27017'
@@ -51,9 +97,18 @@ services:
   readmodel-orders:
     build: ../../packages/orchestrated/readmodel-orders
     depends_on:
-      - mongo
-      - rabbit
-      - change-notifier
+      mongo:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+      change-notifier:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:80/',r=>{r.resume();process.exit(0)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     environment:
       EXPRESS_PORT: '80'
       MONGO_URL: 'mongodb://mongo:27017'
@@ -65,6 +120,12 @@ services:
 
   change-notifier:
     build: ../../packages/orchestrated/change-notifier
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:80/',r=>{r.resume();process.exit(0)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     environment:
       EXPRESS_PORT: '80'
       LOG_LEVEL: 'warn'
@@ -72,10 +133,20 @@ services:
   frontend-svelte:
     build: ../../packages/orchestrated/frontend-svelte
     depends_on:
-      - command-processor
-      - readmodel-customers
-      - readmodel-orders
-      - change-notifier
+      command-processor:
+        condition: service_healthy
+      readmodel-customers:
+        condition: service_healthy
+      readmodel-orders:
+        condition: service_healthy
+      change-notifier:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5173/',r=>{r.resume();process.exit(0)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
     environment:
       VITE_RM_CUSTOMERS_URL: 'http://readmodel-customers'
       VITE_RM_ORDERS_URL: 'http://readmodel-orders'
@@ -85,10 +156,20 @@ services:
   frontend-react:
     build: ../../packages/orchestrated/frontend-react
     depends_on:
-      - command-processor
-      - readmodel-customers
-      - readmodel-orders
-      - change-notifier
+      command-processor:
+        condition: service_healthy
+      readmodel-customers:
+        condition: service_healthy
+      readmodel-orders:
+        condition: service_healthy
+      change-notifier:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5173/',r=>{r.resume();process.exit(0)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
     environment:
       VITE_RM_CUSTOMERS_URL: 'http://readmodel-customers'
       VITE_RM_ORDERS_URL: 'http://readmodel-orders'
@@ -99,9 +180,12 @@ services:
   playwright:
     build: .
     depends_on:
-      - monolith
-      - frontend-svelte
-      - frontend-react
+      monolith:
+        condition: service_healthy
+      frontend-svelte:
+        condition: service_healthy
+      frontend-react:
+        condition: service_healthy
     ipc: host
     environment:
       CI: 'true'
