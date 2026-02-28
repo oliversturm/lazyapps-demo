@@ -1,0 +1,8 @@
+{
+  "name": "admin-ui-orchestrated",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@lazyapps/admin-ui": "^0.1.0"
+  }
+}

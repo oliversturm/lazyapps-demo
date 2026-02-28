@@ -128,7 +128,7 @@ http:
     admin-ui-orchestrated:
       loadBalancer:
         servers:
-          - url: "http://admin-ui:5173"
+          - url: "http://admin-ui:3000"
 
     frontend-react-orchestrated:
       loadBalancer:

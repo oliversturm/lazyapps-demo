@@ -23,6 +23,12 @@
         target={target}
       />
     {/each}
+    <a
+      href="http://admin.localhost"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="select-none inline-block cursor-pointer bg-orange-400 hover:bg-amber-300 py-1 px-2 mx-1 rounded"
+    >Admin ↗</a>
     <div class="ml-auto font-bold">Svelte Frontend</div>
   </div>
   <div class="border-solid border mt-4 rounded p-2">
