@@ -32,11 +32,42 @@ const rootPkg = JSON.parse(readFileSync('package.json', 'utf8'));
 collectLazyappsDeps(rootPkg, lazyappsDeps);
 packageJsonData.push({ path: 'package.json', content: rootPkg });
 
+// Discover ALL @lazyapps/* packages from the npm registry, not just direct
+// dependencies. This is critical because transitive-only dependencies (e.g.
+// @lazyapps/command-processor via @lazyapps/bootstrap) also need overrides to
+// prevent semver prerelease ranges from cross-resolving to other branches'
+// snapshots.
+const allScopePackages = new Set(lazyappsDeps);
+try {
+  const searchResult = execSync('npm search @lazyapps --json 2>/dev/null', {
+    encoding: 'utf8',
+  });
+  const packages = JSON.parse(searchResult);
+  for (const pkg of packages) {
+    if (
+      pkg.name.startsWith('@lazyapps/') &&
+      !pkg.name.startsWith('@lazyapps/demo')
+    ) {
+      allScopePackages.add(pkg.name);
+    }
+  }
+  console.log(
+    `Discovered ${allScopePackages.size} @lazyapps/* packages ` +
+      `(${lazyappsDeps.size} direct, ` +
+      `${allScopePackages.size - lazyappsDeps.size} from registry)\n`,
+  );
+} catch {
+  console.log(
+    'Warning: could not query npm registry for full package list, ' +
+      'using direct dependencies only\n',
+  );
+}
+
 // Query npm for each @lazyapps/* package to see if a snapshot exists
 const snapshotVersions = new Map();
 const unchanged = [];
 
-for (const pkg of [...lazyappsDeps].sort()) {
+for (const pkg of [...allScopePackages].sort()) {
   try {
     const version = execSync(`npm view ${pkg}@${tag} version 2>/dev/null`, {
       encoding: 'utf8',
