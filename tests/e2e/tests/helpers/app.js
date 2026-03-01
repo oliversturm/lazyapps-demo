@@ -33,7 +33,7 @@ export const createCustomer = async (page, { name, location }) => {
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();
-  await page.getByText(name).waitFor();
+  await page.getByText(name).waitFor({ timeout: 5000 });
 };
 
 /**

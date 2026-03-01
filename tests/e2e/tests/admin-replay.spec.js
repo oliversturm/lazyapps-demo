@@ -61,6 +61,16 @@ test.describe('Admin replay', () => {
       }
       expect(replayDone).toBeTruthy();
 
+      // Wait for read model service to finish processing
+      for (let i = 0; i < 20; i++) {
+        const rmStatusRes = await request.get(
+          `${adminURL}/admin/replay/customersOverview/status`,
+        );
+        const rmStatus = await rmStatusRes.json();
+        if (rmStatus.status === 'idle') break;
+        await page.waitForTimeout(200);
+      }
+
       await navigate(page, 'Customers');
       await expect(page.getByText(customerName)).toBeVisible();
     } finally {
@@ -156,6 +166,18 @@ test.describe('Admin replay', () => {
         await page.waitForTimeout(100);
       }
       expect(['cancelled', 'completed', 'idle']).toContain(finalStatus);
+
+      // Wait for the read model service to also finish cleanup.
+      // The command processor sends a REPLAY_CANCELLED system message
+      // which the read model service handles asynchronously.
+      for (let i = 0; i < 20; i++) {
+        const rmStatusRes = await request.get(
+          `${adminURL}/admin/replay/customersOverview/status`,
+        );
+        const rmStatus = await rmStatusRes.json();
+        if (rmStatus.status === 'idle') break;
+        await page.waitForTimeout(200);
+      }
     } finally {
       await page.close();
     }

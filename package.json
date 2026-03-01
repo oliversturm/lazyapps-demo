@@ -34,11 +34,5 @@
   "devDependencies": {
     "@lazyapps/log-highlight": "^0.1.1",
     "vitest": "^2.1.8"
-  },
-  "pnpm": {
-    "overrides": {
-      "@lazyapps/command-processor": "0.2.0-branch-admin-replay-20260220155141",
-      "@lazyapps/aggregatestore-inmemory": "0.2.0-branch-admin-replay-20260220155141"
-    }
   }
 }

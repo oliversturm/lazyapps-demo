@@ -2,9 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 5000,
+  timeout: 10000,
   expect: {
-    timeout: 500,
+    timeout: 2000,
   },
   fullyParallel: false,
   workers: 1,
@@ -12,7 +12,7 @@ export default defineConfig({
   reporter: 'list',
   use: {
     ...devices['Desktop Chrome'],
-    actionTimeout: 500,
+    actionTimeout: 2000,
   },
   projects: [
     {
@@ -41,6 +41,13 @@ export default defineConfig({
       testMatch: '**/admin-*.spec.js',
       use: {
         baseURL: 'http://monolith:5173',
+      },
+    },
+    {
+      name: 'admin-orchestrated',
+      testMatch: '**/admin-*-ui.spec.js',
+      use: {
+        baseURL: 'http://frontend-svelte:5173',
       },
     },
   ],

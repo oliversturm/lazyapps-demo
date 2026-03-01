@@ -13,7 +13,7 @@ docker compose -f "$COMPOSE_FILE" build
 
 # Start app services (not playwright)
 docker compose -f "$COMPOSE_FILE" up -d --wait \
-  monolith frontend-svelte frontend-react
+  monolith frontend-svelte frontend-react admin-ui
 
 # Run playwright (exits with test result code)
 docker compose -f "$COMPOSE_FILE" run --rm playwright npx playwright test "$@"

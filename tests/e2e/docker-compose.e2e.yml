@@ -13,6 +13,7 @@ services:
     build:
       dockerfile: tests/e2e/Dockerfile.monolith
       context: ../..
+      network: host
     depends_on:
       mongo-monolith:
         condition: service_healthy
@@ -52,7 +53,9 @@ services:
       start_period: 20s
 
   command-processor:
-    build: ../../packages/orchestrated/command-processor
+    build:
+      context: ../../packages/orchestrated/command-processor
+      network: host
     depends_on:
       mongo:
         condition: service_healthy
@@ -71,7 +74,9 @@ services:
       LOG_LEVEL: 'warn'
 
   readmodel-customers:
-    build: ../../packages/orchestrated/readmodel-customers
+    build:
+      context: ../../packages/orchestrated/readmodel-customers
+      network: host
     depends_on:
       mongo:
         condition: service_healthy
@@ -95,7 +100,9 @@ services:
       LOG_LEVEL: 'warn'
 
   readmodel-orders:
-    build: ../../packages/orchestrated/readmodel-orders
+    build:
+      context: ../../packages/orchestrated/readmodel-orders
+      network: host
     depends_on:
       mongo:
         condition: service_healthy
@@ -119,7 +126,9 @@ services:
       LOG_LEVEL: 'warn'
 
   change-notifier:
-    build: ../../packages/orchestrated/change-notifier
+    build:
+      context: ../../packages/orchestrated/change-notifier
+      network: host
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:80/',r=>{r.resume();process.exit(0)}).on('error',()=>process.exit(1))"]
       interval: 5s
@@ -131,7 +140,9 @@ services:
       LOG_LEVEL: 'warn'
 
   frontend-svelte:
-    build: ../../packages/orchestrated/frontend-svelte
+    build:
+      context: ../../packages/orchestrated/frontend-svelte
+      network: host
     depends_on:
       command-processor:
         condition: service_healthy
@@ -153,8 +164,32 @@ services:
       VITE_COMMAND_URL: 'http://command-processor/api/command'
       VITE_CHANGENOTIFIER_URL: 'http://change-notifier'
 
+  admin-ui:
+    build:
+      context: ../../packages/orchestrated/admin-ui
+      network: host
+    depends_on:
+      command-processor:
+        condition: service_healthy
+      readmodel-customers:
+        condition: service_healthy
+      readmodel-orders:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/',r=>{r.resume();process.exit(r.statusCode>=500?1:0)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    environment:
+      ORIGIN: 'http://admin-ui:3000'
+      ADMIN_COMMAND_PROCESSOR_URL: 'http://command-processor'
+      ADMIN_READ_MODEL_SERVICES: '{"readmodel-customers":"http://readmodel-customers","readmodel-orders":"http://readmodel-orders"}'
+
   frontend-react:
-    build: ../../packages/orchestrated/frontend-react
+    build:
+      context: ../../packages/orchestrated/frontend-react
+      network: host
     depends_on:
       command-processor:
         condition: service_healthy
@@ -178,13 +213,17 @@ services:
 
   # Playwright test runner
   playwright:
-    build: .
+    build:
+      context: .
+      network: host
     depends_on:
       monolith:
         condition: service_healthy
       frontend-svelte:
         condition: service_healthy
       frontend-react:
+        condition: service_healthy
+      admin-ui:
         condition: service_healthy
     ipc: host
     environment:
