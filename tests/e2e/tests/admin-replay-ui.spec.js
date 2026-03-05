@@ -162,7 +162,7 @@ test.describe('Admin replay workflow via UI', () => {
         .waitFor({ timeout: 10000 });
 
       // Verify events were replayed
-      await expect(adminPage.getByText(/\d+ events replayed/)).toBeVisible({
+      await expect(adminPage.getByText(/[1-9]\d* events replayed/)).toBeVisible({
         timeout: 1000,
       });
 

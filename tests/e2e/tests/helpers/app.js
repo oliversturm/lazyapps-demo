@@ -33,7 +33,19 @@ export const createCustomer = async (page, { name, location }) => {
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();
-  await page.getByText(name).waitFor({ timeout: 5000 });
+  // After save, the app navigates to the customer list. The read model
+  // may not be updated yet (async command processing), so poll with
+  // page reloads until the customer name appears.
+  const deadline = Date.now() + 15000;
+  while (Date.now() < deadline) {
+    try {
+      await page.getByText(name).waitFor({ timeout: 2000 });
+      return;
+    } catch {
+      await page.reload({ waitUntil: 'domcontentloaded' });
+    }
+  }
+  await page.getByText(name).waitFor({ timeout: 2000 });
 };
 
 /**
