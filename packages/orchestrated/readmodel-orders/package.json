@@ -24,9 +24,9 @@
     "@lazyapps/observability": "^0.3.0",
     "@lazyapps/readmodels": "^0.1.3",
     "@lazyapps/readmodelstorage-mongodb": "^0.1.2",
-    "express-graphql": "^0.12.0",
-    "graphql": "^15.9.0",
-    "graphql-import": "^1.0.2",
+    "graphql": "^16.11.0",
+    "graphql-http": "^1.22.4",
+    "ruru": "^2.0.0-rc.6",
     "isomorphic-fetch": "^3.0.0",
     "xml-js": "^1.6.11"
   },
