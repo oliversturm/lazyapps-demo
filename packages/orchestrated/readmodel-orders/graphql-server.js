@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createHandler } from 'graphql-http/lib/use/express';
 import { buildSchema } from 'graphql';
+import { ruruHTML } from 'ruru/server';
 
 import { getLogger } from '@lazyapps/logger';
 
@@ -99,6 +100,12 @@ const createRoot = (outerContext) => ({
 export const customizeExpress = (context, app) => {
   log.debug('Adding GraphQL endpoint');
   const rootValue = createRoot(context);
+  app.get('/graphql', (req, res, next) => {
+    if (req.query.query) {
+      return next();
+    }
+    res.type('html').send(ruruHTML({ endpoint: '/graphql' }));
+  });
   app.all(
     '/graphql',
     createHandler({
