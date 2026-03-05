@@ -1,6 +1,6 @@
-import { graphqlHTTP } from 'express-graphql';
+import { readFileSync } from 'node:fs';
+import { createHandler } from 'graphql-http/lib/use/express';
 import { buildSchema } from 'graphql';
-import { importSchema } from 'graphql-import';
 
 import { getLogger } from '@lazyapps/logger';
 
@@ -11,7 +11,7 @@ import {
   customersCollectionName,
 } from './readmodels/overview.js';
 
-const schema = buildSchema(importSchema('schema.graphql'));
+const schema = buildSchema(readFileSync('schema.graphql', 'utf-8'));
 
 const addDynamicOrdersQuery = (outerContext) => (customers) =>
   customers.map((customer) => ({
@@ -99,13 +99,12 @@ const createRoot = (outerContext) => ({
 export const customizeExpress = (context, app) => {
   log.debug('Adding GraphQL endpoint');
   const rootValue = createRoot(context);
-  app.use(
+  app.all(
     '/graphql',
-    graphqlHTTP((request) => ({
-      schema: schema,
+    createHandler({
+      schema,
       rootValue,
-      graphiql: true,
-      context: { req: request },
-    })),
+      context: (req) => ({ req: req.raw }),
+    }),
   );
 };
