@@ -147,7 +147,6 @@ demo/**/dist
 *.db-shm
 *.db-wal
 
-package-lock.json
 code.zip
 static.zip
 
@@ -162,3 +161,5 @@ command-records/
 
 # E2E test artifacts
 tests/e2e-llm/test-results/
+
+compose.override.yml
