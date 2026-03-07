@@ -6,6 +6,7 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "@playwright/test": "1.58.2"
+    "@playwright/test": "1.58.2",
+    "mongodb": "6.16.0"
   }
 }

@@ -46,7 +46,8 @@ export const createCustomer = async (page, { name, location }) => {
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();
   // CQRS pipeline: command → event → read model → UI update
-  await page.getByText(name).waitFor({ timeout: 10000 });
+  // Monolith cold start with Vite dev compilation can be slow
+  await page.getByText(name).waitFor({ timeout: 30000 });
 };
 
 /**

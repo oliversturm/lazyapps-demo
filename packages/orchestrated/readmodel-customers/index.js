@@ -13,6 +13,7 @@ import {
 import {
   encryptionSchema,
   encryptionContexts,
+  readModelEncryptionConfig,
 } from '../common/encryption-config.js';
 
 const encryption = createEncryption({
@@ -25,6 +26,7 @@ const encryption = createEncryption({
     }),
   }),
   contexts: encryptionContexts,
+  readModelEncryption: readModelEncryptionConfig,
 });
 
 start({

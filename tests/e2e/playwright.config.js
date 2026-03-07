@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 30000,
+  timeout: 60000,
   expect: {
     timeout: 2000,
   },
@@ -20,7 +20,7 @@ export default defineConfig({
       use: {
         baseURL: 'http://monolith:5173',
       },
-      testIgnore: /forget-subject/,
+      testIgnore: [/forget-subject/, /encryption/],
     },
     {
       name: 'orchestrated-svelte',

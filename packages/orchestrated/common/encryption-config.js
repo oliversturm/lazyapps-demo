@@ -22,12 +22,17 @@ export const encryptionContexts = {
 };
 
 export const readModelEncryptionConfig = {
-  customers: {
-    name: { context: 'personal', subjectField: 'customerId' },
-    location: { context: 'personal', subjectField: 'customerId' },
+  customers_editing: {
+    name: { context: 'personal', subjectField: 'id' },
+    location: { context: 'personal', subjectField: 'id' },
   },
-  orderSummaries: {
-    customerName: { context: 'personal', subjectField: 'customerId' },
-    orderText: { context: 'order-details', subjectField: 'customerId' },
+  customers_overview: {
+    name: { context: 'personal', subjectField: 'id' },
   },
+  // Order collections are NOT encrypted at storage level because
+  // projections read across collections (ORDER_CREATED reads customer
+  // name from orders_customers, ORDER_CONFIRMATION_REQUIRED reads from
+  // orders_overview). The wrapStorage layer only encrypts writes — reads
+  // return raw encrypted objects, which breaks cross-collection lookups.
+  // PII in orders is still encrypted at rest in the event store.
 };
