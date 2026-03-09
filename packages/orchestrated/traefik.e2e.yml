@@ -1,0 +1,68 @@
+http:
+  routers:
+    command-processor:
+      rule: "Host(`commands.localhost`)"
+      entrypoints:
+        - web
+      service: command-processor
+
+    readmodel-customers:
+      rule: "Host(`rm-customers.localhost`)"
+      entrypoints:
+        - web
+      service: readmodel-customers
+
+    readmodel-orders:
+      rule: "Host(`rm-orders.localhost`)"
+      entrypoints:
+        - web
+      service: readmodel-orders
+
+    change-notifier:
+      rule: "Host(`change-notifier.localhost`)"
+      entrypoints:
+        - web
+      service: change-notifier
+
+    frontend-svelte:
+      rule: "Host(`svelte.localhost`)"
+      entrypoints:
+        - web
+      service: frontend-svelte
+
+    frontend-react:
+      rule: "Host(`react.localhost`)"
+      entrypoints:
+        - web
+      service: frontend-react
+
+  services:
+    command-processor:
+      loadBalancer:
+        servers:
+          - url: "http://command-processor:80"
+
+    readmodel-customers:
+      loadBalancer:
+        servers:
+          - url: "http://readmodel-customers:80"
+
+    readmodel-orders:
+      loadBalancer:
+        servers:
+          - url: "http://readmodel-orders:80"
+
+    change-notifier:
+      loadBalancer:
+        servers:
+          - url: "http://change-notifier:80"
+
+    frontend-svelte:
+      loadBalancer:
+        servers:
+          - url: "http://frontend-svelte:5173"
+
+    frontend-react:
+      loadBalancer:
+        servers:
+          - url: "http://frontend-react:5173"

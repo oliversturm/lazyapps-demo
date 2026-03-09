@@ -218,9 +218,12 @@ services:
       context: .
       dockerfile: command-processor/Dockerfile
     depends_on:
-      - mongo
-      - rabbit
-      - vault-init
+      mongo:
+        condition: service_started
+      rabbit:
+        condition: service_started
+      vault-init:
+        condition: service_completed_successfully
     volumes:
       - ./command-records:/command-records:consistent
     develop:
@@ -245,10 +248,14 @@ services:
       context: .
       dockerfile: readmodel-customers/Dockerfile
     depends_on:
-      - mongo
-      - rabbit
-      - change-notifier
-      - vault-init
+      mongo:
+        condition: service_started
+      rabbit:
+        condition: service_started
+      change-notifier:
+        condition: service_started
+      vault-init:
+        condition: service_completed_successfully
     develop:
       watch:
         - action: sync
@@ -273,10 +280,14 @@ services:
       context: .
       dockerfile: readmodel-orders/Dockerfile
     depends_on:
-      - mongo
-      - rabbit
-      - change-notifier
-      - vault-init
+      mongo:
+        condition: service_started
+      rabbit:
+        condition: service_started
+      change-notifier:
+        condition: service_started
+      vault-init:
+        condition: service_completed_successfully
     develop:
       watch:
         - action: sync

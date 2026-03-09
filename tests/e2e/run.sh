@@ -11,9 +11,11 @@ trap cleanup EXIT
 # Build all images (including playwright)
 docker compose -f "$COMPOSE_FILE" build
 
-# Start app services (not playwright)
-docker compose -f "$COMPOSE_FILE" up -d --wait \
-  monolith frontend-svelte frontend-react
+# Start all app services (not playwright)
+docker compose -f "$COMPOSE_FILE" up -d --wait --remove-orphans --force-recreate \
+  vault mongo rabbit mongo-monolith change-notifier traefik \
+  monolith command-processor readmodel-customers readmodel-orders \
+  frontend-svelte frontend-react
 
 # Run playwright (exits with test result code)
 docker compose -f "$COMPOSE_FILE" run --rm playwright npx playwright test "$@"
