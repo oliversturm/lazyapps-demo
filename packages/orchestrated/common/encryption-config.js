@@ -8,12 +8,6 @@ const customerFields = {
 export const encryptionSchema = defineEncryptionSchema({
   CUSTOMER_CREATED: customerFields,
   CUSTOMER_UPDATED: customerFields,
-  ORDER_CREATED: {
-    'payload.text': {
-      context: 'order-details',
-      subjectField: 'payload.customerId',
-    },
-  },
 });
 
 export const encryptionContexts = {
