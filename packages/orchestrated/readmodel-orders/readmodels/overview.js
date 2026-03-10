@@ -35,12 +35,22 @@ const persistInitialOrder = (
   aggregateId,
   { customerId, text, value },
   { sendChangeNotification, createChangeInfo },
+  encryption,
 ) =>
   storage
     .find(customersCollectionName, { id: customerId })
-    .project({ name: 1 })
+    .project({ name: 1, id: 1 })
     .toArray()
-    .then(([{ name }]) => name)
+    .then(([doc]) =>
+      encryption && encryption.queryDecryptor
+        ? encryption.queryDecryptor
+            .decrypt(doc, {
+              roles: ['order-service'],
+              subjectField: 'id',
+            })
+            .then((d) => d.name)
+        : doc.name,
+    )
     .then((name) =>
       Promise.resolve({
         id: aggregateId,
@@ -133,7 +143,7 @@ export default {
       ]),
 
     ORDER_CREATED: (
-      { storage, sideEffects, commands, changeNotification },
+      { storage, sideEffects, commands, changeNotification, encryption },
       { aggregateId, payload },
     ) =>
       Promise.all([
@@ -142,6 +152,7 @@ export default {
           aggregateId,
           payload,
           changeNotification,
+          encryption,
         ).then((order) =>
           sideEffects.schedule(
             checkOrderValueSideEffect(commands, changeNotification, order),
@@ -191,20 +202,11 @@ export default {
           ),
         ),
 
-    SUBJECT_FORGOTTEN: (
-      {
-        storage,
-        changeNotification: { sendChangeNotification, createChangeInfo },
-      },
-      { payload: { subjectId } },
-    ) =>
-      Promise.all([
-        storage.deleteMany(customersCollectionName, { id: subjectId }),
-        storage.deleteMany(ordersCollectionName, { customerId: subjectId }),
-      ]).then(() =>
-        sendChangeNotification(
-          createChangeInfo('orders', 'overview', 'all', 'all'),
-        ),
+    SUBJECT_FORGOTTEN: ({
+      changeNotification: { sendChangeNotification, createChangeInfo },
+    }) =>
+      sendChangeNotification(
+        createChangeInfo('orders', 'overview', 'all', 'all'),
       ),
   },
 

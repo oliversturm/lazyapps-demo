@@ -30,13 +30,21 @@ export default {
       {
         storage,
         changeNotification: { sendChangeNotification, createChangeInfo },
+        encryption,
       },
       { aggregateId },
     ) =>
       storage
         .find(ordersCollectionName, { id: aggregateId })
         .toArray()
-        .then(([order]) => order)
+        .then(([order]) =>
+          encryption && encryption.queryDecryptor
+            ? encryption.queryDecryptor.decrypt(order, {
+                roles: ['order-service'],
+                subjectField: 'customerId',
+              })
+            : order,
+        )
         .then((order) =>
           Promise.all([
             Promise.resolve({
@@ -106,27 +114,17 @@ export default {
           ),
         ),
 
-    SUBJECT_FORGOTTEN: (
-      {
-        storage,
-        changeNotification: { sendChangeNotification, createChangeInfo },
-      },
-      { payload: { subjectId } },
-    ) =>
-      storage
-        .deleteMany(confirmationRequestsCollectionName, {
-          customerId: subjectId,
-        })
-        .then(() =>
-          sendChangeNotification(
-            createChangeInfo(
-              'orders',
-              'confirmationRequests',
-              'all',
-              'all',
-            ),
-          ),
+    SUBJECT_FORGOTTEN: ({
+      changeNotification: { sendChangeNotification, createChangeInfo },
+    }) =>
+      sendChangeNotification(
+        createChangeInfo(
+          'orders',
+          'confirmationRequests',
+          'all',
+          'all',
         ),
+      ),
   },
 
   resolvers: {

@@ -7,7 +7,7 @@ import {
 } from './helpers/app.js';
 
 test.describe('Forget subject workflow', () => {
-  test('forgets customer and removes their orders', async ({
+  test('forgets customer and anonymizes their data', async ({
     browser,
     baseURL,
   }) => {
@@ -51,14 +51,24 @@ test.describe('Forget subject workflow', () => {
       // Click Forget
       await row.getByText('Forget', { exact: true }).click();
 
-      // Customer should disappear from overview
+      // Customer name should be replaced with placeholder after key shredding
       await expect(page1.getByText(customerName)).toBeHidden({
         timeout: 10000,
       });
 
-      // Orders for that customer should also be gone
+      // Customer row should still exist with placeholder values
+      await expect(
+        page1.locator('tr', { has: page1.getByText('[deleted]') }).first(),
+      ).toBeVisible({ timeout: 10000 });
+
+      // Orders should still be visible with order text intact
       await navigate(page1, 'Orders');
-      await expect(page1.getByText(orderText)).toBeHidden({ timeout: 10000 });
+      await expect(page1.getByText(orderText)).toBeVisible({ timeout: 10000 });
+
+      // Customer name in orders should show placeholder
+      await expect(
+        page1.locator('tr', { has: page1.getByText(orderText) }).getByText('[deleted]'),
+      ).toBeVisible({ timeout: 10000 });
     } finally {
       await context1.close();
     }

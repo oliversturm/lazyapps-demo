@@ -46,6 +46,7 @@ const SystemProvider = ({
         const baseUrl = new URL(commandEndpoint).origin;
         return postCommand(`${baseUrl}/api/forget-subject`, {
           subjectId,
+          subjectType: 'customer',
           correlationId: `REACT-${nanoid()}`,
         });
       },

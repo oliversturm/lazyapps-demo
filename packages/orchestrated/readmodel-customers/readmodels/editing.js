@@ -17,8 +17,7 @@ export default {
         { $set: { name, location } },
       ),
 
-    SUBJECT_FORGOTTEN: ({ storage }, { payload: { subjectId } }) =>
-      storage.deleteMany(collectionName, { id: subjectId }),
+    SUBJECT_FORGOTTEN: () => Promise.resolve(),
   },
 
   resolvers: {

@@ -28,4 +28,4 @@ const _postCommand = (endpoint, content) => {
 export const postCommand = (content) => _postCommand(commandEndpoint, content);
 
 export const forgetSubject = (subjectId) =>
-	_postCommand(`${commandBaseUrl}/api/forget-subject`, { subjectId });
+	_postCommand(`${commandBaseUrl}/api/forget-subject`, { subjectId, subjectType: 'customer' });
