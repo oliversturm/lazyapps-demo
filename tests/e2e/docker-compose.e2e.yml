@@ -191,8 +191,6 @@ services:
       RABBIT_URL: 'amqp://rabbit'
       ADMIN_COMMAND_PROCESSOR_URL: 'http://command-processor'
       ADMIN_READ_MODEL_SERVICES: '{"readmodel-customers":"http://readmodel-customers","readmodel-orders":"http://readmodel-orders"}'
-      ADMIN_INTERNAL_COMMAND_PROCESSOR_URL: 'http://command-processor:80'
-      ADMIN_INTERNAL_READ_MODEL_SERVICES: '{"overview":"http://readmodel-customers:80","editing":"http://readmodel-customers:80","orders":"http://readmodel-orders:80"}'
 
   frontend-react:
     build:
