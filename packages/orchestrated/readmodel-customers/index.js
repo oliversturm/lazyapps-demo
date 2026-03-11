@@ -3,10 +3,12 @@ import { mongodb } from '@lazyapps/readmodelstorage-mongodb';
 import { rabbitMq } from '@lazyapps/eventbus-rabbitmq/readmodels/index.js';
 import { changeNotificationSenderFetch } from '@lazyapps/change-notification-sender-fetch';
 import { installReadModelAdminApi } from '@lazyapps/admin-api';
-import { mongoBackup } from '@lazyapps/readmodel-backup-mongodb';
+import { backup } from '@lazyapps/readmodelstorage-mongodb/backup.js';
 import { start } from '@lazyapps/bootstrap';
 import * as readModels from './readmodels/index.js';
 import { commandSenderFetch } from '@lazyapps/command-sender-fetch';
+
+const expressPort = process.env.EXPRESS_PORT || 3003;
 
 start({
   correlation: {
@@ -14,7 +16,7 @@ start({
   },
   readModels: {
     listener: express({
-      port: process.env.EXPRESS_PORT || 3003,
+      port: expressPort,
       customizeExpress: (context, app) => {
         installReadModelAdminApi(context)(app);
       },
@@ -33,7 +35,10 @@ start({
         'http://localhost:3008/change',
     }),
     commandSender: commandSenderFetch({ url: process.env.COMMAND_URL }),
-    backup: mongoBackup(),
+    backup: backup({
+      backupPath: process.env.BACKUP_PATH || '/tmp/lazyapps-backups',
+    }),
+    lifecycle: true,
     readModels,
   },
 });

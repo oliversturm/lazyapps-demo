@@ -4,6 +4,13 @@
   "type": "module",
   "dependencies": {
     "@lazyapps/admin-ui": "^0.2.0",
+    "@lazyapps/bootstrap": "^1.0.0",
+    "@lazyapps/eventbus-rabbitmq": "^0.2.0",
+    "@lazyapps/eventstore-mongodb": "^0.2.0",
+    "@lazyapps/readmodel-backup-mongodb": "^0.2.0",
+    "@lazyapps/readmodelstorage-mongodb": "^0.2.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "express": "^4.18.0"
   }
 }

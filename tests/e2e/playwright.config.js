@@ -39,13 +39,21 @@ export default defineConfig({
     {
       name: 'admin-monolith',
       testMatch: '**/admin-*.spec.js',
+      testIgnore: '**/admin-*-distributed.spec.js',
       use: {
         baseURL: 'http://monolith:5173',
       },
     },
     {
       name: 'admin-orchestrated',
-      testMatch: '**/admin-*-ui.spec.js',
+      testMatch: ['**/admin-*-ui.spec.js', '**/admin-backup-files.spec.js'],
+      use: {
+        baseURL: 'http://frontend-svelte:5173',
+      },
+    },
+    {
+      name: 'admin-catchup-orchestrated',
+      testMatch: '**/admin-catchup-distributed.spec.js',
       use: {
         baseURL: 'http://frontend-svelte:5173',
       },

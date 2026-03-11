@@ -66,13 +66,13 @@ export const getReadModelConfig = (baseURL) => {
         name: 'overview',
         service: 'readmodel-customers',
         serviceUrl: 'http://readmodel-customers',
-        cpUrl: 'http://command-processor',
+        cpUrl: 'http://admin-ui:3000',
       },
       ordersOverview: {
         name: 'overview',
         service: 'readmodel-orders',
         serviceUrl: 'http://readmodel-orders',
-        cpUrl: 'http://command-processor',
+        cpUrl: 'http://admin-ui:3000',
       },
     };
   }

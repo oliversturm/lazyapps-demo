@@ -277,12 +277,27 @@ services:
   admin-ui:
     build: ./admin-ui
     depends_on:
+      - mongo
+      - rabbit
       - command-processor
       - readmodel-customers
       - readmodel-orders
+    develop:
+      watch:
+        - action: sync
+          path: ./admin-ui
+          target: /app
     environment:
+      <<: *otel-env
+      PORT: '3000'
+      MONGO_URL: 'mongodb://mongo:27017'
+      RABBIT_URL: 'amqp://rabbit'
       ADMIN_COMMAND_PROCESSOR_URL: 'http://commands.localhost'
-      ADMIN_READ_MODEL_SERVICES: '{"rm-customers":"http://rm-customers.localhost","rm-orders":"http://rm-orders.localhost"}'
+      ADMIN_READ_MODEL_SERVICES: '{"overview":"http://rm-customers.localhost","editing":"http://rm-customers.localhost","orders":"http://rm-orders.localhost"}'
+      ADMIN_INTERNAL_COMMAND_PROCESSOR_URL: 'http://command-processor:80'
+      ADMIN_INTERNAL_READ_MODEL_SERVICES: '{"overview":"http://readmodel-customers:80","editing":"http://readmodel-customers:80","orders":"http://readmodel-orders:80"}'
+      LOG_LEVEL: 'trace'
+      OTEL_SERVICE_NAME: 'admin-service'
 
   frontend-react:
     build: ./frontend-react

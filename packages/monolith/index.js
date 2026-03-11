@@ -1,7 +1,7 @@
 import { inmemory } from '@lazyapps/aggregatestore-inmemory';
 import { mongodb as eventStoreMongo } from '@lazyapps/eventstore-mongodb';
 import { mongodb as readModelStorageMongo } from '@lazyapps/readmodelstorage-mongodb';
-import { mongoBackup } from '@lazyapps/readmodel-backup-mongodb';
+import { backup } from '@lazyapps/readmodelstorage-mongodb/backup.js';
 import { start } from '@lazyapps/bootstrap';
 import mqemitter from 'mqemitter';
 import {
@@ -25,6 +25,9 @@ log.debug('Starting up');
 const mqCommandsPort = process.env.MQ_COMMANDS_PORT || 51883;
 const mqQueriesPort = process.env.MQ_QUERIES_PORT || 51884;
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017';
+const adminPort = process.env.ADMIN_PORT || 3005;
+const backupPath = process.env.BACKUP_PATH || '/tmp/lazyapps-backups';
+const mongoBackup = backup({ backupPath });
 
 registerSharedMqEmitter('commands', mqemitter(), mqCommandsPort);
 registerSharedMqEmitter('events', mqemitter());
@@ -74,7 +77,7 @@ start({
       url: 'http://127.0.0.1:53008/change',
     }),
     commandSender: commandSenderMqEmitter({ mqName: 'commands' }),
-    backup: mongoBackup(),
+    backup: mongoBackup,
     readModels,
   },
   changeNotifier: {
@@ -96,14 +99,15 @@ start({
     // we need both?
   },
   admin: {
-    port: process.env.ADMIN_PORT || 3005,
+    port: adminPort,
     eventStore: eventStoreMongo({ url: mongoUrl }),
     readModelStorage: readModelStorageMongo({
       url: mongoUrl,
       database: 'monolith-readmodels',
     }),
     eventBus: commandProcessorEventBusMqEmitter({ mqName: 'events' }),
-    backup: mongoBackup(),
+    backup: mongoBackup,
     readModels,
+    autoActivate: true,
   },
 });
