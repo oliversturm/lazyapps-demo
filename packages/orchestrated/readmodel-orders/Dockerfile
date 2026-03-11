@@ -1,9 +1,11 @@
 FROM node:lts
-RUN apt-get update && apt-get install -y wget gnupg && \
-    wget -qO- https://www.mongodb.org/static/pgp/server-8.0.asc | tee /etc/apt/trusted.gpg.d/mongodb-server-8.0.asc && \
-    echo "deb http://repo.mongodb.org/apt/debian $(. /etc/os-release && echo "$VERSION_CODENAME")/mongodb-org/8.0 main" | tee /etc/apt/sources.list.d/mongodb-org-8.0.list && \
-    apt-get update && apt-get install -y mongodb-database-tools && \
-    rm -rf /var/lib/apt/lists/*
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then MONGO_ARCH="x86_64"; \
+    elif [ "$ARCH" = "arm64" ]; then MONGO_ARCH="aarch64"; \
+    else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
+    wget -q "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-debian12-${MONGO_ARCH}-100.12.0.deb" && \
+    dpkg -i mongodb-database-tools-*.deb && \
+    rm mongodb-database-tools-*.deb
 WORKDIR /app
 COPY package.json ./
 RUN npm install
