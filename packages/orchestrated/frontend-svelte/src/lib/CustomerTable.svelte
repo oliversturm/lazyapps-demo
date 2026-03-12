@@ -14,8 +14,15 @@
 
   export let store;
 
+  const isForgotten = (value) =>
+    value && typeof value === 'object' && value.forgotten === true;
+
+  const displayValue = (value) =>
+    isForgotten(value) ? value.text : value;
+
   const handleForget = (id, name) => {
-    if (confirm(`Forget customer "${name}"? This cannot be undone.`)) {
+    const displayName = displayValue(name);
+    if (confirm(`Forget customer "${displayName}"? This cannot be undone.`)) {
       forgetSubject(id);
     }
   };
@@ -36,22 +43,31 @@
     </Thead>
     <Tbody>
       {#each $store.data as row}
+        {@const forgotten = isForgotten(row.name)}
         <Tr>
           <Td>
-            <Button kind="inline" text="Edit" target={`/customer/${row.id}`} />
+            <Button
+              kind="inline"
+              text="Edit"
+              target={forgotten ? null : `/customer/${row.id}`}
+              disabled={forgotten}
+            />
             <Button
               kind="inline"
               text="Place Order"
-              target={`/order/${row.id}/${uuid()}`}
+              target={forgotten ? null : `/order/${row.id}/${uuid()}`}
+              disabled={forgotten}
             />
-            <Button
-              kind="inline"
-              text="Forget"
-              on:click={() => handleForget(row.id, row.name)}
-            />
+            {#if !forgotten}
+              <Button
+                kind="inline"
+                text="Forget"
+                on:click={() => handleForget(row.id, row.name)}
+              />
+            {/if}
           </Td>
           <Td>{row.id}</Td>
-          <Td>{row.name}</Td>
+          <Td>{displayValue(row.name)}</Td>
         </Tr>
       {/each}
     </Tbody>

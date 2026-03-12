@@ -2,6 +2,11 @@ import React from 'react';
 import { Table, Tbody, Td, Th, Thead, Tr } from './Table';
 import { Working } from './Working';
 
+const displayValue = (value) =>
+  value && typeof value === 'object' && value.forgotten === true
+    ? value.text
+    : value;
+
 const OrderTable = ({ data }) => {
   return data ? (
     <Table>
@@ -21,7 +26,7 @@ const OrderTable = ({ data }) => {
             <Td>{row.id}</Td>
             <Td>{row.text}</Td>
             <Td>{row.value}</Td>
-            <Td>{row.customerName}</Td>
+            <Td>{displayValue(row.customerName)}</Td>
             <Td warn={row.status !== 'confirmed'}>{row.status}</Td>
             <Td>{JSON.stringify(row.usdInfo, null, 2)}</Td>
           </Tr>

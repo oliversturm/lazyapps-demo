@@ -11,6 +11,16 @@
   export let data;
   export let dataId;
 
+  const isForgotten = (value) =>
+    value && typeof value === 'object' && value.forgotten === true;
+
+  $: forgotten =
+    isForgotten(data.name) || isForgotten(data.location);
+
+  $: if (forgotten) {
+    goto('/customers');
+  }
+
   const validator = createValidator(customerEditSchema);
   const { errors, isValid } = validator;
   const validate = () => validator.validate(data);

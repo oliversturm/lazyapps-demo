@@ -11,6 +11,11 @@
 
   export let store;
 
+  const displayValue = (value) =>
+    value && typeof value === 'object' && value.forgotten === true
+      ? value.text
+      : value;
+
   const confirm = (id) =>  () => {
     postCommand({
       aggregateName: 'order',
@@ -44,7 +49,7 @@
         <Td>{row.id}</Td>
         <Td>{row.text}</Td>
         <Td>{row.value}</Td>
-        <Td>{row.customerName}</Td>
+        <Td>{displayValue(row.customerName)}</Td>
         <Td warn={row.status !== 'confirmed'}>{row.status}</Td>
         <Td>
           {#if row.status === 'unconfirmed'}

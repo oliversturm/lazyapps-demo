@@ -28,7 +28,11 @@ const CustomersView = () => {
   );
   const onForget = useCallback(
     (id, name) => {
-      if (confirm(`Forget customer "${name}"? This cannot be undone.`)) {
+      const displayName =
+        name && typeof name === 'object' && name.forgotten === true
+          ? name.text
+          : name;
+      if (confirm(`Forget customer "${displayName}"? This cannot be undone.`)) {
         forgetSubject(id);
       }
     },

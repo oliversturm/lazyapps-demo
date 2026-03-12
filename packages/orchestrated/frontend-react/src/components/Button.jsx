@@ -18,7 +18,10 @@ const Button = ({
   submit = false,
   disabled = false,
 }) => {
-  const className = useMemo(() => styles[kind], [kind]);
+  const className = useMemo(
+    () => (disabled ? `${styles[kind]} pointer-events-none` : styles[kind]),
+    [kind, disabled],
+  );
 
   return (
     <button

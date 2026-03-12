@@ -57,9 +57,20 @@ test.describe('Forget subject workflow', () => {
       });
 
       // Customer row should still exist with placeholder values
+      const forgottenRow = page1
+        .locator('tr', { has: page1.getByText('[deleted]') })
+        .first();
+      await expect(forgottenRow).toBeVisible({ timeout: 10000 });
+
+      // Edit button should be disabled for forgotten customer
+      const editButton = forgottenRow.getByText('Edit', { exact: true });
+      await expect(editButton).toBeVisible();
+      await expect(editButton).toHaveClass(/pointer-events-none/);
+
+      // Forget button should not be shown for already-forgotten customer
       await expect(
-        page1.locator('tr', { has: page1.getByText('[deleted]') }).first(),
-      ).toBeVisible({ timeout: 10000 });
+        forgottenRow.getByText('Forget', { exact: true }),
+      ).toBeHidden();
 
       // Orders should still be visible with order text intact
       await navigate(page1, 'Orders');

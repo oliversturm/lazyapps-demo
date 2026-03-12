@@ -3,6 +3,11 @@ import { Table, Tbody, Td, Th, Thead, Tr } from './Table';
 import { Working } from './Working';
 import Button from './Button.jsx';
 
+const displayValue = (value) =>
+  value && typeof value === 'object' && value.forgotten === true
+    ? value.text
+    : value;
+
 const OrderConfirmationRequestsTable = ({ data, onConfirm }) => {
   return data ? (
     <Table>
@@ -22,7 +27,7 @@ const OrderConfirmationRequestsTable = ({ data, onConfirm }) => {
             <Td>{row.id}</Td>
             <Td>{row.text}</Td>
             <Td>{row.value}</Td>
-            <Td>{row.customerName}</Td>
+            <Td>{displayValue(row.customerName)}</Td>
             <Td warn={row.status !== 'confirmed'}>{row.status}</Td>
             <Td>
               {row.status !== 'confirmed' && (

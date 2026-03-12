@@ -13,6 +13,21 @@ export const has = (ob, field) => {
     );
 };
 
+export const isForgotten = (value) =>
+  value && typeof value === 'object' && value.forgotten === true;
+
+export const notForgotten = (agg, ...fields) => {
+  for (const field of fields) {
+    if (isForgotten(agg[field])) {
+      const err = new Error(
+        `Cannot modify aggregate: field '${field}' has been forgotten`,
+      );
+      err.name = 'ValidationError';
+      throw err;
+    }
+  }
+};
+
 export const is = (ob, field, value) => {
   if (ob[field] !== value)
     throw new Error(

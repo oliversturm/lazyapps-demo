@@ -6,8 +6,10 @@ const customerFields = {
 };
 
 export const encryptionSchema = defineEncryptionSchema({
-  CUSTOMER_CREATED: customerFields,
-  CUSTOMER_UPDATED: customerFields,
+  events: {
+    CUSTOMER_CREATED: customerFields,
+    CUSTOMER_UPDATED: customerFields,
+  },
 });
 
 export const encryptionContexts = {

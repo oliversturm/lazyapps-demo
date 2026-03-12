@@ -8,6 +8,11 @@
   import Working from './Working.svelte';
 
   export let store;
+
+  const displayValue = (value) =>
+    value && typeof value === 'object' && value.forgotten === true
+      ? value.text
+      : value;
 </script>
 
 {#if !$store.loaded}
@@ -32,7 +37,7 @@
           <Td>{row.id}</Td>
           <Td>{row.text}</Td>
           <Td>{row.value}</Td>
-          <Td>{row.customerName}</Td>
+          <Td>{displayValue(row.customerName)}</Td>
           <Td warn={row.status !== 'confirmed'}>{row.status}</Td>
           <Td>{JSON.stringify(row.usdInfo, null, 2)}</Td>
         </Tr>
