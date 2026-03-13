@@ -1,0 +1,34 @@
+services:
+  playwright:
+    build: ../../tests/e2e
+    depends_on:
+      - frontend-svelte
+      - frontend-react
+      - keycloak
+    networks:
+      default:
+      e2e:
+    ipc: host
+    extra_hosts:
+      - 'commands.localhost:172.28.0.100'
+      - 'rm-customers.localhost:172.28.0.100'
+      - 'rm-orders.localhost:172.28.0.100'
+      - 'change-notifier.localhost:172.28.0.100'
+      - 'keycloak.localhost:172.28.0.100'
+      - 'svelte.localhost:172.28.0.100'
+      - 'react.localhost:172.28.0.100'
+    environment:
+      CI: 'true'
+      MONGO_URL: 'mongodb://mongo:27017'
+      VAULT_ADDR: 'http://vault:8200'
+    command:
+      [
+        'npx',
+        'playwright',
+        'test',
+        '--project=setup',
+        '--project=orchestrated-svelte',
+        '--project=orchestrated-svelte-forget',
+        '--project=orchestrated-react',
+        '--project=orchestrated-react-forget',
+      ]

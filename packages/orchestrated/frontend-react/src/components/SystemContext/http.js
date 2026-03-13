@@ -1,13 +1,21 @@
+import { getToken } from '../../auth';
+
+const authHeaders = (headers) => {
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+};
+
 const query =
   (endpoint) =>
   (correlationId, readModelName, resolverName, params = {}) => {
     const url = new URL(`/query/${readModelName}/${resolverName}`, endpoint);
     return fetch(url, {
       method: 'POST',
-      headers: {
+      headers: authHeaders({
         'Content-Type': 'application/json',
         'X-Correlation-Id': correlationId,
-      },
+      }),
       body: JSON.stringify(params),
     })
       .then((res) => {
@@ -27,7 +35,7 @@ const query =
 const postCommand = (endpoint, content) => {
   return fetch(endpoint, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(content),
   })
     .then((res) => {

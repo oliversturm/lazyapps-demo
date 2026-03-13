@@ -24,7 +24,9 @@ test.describe('Encryption at rest', () => {
       });
 
       // Query MongoDB directly to inspect stored data
-      const client = new MongoClient('mongodb://mongo:27017');
+      const client = new MongoClient(
+        process.env.MONGO_URL || 'mongodb://localhost:27017',
+      );
       try {
         await client.connect();
         const db = client.db('readmodel-customers');

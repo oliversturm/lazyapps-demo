@@ -1,5 +1,6 @@
 import { readable } from 'svelte/store';
 import io from 'socket.io-client';
+import { getToken } from './auth';
 
 const applyChange = (data, changeInfo) => {
 	switch (changeInfo.changeKind) {
@@ -52,7 +53,10 @@ export const readModelStore = (
 		if (correlationId) {
 			query.correlationId = correlationId;
 		}
-		const socket = io(socketIoEndpoint, { query });
+		const auth = {};
+		const token = getToken();
+		if (token) auth.token = token;
+		const socket = io(socketIoEndpoint, { query, auth });
 
 		socket.on('connect', () => {
 			socket.emit('register', [{ endpointName, readModelName, resolverName }], () => {

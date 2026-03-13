@@ -1,11 +1,16 @@
+import { getToken } from './auth';
+
 export const query =
 	(correlationId, fetch) =>
 	(endpoint, readModelName, resolverName, params = {}) => {
 		const url = new URL(`/query/${readModelName}/${resolverName}`, endpoint);
+		const headers = { 'Content-Type': 'application/json', 'X-Correlation-Id': correlationId };
+		const token = getToken();
+		if (token) headers['Authorization'] = `Bearer ${token}`;
 
 		return fetch(url, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json', 'X-Correlation-Id': correlationId },
+			headers,
 			body: JSON.stringify(params)
 		})
 			.then((res) => {

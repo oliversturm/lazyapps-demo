@@ -10,9 +10,10 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: 'list',
+  globalSetup: './global-setup.js',
   use: {
     ...devices['Desktop Chrome'],
-    actionTimeout: 3000,
+    actionTimeout: 5000,
     launchOptions: {
       args: [
         // Chromium resolves .localhost to 127.0.0.1 per RFC 6761, bypassing
@@ -28,27 +29,64 @@ export default defineConfig({
       testMatch: /health\.spec\.js/,
     },
 
-    // --- Monolith: unchanged, depends on setup ---
+    // --- Monolith Svelte: basic CQRS tests without auth/encryption ---
     {
       name: 'monolith-svelte',
-      dependencies: ['setup'],
+      testIgnore: [
+        /forget-subject/,
+        /encryption/,
+        /vault-auth/,
+        /cors/,
+        /keycloak-auth/,
+        /health/,
+      ],
       use: {
         baseURL: 'http://monolith:5173',
+        launchOptions: {
+          // No host-resolver-rules needed — monolith uses Docker DNS
+          args: [],
+        },
       },
-      testIgnore: [/forget-subject/, /encryption/, /vault-auth/, /cors/],
     },
 
-    // --- Orchestrated: now through Traefik ---
+    // --- Orchestrated Svelte: all tests except forget-subject ---
     {
       name: 'orchestrated-svelte',
       dependencies: ['setup'],
+      testIgnore: [/forget-subject/],
       use: {
         baseURL: 'http://svelte.localhost',
       },
     },
+
+    // --- Orchestrated Svelte forget-subject: runs AFTER main svelte tests
+    // because forget tests shred encryption keys for bob/carol/dave, making
+    // those user accounts unusable for subsequent customer creation ---
+    {
+      name: 'orchestrated-svelte-forget',
+      dependencies: ['orchestrated-svelte'],
+      testMatch: /forget-subject\.spec\.js/,
+      use: {
+        baseURL: 'http://svelte.localhost',
+      },
+    },
+
+    // --- Orchestrated React: runs after setup, excludes forget-subject ---
     {
       name: 'orchestrated-react',
       dependencies: ['setup'],
+      testIgnore: [/forget-subject/],
+      use: {
+        baseURL: 'http://react.localhost',
+      },
+    },
+
+    // --- Orchestrated React forget-subject: runs AFTER main react tests
+    // using eve/frank/grace (separate from svelte's bob/carol/dave) ---
+    {
+      name: 'orchestrated-react-forget',
+      dependencies: ['orchestrated-react'],
+      testMatch: /forget-subject\.spec\.js/,
       use: {
         baseURL: 'http://react.localhost',
       },

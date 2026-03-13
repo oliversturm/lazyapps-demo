@@ -1,20 +1,83 @@
 import { expect } from '@playwright/test';
 
+// Default Keycloak test user (admin with full access)
+export const DEFAULT_USER = {
+  username: 'alice',
+  password: 'alice',
+};
+
 /**
- * Wait for the app to be ready by retrying page load until the nav bar appears.
+ * Log into the app via Keycloak login page.
+ * The app uses onLoad: 'login-required', so navigating to it redirects
+ * to Keycloak. We fill in the login form and submit.
+ * Retries on failure since the redirect chain (app → Keycloak → app)
+ * can be slow under load.
+ */
+export const keycloakLogin = async (page, url, username, password) => {
+  const maxAttempts = 3;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+
+      // Wait for Keycloak login form — may take time on first load
+      await page.locator('#username').waitFor({ timeout: 15000 });
+      await page.locator('#username').fill(username);
+      await page.locator('#password').fill(password);
+      await page.locator('#kc-login').click();
+
+      // Wait for redirect back to app — nav bar appears when authenticated
+      await page.locator('.bg-orange-100').waitFor({ timeout: 20000 });
+      return;
+    } catch {
+      if (attempt === maxAttempts - 1) throw new Error(
+        `keycloakLogin failed for ${username} at ${url} after ${maxAttempts} attempts`,
+      );
+      await page.waitForTimeout(2000);
+    }
+  }
+};
+
+/**
+ * Wait for the app to be ready by retrying page load until authenticated
+ * and the nav bar appears. Handles the Keycloak login redirect.
  * Dev servers inside Docker may take time to compile on first request.
  */
-export const waitForApp = async (page, url) => {
+export const waitForApp = async (
+  page,
+  url,
+  { username, password } = DEFAULT_USER,
+) => {
   const maxAttempts = 15;
   for (let i = 0; i < maxAttempts; i++) {
     try {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 3000 });
-      await page.locator('.bg-orange-100').waitFor({ timeout: 2000 });
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 5000 });
+
+      // Check if we landed on the Keycloak login page
+      const usernameField = page.locator('#username');
+      const navBar = page.locator('.bg-orange-100');
+
+      // Race: either Keycloak form or app nav bar appears first
+      const first = await Promise.race([
+        usernameField
+          .waitFor({ timeout: 5000 })
+          .then(() => 'keycloak'),
+        navBar
+          .waitFor({ timeout: 5000 })
+          .then(() => 'app'),
+      ]);
+
+      if (first === 'keycloak') {
+        await usernameField.fill(username);
+        await page.locator('#password').fill(password);
+        await page.locator('#kc-login').click();
+        await navBar.waitFor({ timeout: 15000 });
+      }
+
       return;
     } catch {
       if (i === maxAttempts - 1)
         throw new Error(`App at ${url} not ready after ${maxAttempts} attempts`);
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(2000);
     }
   }
 };
@@ -22,14 +85,16 @@ export const waitForApp = async (page, url) => {
 /**
  * Navigate to a page by clicking the nav button with the given text.
  * Works for both Svelte (a tags) and React (button tags) frontends.
+ * Retries on element detachment which can happen during re-renders.
  */
 export const navigate = async (page, name) => {
   await page.locator('.bg-orange-100').waitFor();
-  await page
+  const navItem = page
     .locator('.bg-orange-100')
     .getByRole('link', { name })
-    .or(page.locator('.bg-orange-100').getByRole('button', { name }))
-    .click();
+    .or(page.locator('.bg-orange-100').getByRole('button', { name }));
+  await navItem.waitFor({ state: 'visible', timeout: 5000 });
+  await navItem.click({ timeout: 10000 });
 };
 
 /**
@@ -41,12 +106,11 @@ export const createCustomer = async (page, { name, location }) => {
   await page.getByText('New Customer').click();
   // Wait for Vite dev compilation + SvelteKit hydration on first visit
   await page.waitForLoadState('networkidle');
-  await page.locator('input[name="name"]').waitFor({ timeout: 10000 });
+  await page.locator('input[name="name"]').waitFor({ timeout: 15000 });
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();
   // CQRS pipeline: command → event → read model → UI update
-  // Monolith cold start with Vite dev compilation can be slow
   await page.getByText(name).waitFor({ timeout: 30000 });
 };
 
@@ -59,7 +123,8 @@ export const placeOrder = async (page, customerName, { text, value }) => {
   const row = page.locator('tr', {
     has: page.getByText(customerName, { exact: true }),
   });
-  await row.getByText('Place Order').click();
+  await row.getByText('Place Order').waitFor({ state: 'visible', timeout: 5000 });
+  await row.getByText('Place Order').click({ timeout: 10000 });
   // Wait for Vite dev compilation + SvelteKit hydration on first visit
   await page.waitForLoadState('networkidle');
   await page.locator('input[name="text"]').waitFor({ timeout: 10000 });

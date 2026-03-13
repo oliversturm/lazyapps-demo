@@ -35,7 +35,9 @@ test.describe('CORS through Traefik', () => {
         result.cors,
         'Cross-origin fetch should not be blocked by CORS',
       ).toBeTruthy();
-      expect(result.ok).toBeTruthy();
+      // Any non-zero status means CORS allowed the request through.
+      // 401 is acceptable — it means auth is required but CORS didn't block.
+      expect(result.status).toBeGreaterThan(0);
     } finally {
       await context.close();
     }
@@ -75,7 +77,8 @@ test.describe('CORS through Traefik', () => {
         result.cors,
         'Cross-origin POST should not be blocked by CORS',
       ).toBeTruthy();
-      // 400 or 500 from unknown command type is fine — we care that CORS didn't block it
+      // 400, 401, or 500 from unknown command type is fine —
+      // we care that CORS didn't block it
       expect(result.status).toBeGreaterThan(0);
     } finally {
       await context.close();
@@ -109,6 +112,8 @@ test.describe('CORS through Traefik', () => {
         result.cors,
         'Socket.io polling endpoint should allow cross-origin',
       ).toBeTruthy();
+      // Any non-zero status means CORS allowed the request through
+      expect(result.status).toBeGreaterThan(0);
     } finally {
       await context.close();
     }

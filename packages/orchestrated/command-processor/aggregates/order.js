@@ -1,5 +1,9 @@
 import { doesntExist, exists, has, is, oneOf } from './validate.js';
 
+const isCustomerForgotten = (aggregate, customerId) =>
+  aggregate.relatedSubjectsForgotten &&
+  aggregate.relatedSubjectsForgotten[customerId];
+
 export default {
   initial: () => ({}),
 
@@ -7,6 +11,11 @@ export default {
     CREATE: (aggregate, payload) => {
       doesntExist(aggregate);
       has(payload, 'customerId');
+      if (isCustomerForgotten(aggregate, payload.customerId)) {
+        throw new Error(
+          `Cannot create order: customer '${payload.customerId}' has been forgotten`,
+        );
+      }
       has(payload, 'text');
       has(payload, 'value');
       return { type: 'ORDER_CREATED', payload };
@@ -31,6 +40,19 @@ export default {
       oneOf(aggregate, 'status', ['new', 'unconfirmed']);
       return { type: 'ORDER_CONFIRMED' };
     },
+
+    FORGET_RELATED_SUBJECT: (aggregate, payload) => {
+      if (!payload.relatedSubjectId) {
+        throw new Error('Missing relatedSubjectId in payload');
+      }
+      if (!payload.relatedSubjectType) {
+        throw new Error('Missing relatedSubjectType in payload');
+      }
+      if (!payload.contexts || !payload.contexts.length) {
+        throw new Error('Missing contexts in payload');
+      }
+      return { type: 'RELATED_SUBJECT_FORGOTTEN', payload };
+    },
   },
 
   projections: {
@@ -48,6 +70,18 @@ export default {
     ORDER_CONFIRMED: (aggregate) => ({
       ...aggregate,
       status: 'confirmed',
+    }),
+
+    RELATED_SUBJECT_FORGOTTEN: (aggregate, event) => ({
+      ...aggregate,
+      relatedSubjectsForgotten: {
+        ...aggregate.relatedSubjectsForgotten,
+        [event.payload.relatedSubjectId]: {
+          type: event.payload.relatedSubjectType,
+          contexts: event.payload.contexts,
+          forgottenAt: event.timestamp,
+        },
+      },
     }),
   },
 };

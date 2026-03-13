@@ -4,7 +4,7 @@ import { Working } from './Working';
 import Button from './Button.jsx';
 
 const displayValue = (value) =>
-  value && typeof value === 'object' && value.forgotten === true
+  value && typeof value === 'object' && typeof value.text === 'string'
     ? value.text
     : value;
 

@@ -3,7 +3,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from './Table';
 import { Working } from './Working';
 
 const displayValue = (value) =>
-  value && typeof value === 'object' && value.forgotten === true
+  value && typeof value === 'object' && typeof value.text === 'string'
     ? value.text
     : value;
 

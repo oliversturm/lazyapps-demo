@@ -29,11 +29,5 @@ export default {
       ...aggregate,
       name: payload.name,
     }),
-
-    SUBJECT_FORGOTTEN: (aggregate, event) => ({
-      ...aggregate,
-      forgotten: true,
-      forgottenAt: event.timestamp,
-    }),
   },
 };

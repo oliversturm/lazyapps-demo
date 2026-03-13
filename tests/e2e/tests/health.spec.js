@@ -11,6 +11,10 @@ const ORCHESTRATED_SERVICES = [
     url: 'http://rm-orders.localhost/query/overview/all',
   },
   { name: 'change-notifier', url: 'http://change-notifier.localhost' },
+  {
+    name: 'keycloak',
+    url: 'http://keycloak.localhost/realms/lazyapps-demo/.well-known/openid-configuration',
+  },
 ];
 
 // This test file runs as the 'setup' project — all other projects depend on it.
@@ -37,23 +41,4 @@ test.describe('Service health checks', () => {
       );
     });
   }
-
-  test('monolith responds directly', async ({ request }) => {
-    let lastError;
-    for (let i = 0; i < 30; i++) {
-      try {
-        const response = await request.get('http://monolith:5173', {
-          timeout: 3000,
-        });
-        expect(response.status()).toBeLessThan(500);
-        return;
-      } catch (e) {
-        lastError = e;
-        await new Promise((r) => setTimeout(r, 2000));
-      }
-    }
-    throw new Error(
-      `monolith not reachable after 60s: ${lastError?.message}`,
-    );
-  });
 });

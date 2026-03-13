@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import Button from './Button';
+import { AuthStatus } from './AuthProvider';
 
 const AppFrame = ({
   children,
@@ -49,7 +50,10 @@ const AppFrame = ({
             />
           ),
         )}
-        <div className="ml-auto font-bold">React Frontend</div>
+        <div className="ml-auto flex items-center gap-2">
+          <AuthStatus />
+          <span className="font-bold ml-2">React Frontend</span>
+        </div>
       </div>
 
       {children}

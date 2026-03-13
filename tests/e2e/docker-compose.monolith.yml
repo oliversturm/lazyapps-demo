@@ -1,0 +1,24 @@
+services:
+  mongo-monolith:
+    image: mongo:latest
+
+  monolith:
+    build:
+      dockerfile: tests/e2e/Dockerfile.monolith
+      context: ../..
+    depends_on:
+      - mongo-monolith
+    environment:
+      MONGO_URL: 'mongodb://mongo-monolith:27017'
+      VITE_CHANGENOTIFIER_URL: 'http://monolith:53008'
+      SVELTE_HOST: '0.0.0.0'
+      LOG_LEVEL: 'warn'
+
+  playwright:
+    build: .
+    depends_on:
+      - monolith
+    ipc: host
+    environment:
+      CI: 'true'
+    command: ['npx', 'playwright', 'test', '--project=monolith-svelte']

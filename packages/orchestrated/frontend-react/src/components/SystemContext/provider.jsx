@@ -42,14 +42,38 @@ const SystemProvider = ({
         }),
         {},
       ),
-      forgetSubject: (subjectId) => {
-        const baseUrl = new URL(commandEndpoint).origin;
-        return postCommand(`${baseUrl}/api/forget-subject`, {
-          subjectId,
-          subjectType: 'customer',
+      forgetSubject: (subjectId) =>
+        postCommand(commandEndpoint, {
+          aggregateName: 'customer',
+          aggregateId: subjectId,
+          command: 'FORGET_SUBJECT',
+          payload: { subjectId },
           correlationId: `REACT-${nanoid()}`,
-        });
-      },
+        }).then(() =>
+          query(readModelEndpoints.orders)(
+            `REACT-${nanoid()}`,
+            'overview',
+            'all',
+          ).then((orders) =>
+            Promise.all(
+              (orders || [])
+                .filter((o) => o.customerId === subjectId)
+                .map((order) =>
+                  postCommand(commandEndpoint, {
+                    aggregateName: 'order',
+                    aggregateId: order.id,
+                    command: 'FORGET_RELATED_SUBJECT',
+                    payload: {
+                      relatedSubjectId: subjectId,
+                      relatedSubjectType: 'customer',
+                      contexts: ['personal'],
+                    },
+                    correlationId: `REACT-${nanoid()}`,
+                  }),
+                ),
+            ),
+          ),
+        ),
     }),
     [aggregates, readModelEndpoints, commandEndpoint, changeNotifierEndpoint],
   );

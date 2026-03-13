@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { v4 as uuid } from 'uuid';
+import { getUserId } from '../auth';
 
 const slice = createSlice({
   name: 'navigation',
@@ -26,7 +27,7 @@ const slice = createSlice({
         s.customerId = id;
       },
       prepare: (customerId) => ({
-        payload: { id: customerId || uuid() },
+        payload: { id: customerId || getUserId() || uuid() },
       }),
     },
 

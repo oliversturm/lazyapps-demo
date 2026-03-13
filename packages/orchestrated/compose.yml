@@ -23,9 +23,15 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik.yml:/etc/traefik/dynamic.yml
+    networks:
+      default:
+      e2e:
+        ipv4_address: 172.28.0.100
 
   mongo:
     image: mongo:latest
+    ports:
+      - '27017:27017'
 
   rabbit:
     image: rabbitmq:latest
@@ -213,6 +219,23 @@ services:
       OTEL_RESOURCE_ATTRIBUTES: 'host.name=signoz-host,os.type=linux'
       LOW_CARDINAL_EXCEPTION_GROUPING: 'false'
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    command: ['start-dev', '--import-realm', '--health-enabled=true']
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: '8080'
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - ./keycloak/themes/lazyapps-demo:/opt/keycloak/themes/lazyapps-demo:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'exec 3<>/dev/tcp/127.0.0.1/9000; echo -e "GET /health/ready HTTP/1.1\r\nhost: localhost\r\nConnection: close\r\n\r\n" >&3; cat <&3 | grep -q 200']
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
   command-processor:
     build:
       context: .
@@ -224,6 +247,8 @@ services:
         condition: service_started
       vault-init:
         condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
     volumes:
       - ./command-records:/command-records:consistent
     develop:
@@ -242,6 +267,7 @@ services:
       VAULT_ADDR: 'http://vault:8200'
       VAULT_ROLE_ID: 'command-processor-role-id'
       VAULT_SECRET_ID: 'command-processor-secret-id'
+      JWKS_URI: 'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/certs'
 
   readmodel-customers:
     build:
@@ -256,6 +282,8 @@ services:
         condition: service_started
       vault-init:
         condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
     develop:
       watch:
         - action: sync
@@ -274,6 +302,7 @@ services:
       VAULT_ADDR: 'http://vault:8200'
       VAULT_ROLE_ID: 'readmodel-customers-role-id'
       VAULT_SECRET_ID: 'readmodel-customers-secret-id'
+      JWKS_URI: 'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/certs'
 
   readmodel-orders:
     build:
@@ -288,6 +317,8 @@ services:
         condition: service_started
       vault-init:
         condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
     develop:
       watch:
         - action: sync
@@ -306,6 +337,7 @@ services:
       VAULT_ADDR: 'http://vault:8200'
       VAULT_ROLE_ID: 'readmodel-orders-role-id'
       VAULT_SECRET_ID: 'readmodel-orders-secret-id'
+      JWKS_URI: 'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/certs'
 
   readmodel-dotnet:
     build:
@@ -323,7 +355,12 @@ services:
           target: /src/packages/orchestrated/readmodel-dotnet
 
   change-notifier:
-    build: ./change-notifier
+    build:
+      context: .
+      dockerfile: change-notifier/Dockerfile
+    depends_on:
+      keycloak:
+        condition: service_healthy
     develop:
       watch:
         - action: sync
@@ -334,6 +371,7 @@ services:
       EXPRESS_PORT: '80'
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'change-notifier'
+      JWKS_URI: 'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/certs'
 
   frontend-react:
     build: ./frontend-react
@@ -352,6 +390,9 @@ services:
       VITE_RM_ORDERS_URL: 'http://rm-orders.localhost'
       VITE_COMMAND_URL: 'http://commands.localhost/api/command'
       VITE_CHANGENOTIFIER_URL: 'http://change-notifier.localhost'
+      VITE_KEYCLOAK_URL: 'http://keycloak.localhost'
+      VITE_KEYCLOAK_REALM: 'lazyapps-demo'
+      VITE_KEYCLOAK_CLIENT_ID: 'lazyapps-frontend'
 
   frontend-svelte:
     build: ./frontend-svelte
@@ -370,6 +411,16 @@ services:
       VITE_RM_ORDERS_URL: 'http://rm-orders.localhost'
       VITE_COMMAND_URL: 'http://commands.localhost/api/command'
       VITE_CHANGENOTIFIER_URL: 'http://change-notifier.localhost'
+      VITE_KEYCLOAK_URL: 'http://keycloak.localhost'
+      VITE_KEYCLOAK_REALM: 'lazyapps-demo'
+      VITE_KEYCLOAK_CLIENT_ID: 'lazyapps-frontend'
+
+networks:
+  e2e:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
 
 volumes:
   signoz-user-scripts:

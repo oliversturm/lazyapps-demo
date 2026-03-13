@@ -8,6 +8,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { connectRoutes } from 'redux-first-router';
 import { createBrowserHistory as createHistory } from 'rudy-history';
 import { SystemProvider } from './components/SystemContext';
+import { AuthProvider } from './components/AuthProvider';
 
 import customersViewSlice from './state/customersView.slice';
 import customerViewSlice from './state/customerView.slice';
@@ -86,15 +87,17 @@ const root = createRoot(container);
 // tag must be removed or commented here.
 root.render(
   <StrictMode>
-    <SystemProvider
-      readModelEndpoints={readModelEndpoints}
-      commandEndpoint={commandEndpoint}
-      changeNotifierEndpoint={changeNotifierEndpoint}
-      aggregates={aggregates}
-    >
-      <ReduxProvider store={store}>
-        <App />
-      </ReduxProvider>
-    </SystemProvider>
+    <AuthProvider>
+      <SystemProvider
+        readModelEndpoints={readModelEndpoints}
+        commandEndpoint={commandEndpoint}
+        changeNotifierEndpoint={changeNotifierEndpoint}
+        aggregates={aggregates}
+      >
+        <ReduxProvider store={store}>
+          <App />
+        </ReduxProvider>
+      </SystemProvider>
+    </AuthProvider>
   </StrictMode>,
 );

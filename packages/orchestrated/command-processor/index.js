@@ -3,17 +3,13 @@ import { inmemory } from '@lazyapps/aggregatestore-inmemory';
 import { mongodb } from '@lazyapps/eventstore-mongodb';
 import { rabbitMq } from '@lazyapps/eventbus-rabbitmq/command-receiver/index.js';
 import { start } from '@lazyapps/bootstrap';
-import {
-  createEncryption,
-  vaultKeyStore,
-  appRole,
-  subjectLifecycleAggregate,
-  createForgetSubjectEndpoints,
-} from '@lazyapps/encryption';
+import { createEncryption, vaultKeyStore, appRole } from '@lazyapps/encryption';
 import {
   encryptionSchema,
   encryptionContexts,
+  encryptionSubjects,
 } from '../common/encryption-config.js';
+import { jwtSecret, jwtAlgorithms } from '../common/jwt-config.js';
 import * as aggregates from './aggregates/index.js';
 import path from 'path';
 
@@ -39,9 +35,8 @@ const encryption = createEncryption({
     }),
   }),
   contexts: encryptionContexts,
+  subjects: encryptionSubjects,
 });
-
-const customizeExpress = createForgetSubjectEndpoints(encryption);
 
 start({
   correlation: {
@@ -51,7 +46,8 @@ start({
   commands: {
     receiver: express({
       port: process.env.EXPRESS_PORT || 3001,
-      customizeExpress,
+      jwtSecret,
+      jwtAlgorithms,
     }),
     aggregateStore: inmemory(),
     eventStore: mongodb({
@@ -63,7 +59,6 @@ start({
     }),
     aggregates: {
       ...aggregates,
-      subjectLifecycle: subjectLifecycleAggregate,
     },
     commandRecording: commandRecordingConfig,
   },

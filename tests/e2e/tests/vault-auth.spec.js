@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-// Direct Vault API access (not through Traefik — Vault is internal infrastructure)
-const VAULT_ADDR = 'http://vault:8200';
+// Direct Vault API access (not through Traefik — Vault is internal infrastructure).
+// When running inside a Docker container alongside the orchestrated stack,
+// VAULT_ADDR points to the Vault service name instead of localhost.
+const VAULT_ADDR = process.env.VAULT_ADDR || 'http://localhost:8200';
 
 const SERVICES = [
   {

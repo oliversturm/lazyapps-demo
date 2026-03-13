@@ -60,6 +60,12 @@ http:
         - web
       service: frontend-svelte-orchestrated
 
+    keycloak:
+      rule: "Host(`keycloak.localhost`)"
+      entrypoints:
+        - web
+      service: keycloak
+
     grafanaUI:
       rule: "Host(`grafana.localhost`)"
       entrypoints:
@@ -143,3 +149,8 @@ http:
       loadBalancer:
         servers:
           - url: "http://signoz:8080"
+
+    keycloak:
+      loadBalancer:
+        servers:
+          - url: "http://keycloak:8080"

@@ -13,8 +13,15 @@ export const encryptionSchema = defineEncryptionSchema({
 });
 
 export const encryptionContexts = {
-  personal: { roles: ['admin', 'support', 'self', 'customer-service', 'order-service'] },
+  personal: {
+    roles: ['admin', 'support', 'self', 'customer-service', 'order-service'],
+    autoForget: true,
+  },
   'order-details': { roles: ['admin', 'support', 'sales', 'order-service'] },
+};
+
+export const encryptionSubjects = {
+  customer: { contexts: ['personal'] },
 };
 
 export const readModelEncryptionConfig = {

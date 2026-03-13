@@ -10,12 +10,14 @@ import {
   createEncryption,
   vaultKeyStore,
   appRole,
+  customMapper,
 } from '@lazyapps/encryption';
 import {
   encryptionSchema,
   encryptionContexts,
   readModelEncryptionConfig,
 } from '../common/encryption-config.js';
+import { jwtSecret, jwtAlgorithms } from '../common/jwt-config.js';
 
 const encryption = createEncryption({
   schema: encryptionSchema,
@@ -37,8 +39,14 @@ start({
   encryption,
   readModels: {
     role: 'order-service',
+    jwtScopeMapper: customMapper((auth) => ({
+      roles: (auth && auth.realm_access && auth.realm_access.roles) || [],
+      identity: auth && auth.sub,
+    })),
     listener: express({
       port: process.env.EXPRESS_PORT || 3005,
+      jwtSecret,
+      jwtAlgorithms,
       customizeExpress,
     }),
     storage: mongodb({

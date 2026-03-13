@@ -1,7 +1,9 @@
 FROM node:lts
-WORKDIR /app
-COPY package.json ./
+WORKDIR /app/change-notifier
+COPY change-notifier/package.json ./
 RUN npm install
-COPY . ./
+COPY change-notifier/ ./
+COPY common/ ../common/
+RUN ln -s /app/change-notifier/node_modules /app/node_modules
 EXPOSE 80
 CMD ["node", "--import", "@lazyapps/observability/register.js", "--watch", "index.js"]

@@ -14,11 +14,17 @@
 
   export let store;
 
+  const isStructured = (value) =>
+    value && typeof value === 'object' && typeof value.text === 'string';
+
   const isForgotten = (value) =>
-    value && typeof value === 'object' && value.forgotten === true;
+    isStructured(value) && value.forgotten === true;
+
+  const isRestricted = (value) =>
+    isStructured(value) && value.restricted === true;
 
   const displayValue = (value) =>
-    isForgotten(value) ? value.text : value;
+    isStructured(value) ? value.text : value;
 
   const handleForget = (id, name) => {
     const displayName = displayValue(name);
@@ -44,21 +50,23 @@
     <Tbody>
       {#each $store.data as row}
         {@const forgotten = isForgotten(row.name)}
+        {@const restricted = isRestricted(row.name)}
+        {@const unavailable = forgotten || restricted}
         <Tr>
           <Td>
             <Button
               kind="inline"
               text="Edit"
-              target={forgotten ? null : `/customer/${row.id}`}
-              disabled={forgotten}
+              target={unavailable ? null : `/customer/${row.id}`}
+              disabled={unavailable}
             />
             <Button
               kind="inline"
               text="Place Order"
-              target={forgotten ? null : `/order/${row.id}/${uuid()}`}
-              disabled={forgotten}
+              target={unavailable ? null : `/order/${row.id}/${uuid()}`}
+              disabled={unavailable}
             />
-            {#if !forgotten}
+            {#if !unavailable}
               <Button
                 kind="inline"
                 text="Forget"

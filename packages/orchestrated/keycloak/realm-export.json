@@ -1,0 +1,228 @@
+{
+  "id": "lazyapps-demo",
+  "realm": "lazyapps-demo",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "loginTheme": "lazyapps-demo",
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Full access to all encrypted contexts"
+      },
+      {
+        "name": "support",
+        "description": "Access to personal context only"
+      },
+      {
+        "name": "customer-service",
+        "description": "Access to customer-service context"
+      },
+      {
+        "name": "order-service",
+        "description": "Access to order-service context"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "lazyapps-frontend",
+      "name": "LazyApps Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://svelte.localhost/*",
+        "http://react.localhost/*",
+        "http://localhost:*/*",
+        "http://127.0.0.1:*/*"
+      ],
+      "webOrigins": ["+"],
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567001",
+      "username": "alice",
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "alice",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin", "customer-service"]
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567002",
+      "username": "bob",
+      "email": "bob@example.com",
+      "firstName": "Bob",
+      "lastName": "Support",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "bob",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["support"]
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567003",
+      "username": "carol",
+      "email": "carol@example.com",
+      "firstName": "Carol",
+      "lastName": "CustomerService",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "carol",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["customer-service"]
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567004",
+      "username": "dave",
+      "email": "dave@example.com",
+      "firstName": "Dave",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "dave",
+          "temporary": false
+        }
+      ],
+      "realmRoles": []
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567005",
+      "username": "eve",
+      "email": "eve@example.com",
+      "firstName": "Eve",
+      "lastName": "AdminOps",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "eve",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin", "order-service"]
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567006",
+      "username": "frank",
+      "email": "frank@example.com",
+      "firstName": "Frank",
+      "lastName": "SupportOps",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "frank",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["support", "order-service"]
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567007",
+      "username": "grace",
+      "email": "grace@example.com",
+      "firstName": "Grace",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "grace",
+          "temporary": false
+        }
+      ],
+      "realmRoles": []
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567008",
+      "username": "heidi",
+      "email": "heidi@example.com",
+      "firstName": "Heidi",
+      "lastName": "ServiceOps",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "heidi",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["customer-service", "order-service"]
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567009",
+      "username": "ivan",
+      "email": "ivan@example.com",
+      "firstName": "Ivan",
+      "lastName": "Support",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "ivan",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["support"]
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567010",
+      "username": "judy",
+      "email": "judy@example.com",
+      "firstName": "Judy",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "judy",
+          "temporary": false
+        }
+      ],
+      "realmRoles": []
+    }
+  ]
+}

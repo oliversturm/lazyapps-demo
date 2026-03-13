@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import { nanoid } from 'nanoid';
 
 import { SystemContext } from '../components/SystemContext';
+import { getToken } from '../auth';
 
 const applyChange = (data, changeInfo) => {
   switch (changeInfo.changeKind) {
@@ -37,7 +38,10 @@ const useReadModelStore = (readModelSpec, dataLoadedAction, dataChangedAction) =
     dataLoadedRef.current = false;
 
     const correlationId = `REACT-${nanoid()}`;
-    const socket = io(changeNotifierEndpoint, { query: { correlationId } });
+    const auth = {};
+    const token = getToken();
+    if (token) auth.token = token;
+    const socket = io(changeNotifierEndpoint, { query: { correlationId }, auth });
 
     const runQuery = () =>
       readModels[endpoint]

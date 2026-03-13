@@ -11,13 +11,20 @@
   export let data;
   export let dataId;
 
+  const isStructured = (value) =>
+    value && typeof value === 'object' && typeof value.text === 'string';
+
   const isForgotten = (value) =>
-    value && typeof value === 'object' && value.forgotten === true;
+    isStructured(value) && value.forgotten === true;
 
-  $: forgotten =
-    isForgotten(data.name) || isForgotten(data.location);
+  const isRestricted = (value) =>
+    isStructured(value) && value.restricted === true;
 
-  $: if (forgotten) {
+  $: unavailable =
+    isForgotten(data.name) || isForgotten(data.location) ||
+    isRestricted(data.name) || isRestricted(data.location);
+
+  $: if (unavailable) {
     goto('/customers');
   }
 
