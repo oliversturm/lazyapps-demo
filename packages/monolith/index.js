@@ -27,7 +27,17 @@ const mqQueriesPort = process.env.MQ_QUERIES_PORT || 51884;
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017';
 const adminPort = process.env.ADMIN_PORT || 3005;
 const backupPath = process.env.BACKUP_PATH || '/tmp/lazyapps-backups';
+const svelteHost = process.env.SVELTE_HOST || 'localhost';
+const sveltePort = 5173;
 const mongoBackup = backup({ backupPath });
+
+// The activator queries read model state via HTTP. In the monolith, the
+// admin server and the read model listener share the same process. Pointing
+// the activator at the admin server's own port would cause infinite HTTP
+// recursion (readModelsHandler → activator → fetchReadModels → readModelsHandler).
+// Instead, route through the SvelteKit backend which bridges to the shared
+// 'queries' mqemitter via mqemitter-cs TCP (same pattern as data queries).
+const readModelServiceUrl = `http://${svelteHost === '0.0.0.0' ? '127.0.0.1' : svelteHost}:${sveltePort}/api`;
 
 registerSharedMqEmitter('commands', mqemitter(), mqCommandsPort);
 registerSharedMqEmitter('events', mqemitter());
@@ -78,6 +88,7 @@ start({
     }),
     commandSender: commandSenderMqEmitter({ mqName: 'commands' }),
     backup: mongoBackup,
+    endpointName: 'monolith',
     readModels,
   },
   changeNotifier: {
@@ -100,14 +111,8 @@ start({
   },
   admin: {
     port: adminPort,
-    eventStore: eventStoreMongo({ url: mongoUrl }),
-    readModelStorage: readModelStorageMongo({
-      url: mongoUrl,
-      database: 'monolith-readmodels',
-    }),
     eventBus: commandProcessorEventBusMqEmitter({ mqName: 'events' }),
-    backup: mongoBackup,
-    readModels,
+    readModelServiceUrl,
     autoActivate: true,
   },
 });

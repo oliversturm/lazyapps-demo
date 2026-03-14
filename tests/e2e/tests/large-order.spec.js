@@ -6,12 +6,17 @@ import {
   placeOrder,
   confirmOrder,
 } from './helpers/app.js';
+import { getReadModelConfig, ensureLive } from './helpers/admin.js';
 
 test.describe('Large order workflow', () => {
-  test('requires manual confirmation', async ({ browser, baseURL }) => {
+  test('requires manual confirmation', async ({ browser, request, baseURL }) => {
     const unique = `${Date.now()}`;
     const customerName = `TestCust-${unique}`;
     const orderText = `Expensive-${unique}`;
+
+    const rmConfig = getReadModelConfig(baseURL);
+    await ensureLive(request, rmConfig.customersOverview);
+    await ensureLive(request, rmConfig.ordersOverview);
 
     const context1 = await browser.newContext();
     const context2 = await browser.newContext();

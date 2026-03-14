@@ -42,7 +42,7 @@ test.describe('Admin status and read models', () => {
     for (const rm of readModels) {
       expect(rm).toHaveProperty('name');
       expect(rm).toHaveProperty('status');
-      expect(rm).toHaveProperty('collections');
+      expect(rm).toHaveProperty('endpointName');
     }
   });
 

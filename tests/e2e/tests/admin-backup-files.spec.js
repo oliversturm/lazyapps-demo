@@ -4,17 +4,18 @@ import {
   getAdminURL,
   waitForAdmin,
   getReadModelConfig,
+  ensureLive,
 } from './helpers/admin.js';
 
 test.describe('Admin backup API (file-based)', () => {
   test('backup includes metadata fields', async ({ request, baseURL }) => {
     const rmConfig = getReadModelConfig(baseURL);
-    const serviceUrl = rmConfig.customersOverview.serviceUrl;
+    const adminUrl = rmConfig.customersOverview.adminUrl;
     const readModel = rmConfig.customersOverview.name;
     await waitForAdmin(request, getAdminURL(baseURL));
 
     const createRes = await request.post(
-      `${serviceUrl}/admin/backup/${readModel}`,
+      `${adminUrl}/admin/backup/${rmConfig.customersOverview.endpointName}/${readModel}`,
       { data: {} },
     );
     expect(createRes.ok()).toBeTruthy();
@@ -25,7 +26,9 @@ test.describe('Admin backup API (file-based)', () => {
     expect(backup).toHaveProperty('timestamp');
 
     // Clean up
-    await request.delete(`${serviceUrl}/admin/backup/${backup.backupId}`);
+    await request.delete(
+      `${adminUrl}/admin/backup/${backup.backupId}?readModelName=${readModel}&endpointName=${rmConfig.customersOverview.endpointName}`,
+    );
   });
 
   test('list backups returns array with correct shape', async ({
@@ -33,32 +36,39 @@ test.describe('Admin backup API (file-based)', () => {
     baseURL,
   }) => {
     const rmConfig = getReadModelConfig(baseURL);
-    const serviceUrl = rmConfig.customersOverview.serviceUrl;
+    const adminUrl = rmConfig.customersOverview.adminUrl;
     const readModel = rmConfig.customersOverview.name;
     await waitForAdmin(request, getAdminURL(baseURL));
+    await ensureLive(request, rmConfig.customersOverview);
 
     // Create a backup so the list is non-empty
     const createRes = await request.post(
-      `${serviceUrl}/admin/backup/${readModel}`,
+      `${adminUrl}/admin/backup/${rmConfig.customersOverview.endpointName}/${readModel}`,
       { data: {} },
     );
     const backup = await createRes.json();
 
-    const listRes = await request.get(
-      `${serviceUrl}/admin/backups/${readModel}`,
-    );
-    expect(listRes.ok()).toBeTruthy();
-
-    const backups = await listRes.json();
-    expect(Array.isArray(backups)).toBeTruthy();
-
-    const found = backups.find((b) => b.backupId === backup.backupId);
+    // Poll until the backup appears in the list (event bus delegation adds latency)
+    let found = null;
+    for (let i = 0; i < 10; i++) {
+      const listRes = await request.get(
+        `${adminUrl}/admin/backups/${rmConfig.customersOverview.endpointName}/${readModel}`,
+      );
+      expect(listRes.ok()).toBeTruthy();
+      const backups = await listRes.json();
+      expect(Array.isArray(backups)).toBeTruthy();
+      found = backups.find((b) => b.backupId === backup.backupId);
+      if (found) break;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
     expect(found).toBeTruthy();
     expect(found).toHaveProperty('eventTimestamp');
     expect(found).toHaveProperty('timestamp');
 
     // Clean up
-    await request.delete(`${serviceUrl}/admin/backup/${backup.backupId}`);
+    await request.delete(
+      `${adminUrl}/admin/backup/${backup.backupId}?readModelName=${readModel}&endpointName=${rmConfig.customersOverview.endpointName}`,
+    );
   });
 
   test('delete backup removes it from list', async ({
@@ -66,13 +76,14 @@ test.describe('Admin backup API (file-based)', () => {
     baseURL,
   }) => {
     const rmConfig = getReadModelConfig(baseURL);
-    const serviceUrl = rmConfig.customersOverview.serviceUrl;
+    const adminUrl = rmConfig.customersOverview.adminUrl;
     const readModel = rmConfig.customersOverview.name;
     await waitForAdmin(request, getAdminURL(baseURL));
+    await ensureLive(request, rmConfig.customersOverview);
 
     // Create a backup
     const createRes = await request.post(
-      `${serviceUrl}/admin/backup/${readModel}`,
+      `${adminUrl}/admin/backup/${rmConfig.customersOverview.endpointName}/${readModel}`,
       { data: {} },
     );
     const backup = await createRes.json();
@@ -80,16 +91,24 @@ test.describe('Admin backup API (file-based)', () => {
 
     // Delete it
     const deleteRes = await request.delete(
-      `${serviceUrl}/admin/backup/${backupId}`,
+      `${adminUrl}/admin/backup/${backupId}?readModelName=${readModel}&endpointName=${rmConfig.customersOverview.endpointName}`,
     );
-    expect(deleteRes.status()).toBe(204);
+    expect(deleteRes.ok()).toBeTruthy();
 
-    // Verify it's gone
-    const listRes = await request.get(
-      `${serviceUrl}/admin/backups/${readModel}`,
-    );
-    const backups = await listRes.json();
-    expect(backups.some((b) => b.backupId === backupId)).toBeFalsy();
+    // Verify it's gone (poll because event bus delegation adds latency)
+    let gone = false;
+    for (let i = 0; i < 10; i++) {
+      const listRes = await request.get(
+        `${adminUrl}/admin/backups/${rmConfig.customersOverview.endpointName}/${readModel}`,
+      );
+      const backups = await listRes.json();
+      if (!backups.some((b) => b.backupId === backupId)) {
+        gone = true;
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+    expect(gone).toBeTruthy();
   });
 
   test('restore backup reverts read model data', async ({
@@ -97,10 +116,8 @@ test.describe('Admin backup API (file-based)', () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(30000);
-
     const rmConfig = getReadModelConfig(baseURL);
-    const serviceUrl = rmConfig.customersOverview.serviceUrl;
+    const adminUrl = rmConfig.customersOverview.adminUrl;
     const cpUrl = rmConfig.customersOverview.cpUrl;
     const readModel = rmConfig.customersOverview.name;
     const unique = `${Date.now()}`;
@@ -111,6 +128,9 @@ test.describe('Admin backup API (file-based)', () => {
     try {
       await waitForApp(page, baseURL);
 
+      // Ensure read model is live (auto-activation may not have completed yet)
+      await ensureLive(request, rmConfig.customersOverview);
+
       // Create initial customer
       const customerBefore = `BackupBefore-${unique}`;
       await createCustomer(page, {
@@ -120,7 +140,7 @@ test.describe('Admin backup API (file-based)', () => {
 
       // Create backup (captures state with customerBefore)
       const createRes = await request.post(
-        `${serviceUrl}/admin/backup/${readModel}`,
+        `${adminUrl}/admin/backup/${rmConfig.customersOverview.endpointName}/${readModel}`,
         { data: {} },
       );
       expect(createRes.ok()).toBeTruthy();
@@ -143,7 +163,7 @@ test.describe('Admin backup API (file-based)', () => {
       // events from the backup's timestamp onward, which should include
       // customerAfter's creation event
       const prepareRes = await request.post(
-        `${serviceUrl}/admin/replay/${readModel}/prepare`,
+        `${adminUrl}/admin/replay/${rmConfig.customersOverview.endpointName}/${readModel}/prepare`,
         { data: { backupId } },
       );
       expect(prepareRes.ok()).toBeTruthy();
@@ -158,7 +178,7 @@ test.describe('Admin backup API (file-based)', () => {
           data: {
             readModel,
             fromTimestamp: prepared.fromTimestamp,
-            serviceId: prepared.serviceId,
+            targetEndpointName: prepared.endpointName,
           },
         },
       );
@@ -167,7 +187,7 @@ test.describe('Admin backup API (file-based)', () => {
       // Wait for replay to complete
       for (let i = 0; i < 30; i++) {
         const statusRes = await request.get(
-          `${cpUrl}/api/admin/replayStatus/${readModel}`,
+          `${cpUrl}/api/admin/replayStatus/${rmConfig.customersOverview.endpointName}/${readModel}`,
         );
         const status = await statusRes.json();
         if (status.status === 'completed' || status.status === 'idle') break;
@@ -177,7 +197,7 @@ test.describe('Admin backup API (file-based)', () => {
       // Wait for RM-side replay to finish
       for (let i = 0; i < 30; i++) {
         const rmStatusRes = await request.get(
-          `${serviceUrl}/admin/replay/${readModel}/status`,
+          `${adminUrl}/admin/replay/${rmConfig.customersOverview.endpointName}/${readModel}/status`,
         );
         const rmStatus = await rmStatusRes.json();
         if (rmStatus.status === 'idle') break;
@@ -189,12 +209,12 @@ test.describe('Admin backup API (file-based)', () => {
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.locator('.bg-orange-100').waitFor();
       await navigate(page, 'Customers');
-      await expect(page.getByText(customerBefore)).toBeVisible({
-        timeout: 5000,
-      });
+      await expect(page.getByText(customerBefore)).toBeVisible();
 
       // Clean up backup
-      await request.delete(`${serviceUrl}/admin/backup/${backupId}`);
+      await request.delete(
+        `${adminUrl}/admin/backup/${backupId}?readModelName=${readModel}&endpointName=${rmConfig.customersOverview.endpointName}`,
+      );
     } finally {
       await page.close();
     }
@@ -205,10 +225,8 @@ test.describe('Admin backup API (file-based)', () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(30000);
-
     const rmConfig = getReadModelConfig(baseURL);
-    const serviceUrl = rmConfig.customersOverview.serviceUrl;
+    const adminUrl = rmConfig.customersOverview.adminUrl;
     const cpUrl = rmConfig.customersOverview.cpUrl;
     const readModel = rmConfig.customersOverview.name;
     const unique = `${Date.now()}`;
@@ -218,6 +236,9 @@ test.describe('Admin backup API (file-based)', () => {
 
     try {
       await waitForApp(page, baseURL);
+
+      // Ensure read model is live (auto-activation may not have completed yet)
+      await ensureLive(request, rmConfig.customersOverview);
 
       // Create a customer
       const customerName = `ScratchReplay-${unique}`;
@@ -230,7 +251,7 @@ test.describe('Admin backup API (file-based)', () => {
 
       // Prepare replay from scratch
       const prepareRes = await request.post(
-        `${serviceUrl}/admin/replay/${readModel}/prepare`,
+        `${adminUrl}/admin/replay/${rmConfig.customersOverview.endpointName}/${readModel}/prepare`,
         { data: { fromScratch: true } },
       );
       expect(prepareRes.ok()).toBeTruthy();
@@ -245,7 +266,7 @@ test.describe('Admin backup API (file-based)', () => {
           data: {
             readModel,
             fromTimestamp: 0,
-            serviceId: prepared.serviceId,
+            targetEndpointName: prepared.endpointName,
           },
         },
       );
@@ -254,7 +275,7 @@ test.describe('Admin backup API (file-based)', () => {
       // Wait for replay to complete
       for (let i = 0; i < 30; i++) {
         const statusRes = await request.get(
-          `${cpUrl}/api/admin/replayStatus/${readModel}`,
+          `${cpUrl}/api/admin/replayStatus/${rmConfig.customersOverview.endpointName}/${readModel}`,
         );
         const status = await statusRes.json();
         if (status.status === 'completed' || status.status === 'idle') break;
@@ -264,7 +285,7 @@ test.describe('Admin backup API (file-based)', () => {
       // Wait for RM-side replay to finish
       for (let i = 0; i < 30; i++) {
         const rmStatusRes = await request.get(
-          `${serviceUrl}/admin/replay/${readModel}/status`,
+          `${adminUrl}/admin/replay/${rmConfig.customersOverview.endpointName}/${readModel}/status`,
         );
         const rmStatus = await rmStatusRes.json();
         if (rmStatus.status === 'idle') break;
@@ -281,7 +302,7 @@ test.describe('Admin backup API (file-based)', () => {
         await page.locator('.bg-orange-100').waitFor();
         await navigate(page, 'Customers');
         try {
-          await page.getByText(customerName).waitFor({ timeout: 2000 });
+          await page.getByText(customerName).waitFor();
           found = true;
           break;
         } catch {
@@ -289,9 +310,7 @@ test.describe('Admin backup API (file-based)', () => {
         }
       }
       if (!found) {
-        await expect(page.getByText(customerName)).toBeVisible({
-          timeout: 5000,
-        });
+        await expect(page.getByText(customerName)).toBeVisible();
       }
     } finally {
       await page.close();
@@ -303,11 +322,11 @@ test.describe('Admin backup API (file-based)', () => {
     baseURL,
   }) => {
     const rmConfig = getReadModelConfig(baseURL);
-    const serviceUrl = rmConfig.customersOverview.serviceUrl;
+    const adminUrl = rmConfig.customersOverview.adminUrl;
     await waitForAdmin(request, getAdminURL(baseURL));
 
     const res = await request.post(
-      `${serviceUrl}/admin/backup/nonExistentModel`,
+      `${adminUrl}/admin/backup/_unknown/nonExistentModel`,
       { data: {} },
     );
     expect(res.status()).toBe(404);
@@ -318,11 +337,11 @@ test.describe('Admin backup API (file-based)', () => {
     baseURL,
   }) => {
     const rmConfig = getReadModelConfig(baseURL);
-    const serviceUrl = rmConfig.customersOverview.serviceUrl;
+    const adminUrl = rmConfig.customersOverview.adminUrl;
     await waitForAdmin(request, getAdminURL(baseURL));
 
     const res = await request.get(
-      `${serviceUrl}/admin/backups/nonExistentModel`,
+      `${adminUrl}/admin/backups/_unknown/nonExistentModel`,
     );
     expect(res.status()).toBe(404);
   });

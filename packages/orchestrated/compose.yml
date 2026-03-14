@@ -277,7 +277,6 @@ services:
   admin-ui:
     build: ./admin-ui
     depends_on:
-      - mongo
       - rabbit
       - command-processor
       - readmodel-customers
@@ -290,12 +289,10 @@ services:
     environment:
       <<: *otel-env
       PORT: '3000'
-      MONGO_URL: 'mongodb://mongo:27017'
       RABBIT_URL: 'amqp://rabbit'
-      ADMIN_COMMAND_PROCESSOR_URL: 'http://commands.localhost'
-      ADMIN_READ_MODEL_SERVICES: '{"overview":"http://rm-customers.localhost","editing":"http://rm-customers.localhost","orders":"http://rm-orders.localhost"}'
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'admin-service'
+      ADMIN_READ_MODEL_SERVICES: '{"readmodel-customers":"http://readmodel-customers","readmodel-orders":"http://readmodel-orders"}'
 
   frontend-react:
     build: ./frontend-react

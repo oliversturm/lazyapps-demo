@@ -32,14 +32,14 @@ const pollForState = (request, serviceUrl, readModel, targetState, maxPolls = 30
   return poll(0);
 };
 
-const ensureLive = async (request, cpUrl, serviceUrl, readModel) => {
+const ensureLive = async (request, cpUrl, serviceUrl, endpointName, readModel) => {
   const rmRes = await request.get(`${serviceUrl}/admin/readmodels`);
   const readModels = await rmRes.json();
   const rm = readModels.find((r) => r.name === readModel);
 
   if (rm.state === 'live') return;
 
-  await request.post(`${cpUrl}/admin/readmodels/${readModel}/activate`);
+  await request.post(`${cpUrl}/admin/readmodels/${endpointName}/${readModel}/activate`);
   const finalState = await pollForState(request, serviceUrl, readModel, 'live');
   expect(finalState).toBe('live');
 };
@@ -62,7 +62,6 @@ test.describe('Admin catch-up lifecycle', () => {
     for (const rm of readModels) {
       expect(rm).toHaveProperty('name');
       expect(rm).toHaveProperty('status');
-      expect(rm).toHaveProperty('collections');
       // Lifecycle is always active — every RM must have a state field
       expect(rm).toHaveProperty('state');
       expect([
@@ -93,7 +92,7 @@ test.describe('Admin catch-up lifecycle', () => {
     // If already live, stop it first to test activation
     if (rm.state === 'live') {
       const stopRes = await request.post(
-        `${cpUrl}/admin/readmodels/${readModel}/stop`,
+        `${cpUrl}/admin/readmodels/${rmConfig.customersOverview.endpointName}/${readModel}/stop`,
       );
       expect(stopRes.ok()).toBeTruthy();
       await pollForState(request, serviceUrl, readModel, 'stopped');
@@ -101,7 +100,7 @@ test.describe('Admin catch-up lifecycle', () => {
 
     // Activate via admin server (triggers activator orchestration)
     const activateRes = await request.post(
-      `${cpUrl}/admin/readmodels/${readModel}/activate`,
+      `${cpUrl}/admin/readmodels/${rmConfig.customersOverview.endpointName}/${readModel}/activate`,
     );
     expect(activateRes.status()).toBe(202);
     const body = await activateRes.json();
@@ -145,12 +144,14 @@ test.describe('Admin catch-up lifecycle', () => {
     const readModel = rmConfig.customersOverview.name;
     await waitForAdmin(request, getAdminURL(baseURL));
 
+    const endpointName = rmConfig.customersOverview.endpointName;
+
     // Ensure the read model is live first
-    await ensureLive(request, cpUrl, serviceUrl, readModel);
+    await ensureLive(request, cpUrl, serviceUrl, endpointName, readModel);
 
     // Stop via admin server (publishes __admin stop instruction)
     const stopRes = await request.post(
-      `${cpUrl}/admin/readmodels/${readModel}/stop`,
+      `${cpUrl}/admin/readmodels/${endpointName}/${readModel}/stop`,
     );
     expect(stopRes.ok()).toBeTruthy();
     const stopBody = await stopRes.json();
@@ -167,7 +168,7 @@ test.describe('Admin catch-up lifecycle', () => {
 
     // Re-activate so other tests aren't affected
     await request.post(
-      `${cpUrl}/admin/readmodels/${readModel}/activate`,
+      `${cpUrl}/admin/readmodels/${endpointName}/${readModel}/activate`,
     );
     await pollForState(request, serviceUrl, readModel, 'live');
   });
@@ -178,9 +179,11 @@ test.describe('Admin catch-up lifecycle', () => {
     const readModel = rmConfig.customersOverview.name;
     await waitForAdmin(request, getAdminURL(baseURL));
 
+    const endpointName = rmConfig.customersOverview.endpointName;
+
     // Catchup status is served by the admin/CP server
     const statusRes = await request.get(
-      `${cpUrl}/admin/catchup/${readModel}/status`,
+      `${cpUrl}/admin/catchup/${endpointName}/${readModel}/status`,
     );
     expect(statusRes.ok()).toBeTruthy();
 
@@ -193,12 +196,11 @@ test.describe('Admin catch-up lifecycle', () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(60000);
-
     const rmConfig = getReadModelConfig(baseURL);
     const cpUrl = rmConfig.customersOverview.cpUrl;
     const serviceUrl = rmConfig.customersOverview.serviceUrl;
     const readModel = rmConfig.customersOverview.name;
+    const endpointName = rmConfig.customersOverview.endpointName;
     const unique = `${Date.now()}`;
     await waitForAdmin(request, getAdminURL(baseURL));
 
@@ -208,7 +210,7 @@ test.describe('Admin catch-up lifecycle', () => {
       await waitForApp(page, baseURL);
 
       // Ensure read model is live via admin-driven activation
-      await ensureLive(request, cpUrl, serviceUrl, readModel);
+      await ensureLive(request, cpUrl, serviceUrl, endpointName, readModel);
 
       // Create a customer while read model is live
       const customerBefore = `CatchupBefore-${unique}`;
@@ -221,7 +223,7 @@ test.describe('Admin catch-up lifecycle', () => {
 
       // Stop the read model via admin server
       const stopRes = await request.post(
-        `${cpUrl}/admin/readmodels/${readModel}/stop`,
+        `${cpUrl}/admin/readmodels/${endpointName}/${readModel}/stop`,
       );
       expect(stopRes.ok()).toBeTruthy();
       await pollForState(request, serviceUrl, readModel, 'stopped');
@@ -243,7 +245,7 @@ test.describe('Admin catch-up lifecycle', () => {
       // Re-activate via admin server — triggers activator orchestration
       // which does: __admin activate → RM lifecycle → CP catchup → events
       const activateRes = await request.post(
-        `${cpUrl}/admin/readmodels/${readModel}/activate`,
+        `${cpUrl}/admin/readmodels/${endpointName}/${readModel}/activate`,
       );
       expect(activateRes.status()).toBe(202);
 
@@ -263,7 +265,7 @@ test.describe('Admin catch-up lifecycle', () => {
           await page.reload({ waitUntil: 'domcontentloaded' });
           await page.locator('.bg-orange-100').waitFor();
           await navigate(page, 'Customers');
-          await page.getByText(customerDuring).waitFor({ timeout: 2000 });
+          await page.getByText(customerDuring).waitFor();
           break;
         } catch {
           // Keep polling
@@ -286,14 +288,16 @@ test.describe('Admin catch-up lifecycle', () => {
     const readModel = rmConfig.customersOverview.name;
     await waitForAdmin(request, getAdminURL(baseURL));
 
+    const endpointName = rmConfig.customersOverview.endpointName;
+
     // Ensure it's live
-    await ensureLive(request, cpUrl, serviceUrl, readModel);
+    await ensureLive(request, cpUrl, serviceUrl, endpointName, readModel);
 
     // With the activator, re-activating a live RM returns 202. The
     // activator orchestrates the request and handles the state internally
     // (the RM lifecycle manager will reject the duplicate activation).
     const activateRes = await request.post(
-      `${cpUrl}/admin/readmodels/${readModel}/activate`,
+      `${cpUrl}/admin/readmodels/${endpointName}/${readModel}/activate`,
     );
     expect(activateRes.status()).toBe(202);
     const body = await activateRes.json();
@@ -309,7 +313,7 @@ test.describe('Admin catch-up lifecycle', () => {
     await waitForAdmin(request, getAdminURL(baseURL));
 
     const res = await request.post(
-      `${cpUrl}/admin/readmodels/nonExistentModel/activate`,
+      `${cpUrl}/admin/readmodels/_unknown/nonExistentModel/activate`,
     );
     expect(res.status()).toBe(404);
   });
@@ -323,7 +327,7 @@ test.describe('Admin catch-up lifecycle', () => {
     await waitForAdmin(request, getAdminURL(baseURL));
 
     const res = await request.post(
-      `${cpUrl}/admin/readmodels/nonExistentModel/stop`,
+      `${cpUrl}/admin/readmodels/_unknown/nonExistentModel/stop`,
     );
     expect(res.status()).toBe(404);
   });

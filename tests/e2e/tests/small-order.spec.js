@@ -5,12 +5,17 @@ import {
   createCustomer,
   placeOrder,
 } from './helpers/app.js';
+import { getReadModelConfig, ensureLive } from './helpers/admin.js';
 
 test.describe('Small order workflow', () => {
-  test('auto-confirms and gets USD info', async ({ browser, baseURL }) => {
+  test('auto-confirms and gets USD info', async ({ browser, request, baseURL }) => {
     const unique = `${Date.now()}`;
     const customerName = `TestCust-${unique}`;
     const orderText = `Widget-${unique}`;
+
+    const rmConfig = getReadModelConfig(baseURL);
+    await ensureLive(request, rmConfig.customersOverview);
+    await ensureLive(request, rmConfig.ordersOverview);
 
     const context1 = await browser.newContext();
     const context2 = await browser.newContext();

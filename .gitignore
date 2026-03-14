@@ -158,4 +158,5 @@ logs.txt
 scratch.js
 .DS_Store
 command-records/
+test-results/
 *~

@@ -6,6 +6,7 @@ import {
   waitForAdminUI,
   getReadModelConfig,
   findReadModelRow,
+  ensureLive,
 } from './helpers/admin.js';
 
 test.describe('Admin backup management via UI', () => {
@@ -14,8 +15,6 @@ test.describe('Admin backup management via UI', () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(15000);
-
     const adminURL = getAdminURL(baseURL);
     const rmConfig = getReadModelConfig(baseURL);
     const unique = `${Date.now()}`;
@@ -27,6 +26,9 @@ test.describe('Admin backup management via UI', () => {
     try {
       await waitForApp(appPage, baseURL);
       await waitForAdmin(request, adminURL);
+
+      // Ensure read model is live (auto-activation may not have completed yet)
+      await ensureLive(request, rmConfig.customersOverview);
 
       // Create some data so the backup is meaningful
       await createCustomer(appPage, {
@@ -40,11 +42,11 @@ test.describe('Admin backup management via UI', () => {
       await adminPage.getByRole('link', { name: 'Read Models' }).click();
       await adminPage
         .getByRole('heading', { name: 'Read Models' })
-        .waitFor({ timeout: 2000 });
+        .waitFor();
       await adminPage
         .getByText(rmConfig.customersOverview.name)
         .first()
-        .waitFor({ timeout: 3000 });
+        .waitFor();
 
       const row = findReadModelRow(adminPage, rmConfig.customersOverview);
       await row.getByRole('link', { name: 'Backups' }).click();
@@ -52,7 +54,7 @@ test.describe('Admin backup management via UI', () => {
       // Verify we're on the backups page
       await adminPage
         .getByRole('heading', { name: /Backups:/ })
-        .waitFor({ timeout: 2000 });
+        .waitFor();
 
       // Create a backup
       await adminPage.getByRole('button', { name: 'Create Backup' }).click();
@@ -61,11 +63,11 @@ test.describe('Admin backup management via UI', () => {
       await adminPage
         .getByRole('button', { name: 'Delete' })
         .first()
-        .waitFor({ timeout: 5000 });
+        .waitFor();
 
       // Verify the backup table has at least one row with a backup ID
       const backupTable = adminPage.locator('table');
-      await expect(backupTable).toBeVisible({ timeout: 1000 });
+      await expect(backupTable).toBeVisible();
 
       const backupRows = backupTable.locator('tbody tr');
       const rowCount = await backupRows.count();
@@ -82,9 +84,7 @@ test.describe('Admin backup management via UI', () => {
 
       const remainingRows = await backupRows.count();
       if (remainingRows === 0) {
-        await expect(adminPage.getByText('No backups available')).toBeVisible({
-          timeout: 2000,
-        });
+        await expect(adminPage.getByText('No backups available')).toBeVisible();
       }
     } finally {
       await appPage.close();
@@ -111,7 +111,7 @@ test.describe('Admin backup management via UI', () => {
       await page
         .getByText(rmConfig.customersOverview.name)
         .first()
-        .waitFor({ timeout: 3000 });
+        .waitFor();
 
       const row = findReadModelRow(page, rmConfig.customersOverview);
       await row
@@ -120,7 +120,7 @@ test.describe('Admin backup management via UI', () => {
 
       await page
         .getByRole('heading', { name: rmConfig.customersOverview.name })
-        .waitFor({ timeout: 2000 });
+        .waitFor();
 
       // Click Manage Backups
       await page.getByRole('link', { name: 'Manage Backups' }).click();
@@ -128,7 +128,7 @@ test.describe('Admin backup management via UI', () => {
       // Verify we're on the backups page
       await expect(
         page.getByRole('heading', { name: /Backups:/ }),
-      ).toBeVisible({ timeout: 2000 });
+      ).toBeVisible();
 
       // Verify Create Backup button is present
       await expect(

@@ -48,7 +48,7 @@ test.describe('Admin replay', () => {
       let replayDone = false;
       for (let i = 0; i < 10; i++) {
         const statusRes = await request.get(
-          `${adminURL}/api/admin/replayStatus/customersOverview`,
+          `${adminURL}/api/admin/replayStatus/monolith/customersOverview`,
         );
         const status = await statusRes.json();
 
@@ -64,7 +64,7 @@ test.describe('Admin replay', () => {
       // Wait for read model service to finish processing
       for (let i = 0; i < 20; i++) {
         const rmStatusRes = await request.get(
-          `${adminURL}/admin/replay/customersOverview/status`,
+          `${adminURL}/admin/replay/monolith/customersOverview/status`,
         );
         const rmStatus = await rmStatusRes.json();
         if (rmStatus.status === 'idle') break;
@@ -86,7 +86,7 @@ test.describe('Admin replay', () => {
     await waitForAdmin(request, adminURL);
 
     const res = await request.get(
-      `${adminURL}/api/admin/replayStatus/nonExistentModel`,
+      `${adminURL}/api/admin/replayStatus/_unknown/nonExistentModel`,
     );
     expect(res.ok()).toBeTruthy();
 
@@ -150,7 +150,7 @@ test.describe('Admin replay', () => {
       let finalStatus;
       for (let i = 0; i < 10; i++) {
         const statusRes = await request.get(
-          `${adminURL}/api/admin/replayStatus/customersOverview`,
+          `${adminURL}/api/admin/replayStatus/monolith/customersOverview`,
         );
         const status = await statusRes.json();
 
@@ -172,7 +172,7 @@ test.describe('Admin replay', () => {
       // which the read model service handles asynchronously.
       for (let i = 0; i < 20; i++) {
         const rmStatusRes = await request.get(
-          `${adminURL}/admin/replay/customersOverview/status`,
+          `${adminURL}/admin/replay/monolith/customersOverview/status`,
         );
         const rmStatus = await rmStatusRes.json();
         if (rmStatus.status === 'idle') break;

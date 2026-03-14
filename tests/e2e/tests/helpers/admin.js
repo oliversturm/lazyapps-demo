@@ -26,7 +26,7 @@ export const waitForAdmin = async (request, adminURL) => {
     await request.get(adminURL);
   } else {
     // Monolith: verify admin API is ready
-    await request.get(`${adminURL}/api/admin/replayStatus/_healthcheck`);
+    await request.get(`${adminURL}/api/admin/replayStatus/_hc/_healthcheck`);
   }
 };
 
@@ -64,14 +64,18 @@ export const getReadModelConfig = (baseURL) => {
     return {
       customersOverview: {
         name: 'overview',
+        endpointName: 'customers',
         service: 'readmodel-customers',
         serviceUrl: 'http://readmodel-customers',
+        adminUrl: 'http://admin-ui:3000',
         cpUrl: 'http://admin-ui:3000',
       },
       ordersOverview: {
         name: 'overview',
+        endpointName: 'orders',
         service: 'readmodel-orders',
         serviceUrl: 'http://readmodel-orders',
+        adminUrl: 'http://admin-ui:3000',
         cpUrl: 'http://admin-ui:3000',
       },
     };
@@ -79,14 +83,18 @@ export const getReadModelConfig = (baseURL) => {
   return {
     customersOverview: {
       name: 'customersOverview',
+      endpointName: 'monolith',
       service: 'monolith',
       serviceUrl: 'http://monolith:3005',
+      adminUrl: 'http://monolith:3005',
       cpUrl: 'http://monolith:3005',
     },
     ordersOverview: {
       name: 'ordersOverview',
+      endpointName: 'monolith',
       service: 'monolith',
       serviceUrl: 'http://monolith:3005',
+      adminUrl: 'http://monolith:3005',
       cpUrl: 'http://monolith:3005',
     },
   };
@@ -110,6 +118,115 @@ export const findReadModelRow = (page, rmInfo) => {
 };
 
 /**
+ * Poll the read models endpoint until a specific read model reaches the
+ * target lifecycle state, or until maxPolls is reached. Returns the final
+ * state or null if timed out.
+ */
+const pollForState = async (
+  request,
+  serviceUrl,
+  readModel,
+  targetState,
+  maxPolls = 30,
+) => {
+  for (let i = 0; i < maxPolls; i++) {
+    const res = await request.get(`${serviceUrl}/admin/readmodels`);
+    const models = await res.json();
+    const model = models.find((r) => r.name === readModel);
+    if (model && model.state === targetState) return model.state;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  return null;
+};
+
+/**
+ * Ensure a read model is in 'live' state. If it is not live, activate it
+ * via the admin API and poll until it reaches 'live'. This is needed because
+ * when the admin section is configured, bootstrap enables lifecycle
+ * management and read models start in 'waiting' state. Auto-activation may
+ * not have completed by the time tests start running.
+ */
+export const ensureLive = async (request, rmInfo) => {
+  const rmRes = await request.get(`${rmInfo.serviceUrl}/admin/readmodels`);
+  const readModels = await rmRes.json();
+  const rm = readModels.find((r) => r.name === rmInfo.name);
+
+  if (rm && rm.state === 'live') return;
+
+  await request.post(
+    `${rmInfo.cpUrl}/admin/readmodels/${rmInfo.endpointName}/${rmInfo.name}/activate`,
+  );
+  const finalState = await pollForState(
+    request,
+    rmInfo.serviceUrl,
+    rmInfo.name,
+    'live',
+  );
+  if (finalState !== 'live')
+    throw new Error(`Read model ${rmInfo.name} did not reach live state`);
+};
+
+/**
+ * Wait for a replay to complete by polling the admin service's replay
+ * orchestration status (/api/admin/replayStatus/:name).
+ *
+ * Two phases:
+ * 1. Wait for the replay to start (status becomes non-idle). This handles
+ *    the delay between clicking "Start Replay" in the UI and the admin
+ *    backend actually beginning the replay. Bounded to 5 seconds — if
+ *    status is still idle after that, assume the replay completed very
+ *    quickly (possible with few events).
+ * 2. Wait for the replay to finish (status reaches 'completed' or 'idle').
+ */
+export const waitForReplayComplete = async (
+  request,
+  rmInfo,
+  maxWaitMs = 30000,
+) => {
+  const deadline = Date.now() + maxWaitMs;
+  const statusUrl = `${rmInfo.cpUrl}/api/admin/replayStatus/${rmInfo.endpointName}/${rmInfo.name}`;
+
+  // Phase 1: Wait for replay to start (up to 5 seconds)
+  const startDeadline = Date.now() + 5000;
+  let sawNonIdle = false;
+  while (Date.now() < startDeadline) {
+    const res = await request.get(statusUrl);
+    const status = await res.json();
+    if (status.status !== 'idle') {
+      sawNonIdle = true;
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  // Phase 2: Wait for orchestration to complete
+  if (sawNonIdle) {
+    while (Date.now() < deadline) {
+      const res = await request.get(statusUrl);
+      const status = await res.json();
+      if (status.status === 'completed' || status.status === 'idle') break;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+  }
+
+  // Phase 3: Wait for projection handler to finish processing replay events.
+  // The orchestration status may show 'completed' before the RM has finished
+  // processing all replayed events through the event bus.
+  while (Date.now() < deadline) {
+    const res = await request.get(
+      `${rmInfo.adminUrl}/admin/replay/${rmInfo.endpointName}/${rmInfo.name}/status`,
+    );
+    const status = await res.json();
+    if (status.status === 'idle' || status.status === 'completed') return;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+
+  throw new Error(
+    `Replay did not complete within ${maxWaitMs}ms for ${rmInfo.name}`,
+  );
+};
+
+/**
  * Ensure a read model is not stuck in a stale replay state. This can happen
  * when a test calls `prepare` but fails before the replay completes or is
  * cancelled. The prepare step sets the in-memory replay flag in the admin
@@ -121,13 +238,13 @@ export const findReadModelRow = (page, rmInfo) => {
  */
 export const ensureCleanReplayState = async (request, rmInfo) => {
   const rmStatusRes = await request.get(
-    `${rmInfo.serviceUrl}/admin/replay/${rmInfo.name}/status`,
+    `${rmInfo.adminUrl}/admin/replay/${rmInfo.endpointName}/${rmInfo.name}/status`,
   );
   const rmStatus = await rmStatusRes.json();
   if (rmStatus.status === 'idle') return;
 
   // Force-clear the replay state via the reset endpoint
   await request.delete(
-    `${rmInfo.serviceUrl}/admin/replay/${rmInfo.name}/state`,
+    `${rmInfo.adminUrl}/admin/replay/${rmInfo.endpointName}/${rmInfo.name}/state`,
   );
 };

@@ -7,10 +7,11 @@ test.describe('Admin backup lifecycle', () => {
     await waitForAdmin(request, adminURL);
 
     const readModel = 'customersOverview';
+    const endpointName = 'monolith';
 
     // Create backup
     const createRes = await request.post(
-      `${adminURL}/admin/backup/${readModel}`,
+      `${adminURL}/admin/backup/${endpointName}/${readModel}`,
       { data: {} },
     );
     expect(createRes.ok()).toBeTruthy();
@@ -22,7 +23,7 @@ test.describe('Admin backup lifecycle', () => {
 
     // List backups — should contain the new one
     const listRes = await request.get(
-      `${adminURL}/admin/backups/${readModel}`,
+      `${adminURL}/admin/backups/${endpointName}/${readModel}`,
     );
     expect(listRes.ok()).toBeTruthy();
 
@@ -31,13 +32,13 @@ test.describe('Admin backup lifecycle', () => {
 
     // Delete the backup
     const deleteRes = await request.delete(
-      `${adminURL}/admin/backup/${backupId}`,
+      `${adminURL}/admin/backup/${backupId}?readModelName=${readModel}&endpointName=${endpointName}`,
     );
     expect(deleteRes.status()).toBe(204);
 
     // Verify it is gone
     const listAfterRes = await request.get(
-      `${adminURL}/admin/backups/${readModel}`,
+      `${adminURL}/admin/backups/${endpointName}/${readModel}`,
     );
     const backupsAfter = await listAfterRes.json();
     expect(backupsAfter.some((b) => b.backupId === backupId)).toBeFalsy();
@@ -48,7 +49,7 @@ test.describe('Admin backup lifecycle', () => {
     await waitForAdmin(request, adminURL);
 
     const res = await request.post(
-      `${adminURL}/admin/backup/nonExistentModel`,
+      `${adminURL}/admin/backup/_unknown/nonExistentModel`,
       { data: {} },
     );
     expect(res.status()).toBe(404);

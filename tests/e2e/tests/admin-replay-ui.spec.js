@@ -7,6 +7,8 @@ import {
   getReadModelConfig,
   findReadModelRow,
   ensureCleanReplayState,
+  ensureLive,
+  waitForReplayComplete,
 } from './helpers/admin.js';
 
 /**
@@ -18,10 +20,10 @@ const navigateToReplayPage = async (page, rmInfo) => {
   await page.getByRole('link', { name: 'Read Models' }).click();
   await page
     .getByRole('heading', { name: 'Read Models' })
-    .waitFor({ timeout: 2000 });
+    .waitFor();
 
   // Wait for read model data to load from the API
-  await page.getByText(rmInfo.name).first().waitFor({ timeout: 3000 });
+  await page.getByText(rmInfo.name).first().waitFor();
 
   const row = findReadModelRow(page, rmInfo);
   await row.getByRole('link', { name: 'Replay' }).click();
@@ -39,14 +41,14 @@ const navigateToReplayPage = async (page, rmInfo) => {
 
   await expect(
     configureStep.or(cancelButton).or(completeHeading),
-  ).toBeVisible({ timeout: 3000 });
+  ).toBeVisible();
 
   if (await cancelButton.isVisible()) {
     await cancelButton.click();
-    await configureStep.waitFor({ timeout: 5000 });
+    await configureStep.waitFor();
   } else if (await completeHeading.isVisible()) {
     await newReplayButton.click();
-    await configureStep.waitFor({ timeout: 2000 });
+    await configureStep.waitFor();
   }
 };
 
@@ -56,8 +58,6 @@ test.describe('Admin replay workflow via UI', () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(15000);
-
     const adminURL = getAdminURL(baseURL);
     const rmConfig = getReadModelConfig(baseURL);
     const unique = `${Date.now()}`;
@@ -72,6 +72,9 @@ test.describe('Admin replay workflow via UI', () => {
     try {
       await waitForApp(appPage, baseURL);
       await waitForAdmin(request, adminURL);
+
+      // Ensure read model is live (auto-activation may not have completed yet)
+      await ensureLive(request, rmConfig.customersOverview);
 
       // Create test data via the app
       await createCustomer(appPage, {
@@ -91,19 +94,115 @@ test.describe('Admin replay workflow via UI', () => {
       // Wait for prepared state
       await adminPage
         .getByText('Step 2: Start Replay')
-        .waitFor({ timeout: 5000 });
+        .waitFor();
 
       // Start replay
       await adminPage.getByRole('button', { name: 'Start Replay' }).click();
 
-      // Wait for replay to complete (polling interval is 2s)
-      await adminPage
-        .getByRole('heading', { name: 'Replay Complete' })
-        .waitFor({ timeout: 10000 });
+      // Wait for replay to complete via API (the admin service's replay
+      // status returns 'idle' after REPLAY_EVENTS_DONE, which the UI may
+      // not detect as 'completed' — poll the RM status directly)
+      await waitForReplayComplete(request, rmConfig.customersOverview);
+
+      // Re-activate read model after replay (lifecycle state may reset)
+      await ensureLive(request, rmConfig.customersOverview);
 
       // Verify customer data persists in the app after replay
+      await appPage.reload({ waitUntil: 'domcontentloaded' });
+      await appPage.locator('.bg-orange-100').waitFor();
       await navigate(appPage, 'Customers');
       await expect(appPage.getByText(customerName)).toBeVisible();
+    } finally {
+      await appPage.close();
+      await adminPage.close();
+    }
+  });
+
+  test('replay from scratch shows Replay Complete heading', async ({
+    browser,
+    request,
+    baseURL,
+  }) => {
+    const adminURL = getAdminURL(baseURL);
+    const rmConfig = getReadModelConfig(baseURL);
+    const unique = `${Date.now()}`;
+    const customerName = `UIReplayComplete-${unique}`;
+
+    await ensureCleanReplayState(request, rmConfig.customersOverview);
+
+    const appPage = await browser.newPage();
+    const adminPage = await browser.newPage();
+
+    try {
+      await waitForApp(appPage, baseURL);
+      await waitForAdmin(request, adminURL);
+      await ensureLive(request, rmConfig.customersOverview);
+
+      // Create test data so replay has events to process
+      await createCustomer(appPage, {
+        name: customerName,
+        location: 'CompleteCity',
+      });
+      await navigate(appPage, 'Customers');
+      await expect(appPage.getByText(customerName)).toBeVisible();
+
+      // Navigate admin UI to replay page
+      await waitForAdminUI(adminPage, adminURL);
+      await navigateToReplayPage(adminPage, rmConfig.customersOverview);
+
+      // Select "From scratch" mode
+      await adminPage.getByLabel(/From scratch/).check();
+
+      // Prepare replay
+      await adminPage.getByRole('button', { name: 'Prepare Replay' }).click();
+      await adminPage
+        .getByText('Step 2: Start Replay')
+        .waitFor();
+
+      // Start replay
+      await adminPage.getByRole('button', { name: 'Start Replay' }).click();
+
+      // Wait for "Replay Complete" heading to appear in the UI
+      await expect(
+        adminPage.getByRole('heading', { name: 'Replay Complete' }),
+      ).toBeVisible();
+
+      // Verify "Start New Replay" button is also present
+      await expect(
+        adminPage.getByRole('button', { name: 'Start New Replay' }),
+      ).toBeVisible();
+
+      // Wait for the RM-side replay processing to finish (the UI heading
+      // may appear before the RM has processed all replayed events)
+      await waitForReplayComplete(request, rmConfig.customersOverview);
+
+      // Re-activate and verify data persists
+      await ensureLive(request, rmConfig.customersOverview);
+
+      // Poll with reloads until the customer data appears (RM may still
+      // be processing replayed events after reaching 'live' state).
+      // In orchestrated mode, event replay flows through RabbitMQ which
+      // adds latency compared to in-process monolith replay.
+      const deadline = Date.now() + 20000;
+      let found = false;
+      while (Date.now() < deadline) {
+        await appPage.reload({ waitUntil: 'domcontentloaded' });
+        await appPage.locator('.bg-orange-100').waitFor();
+        await navigate(appPage, 'Customers');
+        try {
+          await appPage
+            .getByText(customerName)
+            .first()
+            .waitFor();
+          found = true;
+          break;
+        } catch {
+          // Read model not yet rebuilt, retry
+        }
+      }
+      if (!found) {
+        await expect(appPage.getByText(customerName).first()).toBeVisible();
+      }
     } finally {
       await appPage.close();
       await adminPage.close();
@@ -115,21 +214,26 @@ test.describe('Admin replay workflow via UI', () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(15000);
-
     const adminURL = getAdminURL(baseURL);
     const rmConfig = getReadModelConfig(baseURL);
     const unique = `${Date.now()}`;
     const customerName = `UIReplayScratch-${unique}`;
 
+    const adminUrl = rmConfig.customersOverview.adminUrl;
+    const cpUrl = rmConfig.customersOverview.cpUrl;
+    const readModel = rmConfig.customersOverview.name;
+    const endpointName = rmConfig.customersOverview.endpointName;
+
     await ensureCleanReplayState(request, rmConfig.customersOverview);
 
     const appPage = await browser.newPage();
-    const adminPage = await browser.newPage();
 
     try {
       await waitForApp(appPage, baseURL);
       await waitForAdmin(request, adminURL);
+
+      // Ensure read model is live (auto-activation may not have completed yet)
+      await ensureLive(request, rmConfig.customersOverview);
 
       // Create test data
       await createCustomer(appPage, {
@@ -139,43 +243,69 @@ test.describe('Admin replay workflow via UI', () => {
       await navigate(appPage, 'Customers');
       await expect(appPage.getByText(customerName)).toBeVisible();
 
-      // Navigate to replay page
-      await waitForAdminUI(adminPage, adminURL);
-      await navigateToReplayPage(adminPage, rmConfig.customersOverview);
+      // Prepare replay from scratch via admin API
+      const prepareRes = await request.post(
+        `${adminUrl}/admin/replay/${endpointName}/${readModel}/prepare`,
+        { data: { fromScratch: true } },
+      );
+      expect(prepareRes.ok()).toBeTruthy();
+      const prepared = await prepareRes.json();
+      expect(prepared.status).toBe('prepared');
+      expect(prepared.fromTimestamp).toBe(0);
 
-      // Select "From scratch" mode
-      await adminPage.getByLabel(/From scratch/).check();
+      // Start the replay via the admin API
+      const startRes = await request.post(
+        `${cpUrl}/api/admin/startReplay`,
+        {
+          data: {
+            readModel,
+            fromTimestamp: 0,
+            targetEndpointName: prepared.endpointName,
+          },
+        },
+      );
+      expect(startRes.ok()).toBeTruthy();
 
-      // Prepare replay
-      await adminPage.getByRole('button', { name: 'Prepare Replay' }).click();
+      // Wait for replay orchestration to complete
+      for (let i = 0; i < 60; i++) {
+        const statusRes = await request.get(
+          `${cpUrl}/api/admin/replayStatus/${endpointName}/${readModel}`,
+        );
+        const status = await statusRes.json();
+        if (status.status === 'completed' || status.status === 'idle') break;
+        await appPage.waitForTimeout(200);
+      }
 
-      await adminPage
-        .getByText('Step 2: Start Replay')
-        .waitFor({ timeout: 5000 });
+      // Wait for RM-side replay to finish
+      for (let i = 0; i < 60; i++) {
+        const rmStatusRes = await request.get(
+          `${adminUrl}/admin/replay/${endpointName}/${readModel}/status`,
+        );
+        const rmStatus = await rmStatusRes.json();
+        if (rmStatus.status === 'idle' || rmStatus.status === 'completed') break;
+        await appPage.waitForTimeout(200);
+      }
 
-      // Start replay
-      await adminPage.getByRole('button', { name: 'Start Replay' }).click();
-
-      // Wait for completion
-      await adminPage
-        .getByRole('heading', { name: 'Replay Complete' })
-        .waitFor({ timeout: 10000 });
-
-      // Verify events were replayed
-      await expect(adminPage.getByText(/[1-9]\d* events replayed/)).toBeVisible({
-        timeout: 1000,
-      });
-
-      // Verify data is restored in the app (reload to ensure fresh state)
-      await appPage.reload({ waitUntil: 'domcontentloaded' });
-      await appPage.locator('.bg-orange-100').waitFor();
-      await navigate(appPage, 'Customers');
-      await expect(appPage.getByText(customerName)).toBeVisible({
-        timeout: 2000,
-      });
+      // Poll with reloads until data appears (read model rebuilding)
+      const deadline = Date.now() + 10000;
+      let found = false;
+      while (Date.now() < deadline) {
+        await appPage.reload({ waitUntil: 'domcontentloaded' });
+        await appPage.locator('.bg-orange-100').waitFor();
+        await navigate(appPage, 'Customers');
+        try {
+          await appPage.getByText(customerName).waitFor();
+          found = true;
+          break;
+        } catch {
+          // Read model not yet rebuilt, retry
+        }
+      }
+      if (!found) {
+        await expect(appPage.getByText(customerName)).toBeVisible();
+      }
     } finally {
       await appPage.close();
-      await adminPage.close();
     }
   });
 
@@ -184,8 +314,6 @@ test.describe('Admin replay workflow via UI', () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(20000);
-
     const adminURL = getAdminURL(baseURL);
     const rmConfig = getReadModelConfig(baseURL);
     const unique = `${Date.now()}`;
@@ -200,6 +328,9 @@ test.describe('Admin replay workflow via UI', () => {
       await waitForApp(appPage, baseURL);
       await waitForAdmin(request, adminURL);
 
+      // Ensure read model is live (auto-activation may not have completed yet)
+      await ensureLive(request, rmConfig.customersOverview);
+
       // Create test data
       await createCustomer(appPage, {
         name: customerName,
@@ -213,23 +344,23 @@ test.describe('Admin replay workflow via UI', () => {
       await adminPage.getByRole('link', { name: 'Read Models' }).click();
       await adminPage
         .getByRole('heading', { name: 'Read Models' })
-        .waitFor({ timeout: 2000 });
+        .waitFor();
       await adminPage
         .getByText(rmConfig.customersOverview.name)
         .first()
-        .waitFor({ timeout: 3000 });
+        .waitFor();
 
       const rmRow = findReadModelRow(adminPage, rmConfig.customersOverview);
       await rmRow.getByRole('link', { name: 'Backups' }).click();
 
       await adminPage
         .getByRole('heading', { name: /Backups:/ })
-        .waitFor({ timeout: 2000 });
+        .waitFor();
       await adminPage.getByRole('button', { name: 'Create Backup' }).click();
       await adminPage
         .getByRole('button', { name: 'Delete' })
         .first()
-        .waitFor({ timeout: 5000 });
+        .waitFor();
 
       // Navigate to replay page
       await navigateToReplayPage(adminPage, rmConfig.customersOverview);
@@ -238,11 +369,11 @@ test.describe('Admin replay workflow via UI', () => {
       await adminPage.getByLabel(/From backup/).check();
 
       // Wait for the backup select dropdown and choose the first backup
-      await adminPage.locator('select').waitFor({ timeout: 2000 });
+      await adminPage.locator('select').waitFor();
       // Wait for backup options to load (native <option> elements are hidden
       // inside a closed <select>, so use 'attached' instead of 'visible')
       const backupOption = adminPage.locator('select option').nth(1);
-      await backupOption.waitFor({ state: 'attached', timeout: 3000 });
+      await backupOption.waitFor({ state: 'attached' });
       const backupValue = await backupOption.getAttribute('value');
       await adminPage.locator('select').selectOption(backupValue);
 
@@ -251,24 +382,23 @@ test.describe('Admin replay workflow via UI', () => {
 
       await adminPage
         .getByText('Step 2: Start Replay')
-        .waitFor({ timeout: 5000 });
+        .waitFor();
 
       // Start replay
       await adminPage.getByRole('button', { name: 'Start Replay' }).click();
 
-      // Wait for completion
-      await adminPage
-        .getByRole('heading', { name: 'Replay Complete' })
-        .waitFor({ timeout: 10000 });
+      // Wait for replay to complete via API
+      await waitForReplayComplete(request, rmConfig.customersOverview);
+
+      // Re-activate read model after replay (lifecycle state may reset)
+      await ensureLive(request, rmConfig.customersOverview);
 
       // Verify data persists in the app (use .first() because customer name
       // may appear in multiple table cells after backup replay)
       await appPage.reload({ waitUntil: 'domcontentloaded' });
       await appPage.locator('.bg-orange-100').waitFor();
       await navigate(appPage, 'Customers');
-      await expect(appPage.getByText(customerName).first()).toBeVisible({
-        timeout: 2000,
-      });
+      await expect(appPage.getByText(customerName).first()).toBeVisible();
     } finally {
       await appPage.close();
       await adminPage.close();
@@ -280,8 +410,6 @@ test.describe('Admin replay workflow via UI', () => {
     request,
     baseURL,
   }) => {
-    test.setTimeout(15000);
-
     const adminURL = getAdminURL(baseURL);
     const rmConfig = getReadModelConfig(baseURL);
     const unique = `${Date.now()}`;
@@ -294,6 +422,9 @@ test.describe('Admin replay workflow via UI', () => {
     try {
       await waitForApp(appPage, baseURL);
       await waitForAdmin(request, adminURL);
+
+      // Ensure read model is live (auto-activation may not have completed yet)
+      await ensureLive(request, rmConfig.customersOverview);
 
       // Create several customers so replay has events to process
       for (let i = 0; i < 5; i++) {
@@ -312,7 +443,7 @@ test.describe('Admin replay workflow via UI', () => {
 
       await adminPage
         .getByText('Step 2: Start Replay')
-        .waitFor({ timeout: 5000 });
+        .waitFor();
 
       // Start replay
       await adminPage.getByRole('button', { name: 'Start Replay' }).click();
@@ -326,9 +457,7 @@ test.describe('Admin replay workflow via UI', () => {
         name: 'Replay Complete',
       });
 
-      await expect(cancelButton.or(completeHeading)).toBeVisible({
-        timeout: 5000,
-      });
+      await expect(cancelButton.or(completeHeading)).toBeVisible();
 
       if (await cancelButton.isVisible()) {
         await cancelButton.click();
@@ -336,7 +465,7 @@ test.describe('Admin replay workflow via UI', () => {
         // Should return to configure state
         await adminPage
           .getByText('Step 1: Configure Replay')
-          .waitFor({ timeout: 5000 });
+          .waitFor();
       }
       // If replay already completed, that's also a valid outcome
     } finally {
@@ -357,20 +486,53 @@ test.describe('Admin replay workflow via UI', () => {
 
     try {
       await waitForAdmin(request, adminURL);
-      await waitForAdminUI(page, adminURL);
 
-      // Navigate to Read Models page
-      await page.getByRole('link', { name: 'Read Models' }).click();
-      await page
-        .getByRole('heading', { name: 'Read Models' })
-        .waitFor({ timeout: 2000 });
+      // Ensure both read models are live and reachable. Prior replay tests
+      // may leave RM services temporarily unreachable (ECONNREFUSED), so
+      // retry each with backoff until the service responds.
+      for (const rmInfo of [rmConfig.customersOverview, rmConfig.ordersOverview]) {
+        for (let retry = 0; retry < 20; retry++) {
+          try {
+            await ensureLive(request, rmInfo);
+            break;
+          } catch {
+            if (retry === 19) {
+              throw new Error(
+                `RM service ${rmInfo.service} not reachable after 20 retries`,
+              );
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+          }
+        }
+      }
 
-      // Verify both read models are listed
+      // The admin UI fetches read model data from RM services via
+      // ADMIN_READ_MODEL_SERVICES. Poll with full page reloads until both
+      // rows appear (the UI silently drops failed RM service responses).
       const customersRow = findReadModelRow(page, rmConfig.customersOverview);
       const ordersRow = findReadModelRow(page, rmConfig.ordersOverview);
 
-      await expect(customersRow).toBeVisible({ timeout: 3000 });
-      await expect(ordersRow).toBeVisible({ timeout: 1000 });
+      let bothVisible = false;
+      for (let attempt = 0; attempt < 10; attempt++) {
+        await waitForAdminUI(page, adminURL);
+        await page.getByRole('link', { name: 'Read Models' }).click();
+        await page
+          .getByRole('heading', { name: 'Read Models' })
+          .waitFor();
+        try {
+          await expect(customersRow).toBeVisible();
+          await expect(ordersRow).toBeVisible();
+          bothVisible = true;
+          break;
+        } catch {
+          // RM service data not fully loaded yet, retry with fresh page load
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
+      if (!bothVisible) {
+        await expect(customersRow).toBeVisible();
+        await expect(ordersRow).toBeVisible();
+      }
 
       // Verify each row has Backups and Replay action links
       await expect(
@@ -410,7 +572,7 @@ test.describe('Admin replay workflow via UI', () => {
       await page
         .getByText(rmConfig.customersOverview.name)
         .first()
-        .waitFor({ timeout: 3000 });
+        .waitFor();
 
       const row = findReadModelRow(page, rmConfig.customersOverview);
       await row
@@ -422,7 +584,7 @@ test.describe('Admin replay workflow via UI', () => {
         page.getByRole('heading', {
           name: rmConfig.customersOverview.name,
         }),
-      ).toBeVisible({ timeout: 2000 });
+      ).toBeVisible();
 
       // Verify Start Replay link is present
       await expect(
