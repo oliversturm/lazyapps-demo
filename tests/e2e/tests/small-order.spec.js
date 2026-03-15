@@ -34,7 +34,7 @@ test.describe('Small order workflow', () => {
 
       // page2: Customer arrives via change notification (already on Customers)
       await expect(page2.getByText(customerName)).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // page2: Navigate to Orders BEFORE the order exists
@@ -48,7 +48,7 @@ test.describe('Small order workflow', () => {
 
       // page2: Order arrives via change notification (already on Orders)
       await expect(page2.getByText(orderText)).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // page1: Navigate to Orders, verify auto-confirmed
@@ -57,12 +57,12 @@ test.describe('Small order workflow', () => {
         has: page1.getByText(orderText, { exact: true }),
       });
       await expect(row1.getByText('confirmed', { exact: true })).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // page1: Wait for USD info to appear (exchange rate side effect)
       const lastCell1 = row1.locator('td').last();
-      await expect(lastCell1).not.toHaveText('', { timeout: 5000 });
+      await expect(lastCell1).not.toHaveText('', { timeout: 1000 });
     } finally {
       await context1.close();
       await context2.close();

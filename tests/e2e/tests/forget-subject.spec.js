@@ -61,11 +61,11 @@ test.describe('Forget subject workflow', () => {
 
       // Verify order is visible in Orders view
       await navigate(page1, 'Orders');
-      await expect(page1.getByText(orderText)).toBeVisible({ timeout: 10000 });
+      await expect(page1.getByText(orderText)).toBeVisible({ timeout: 1000 });
 
       // Navigate to Customers, find the customer row
       await navigate(page1, 'Customers');
-      await page1.getByText(customerName).waitFor({ timeout: 10000 });
+      await page1.getByText(customerName).first().waitFor({ timeout: 1000 });
 
       const row = page1.locator('tr', {
         has: page1.getByText(customerName, { exact: true }),
@@ -79,14 +79,14 @@ test.describe('Forget subject workflow', () => {
 
       // Customer name should be replaced with placeholder after key shredding
       await expect(page1.getByText(customerName)).toBeHidden({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // Customer row should still exist with placeholder values
       const forgottenRow = page1
         .locator('tr', { has: page1.getByText('[deleted]') })
         .first();
-      await expect(forgottenRow).toBeVisible({ timeout: 10000 });
+      await expect(forgottenRow).toBeVisible({ timeout: 1000 });
 
       // Edit button should be disabled for forgotten customer
       const editButton = forgottenRow.getByText('Edit', { exact: true });
@@ -100,14 +100,14 @@ test.describe('Forget subject workflow', () => {
 
       // Orders should still be visible with order text intact
       await navigate(page1, 'Orders');
-      await expect(page1.getByText(orderText)).toBeVisible({ timeout: 10000 });
+      await expect(page1.getByText(orderText)).toBeVisible({ timeout: 1000 });
 
       // Customer name in orders should show placeholder
       await expect(
         page1
           .locator('tr', { has: page1.getByText(orderText) })
           .getByText('[deleted]'),
-      ).toBeVisible({ timeout: 10000 });
+      ).toBeVisible({ timeout: 1000 });
     } finally {
       await context1.close();
     }
@@ -141,11 +141,11 @@ test.describe('Forget subject workflow', () => {
 
       // Verify order exists
       await navigate(page1, 'Orders');
-      await expect(page1.getByText(orderText)).toBeVisible({ timeout: 10000 });
+      await expect(page1.getByText(orderText)).toBeVisible({ timeout: 1000 });
 
       // Forget the customer
       await navigate(page1, 'Customers');
-      await page1.getByText(customerName).waitFor({ timeout: 10000 });
+      await page1.getByText(customerName).first().waitFor({ timeout: 1000 });
 
       page1.on('dialog', (dialog) => dialog.accept());
 
@@ -156,13 +156,13 @@ test.describe('Forget subject workflow', () => {
 
       // Wait for the customer to show as forgotten
       await expect(page1.getByText(customerName)).toBeHidden({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       const forgottenRow = page1
         .locator('tr', { has: page1.getByText('[deleted]') })
         .first();
-      await expect(forgottenRow).toBeVisible({ timeout: 10000 });
+      await expect(forgottenRow).toBeVisible({ timeout: 1000 });
 
       // Place Order button should be disabled for forgotten customer
       const placeOrderButton = forgottenRow.getByText('Place Order', {
@@ -176,14 +176,14 @@ test.describe('Forget subject workflow', () => {
       const orderRow = page1.locator('tr', {
         has: page1.getByText(orderText, { exact: true }),
       });
-      await expect(orderRow).toBeVisible({ timeout: 10000 });
+      await expect(orderRow).toBeVisible({ timeout: 1000 });
 
       // Order text should still be readable (not encrypted under personal context)
       await expect(orderRow.getByText(orderText)).toBeVisible();
 
       // Customer name within the order row should show [deleted]
       await expect(orderRow.getByText('[deleted]')).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
     } finally {
       await context1.close();
@@ -227,12 +227,12 @@ test.describe('Forget subject workflow', () => {
 
       // Verify both orders appear in Orders view
       await navigate(page1, 'Orders');
-      await expect(page1.getByText(orderText1)).toBeVisible({ timeout: 10000 });
-      await expect(page1.getByText(orderText2)).toBeVisible({ timeout: 10000 });
+      await expect(page1.getByText(orderText1)).toBeVisible({ timeout: 1000 });
+      await expect(page1.getByText(orderText2)).toBeVisible({ timeout: 1000 });
 
       // Forget the customer (shreds personal context keys)
       await navigate(page1, 'Customers');
-      await page1.getByText(customerName).first().waitFor({ timeout: 10000 });
+      await page1.getByText(customerName).first().waitFor({ timeout: 1000 });
 
       page1.on('dialog', (dialog) => dialog.accept());
 
@@ -243,14 +243,14 @@ test.describe('Forget subject workflow', () => {
 
       // Wait for forget to take effect
       await expect(page1.getByText(customerName).first()).toBeHidden({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // Personal fields should show [deleted] placeholder
       const forgottenRow = page1
         .locator('tr', { has: page1.getByText('[deleted]') })
         .first();
-      await expect(forgottenRow).toBeVisible({ timeout: 10000 });
+      await expect(forgottenRow).toBeVisible({ timeout: 1000 });
 
       // Customer name should be anonymized
       await expect(page1.getByText(customerName).first()).toBeHidden();
@@ -266,8 +266,8 @@ test.describe('Forget subject workflow', () => {
         has: page1.getByText(orderText2, { exact: true }),
       });
 
-      await expect(orderRow1).toBeVisible({ timeout: 10000 });
-      await expect(orderRow2).toBeVisible({ timeout: 10000 });
+      await expect(orderRow1).toBeVisible({ timeout: 1000 });
+      await expect(orderRow2).toBeVisible({ timeout: 1000 });
 
       // Order text fields (not under personal context) should be readable
       await expect(orderRow1.getByText(orderText1)).toBeVisible();
@@ -275,15 +275,15 @@ test.describe('Forget subject workflow', () => {
 
       // Customer name column within order rows should show [deleted]
       await expect(orderRow1.getByText('[deleted]')).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
       await expect(orderRow2.getByText('[deleted]')).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // Order values (numeric, not PII) should still be visible
-      await expect(orderRow1.getByText('150')).toBeVisible();
-      await expect(orderRow2.getByText('300')).toBeVisible();
+      await expect(orderRow1.getByText('150', { exact: true })).toBeVisible();
+      await expect(orderRow2.getByText('300', { exact: true })).toBeVisible();
     } finally {
       await context1.close();
     }

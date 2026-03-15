@@ -18,26 +18,26 @@ importers:
   packages/monolith:
     dependencies:
       '@lazyapps/aggregatestore-inmemory':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260314105512
+        version: 0.3.0-branch-feature-encryption-20260314105512(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/change-notifier-socket-io':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/eventbus-mqemitter-redis':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.1.3-branch-feature-encryption-20260314105512
+        version: 0.1.3-branch-feature-encryption-20260314105512
       '@lazyapps/eventstore-mongodb':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/express':
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -112,11 +112,14 @@ importers:
   packages/orchestrated/change-notifier:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260314105512
+        version: 0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notifier-socket-io':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
+      '@lazyapps/encryption':
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -134,26 +137,32 @@ importers:
   packages/orchestrated/command-processor:
     dependencies:
       '@lazyapps/aggregatestore-inmemory':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260314105512
+        version: 0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))
+      '@lazyapps/encryption':
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/eventbus-rabbitmq':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/eventstore-mongodb':
-        specifier: ^0.1.3
-        version: 0.1.3
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/express':
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
       '@lazyapps/observability':
         specifier: ^0.3.0
         version: 0.3.0
+      jwks-rsa:
+        specifier: ^3.1.0
+        version: 3.2.2
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -173,6 +182,9 @@ importers:
       formik:
         specifier: ^2.4.3
         version: 2.4.9(@types/react@18.3.28)(react@18.3.1)
+      keycloak-js:
+        specifier: ^26.2.3
+        version: 26.2.3
       nanoid:
         specifier: ^5.0.7
         version: 5.1.6
@@ -234,6 +246,9 @@ importers:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^2.4.4
         version: 2.5.3(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
+      keycloak-js:
+        specifier: ^26.2.3
+        version: 26.2.3
       nanoid:
         specifier: ^5.0.7
         version: 5.1.6
@@ -278,20 +293,23 @@ importers:
   packages/orchestrated/readmodel-customers:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260314105512
+        version: 0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/command-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
+      '@lazyapps/encryption':
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/eventbus-rabbitmq':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/express':
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -299,11 +317,14 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       '@lazyapps/readmodels':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/readmodelstorage-mongodb':
         specifier: ^0.1.2
         version: 0.1.2
+      jwks-rsa:
+        specifier: ^3.1.0
+        version: 3.2.2
     devDependencies:
       eslint:
         specifier: ^8.46.0
@@ -315,20 +336,23 @@ importers:
   packages/orchestrated/readmodel-orders:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: ^0.2.0
-        version: 0.2.0(vite@5.4.21(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260314105512
+        version: 0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/command-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
+      '@lazyapps/encryption':
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/eventbus-rabbitmq':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/express':
-        specifier: ^0.1.4
-        version: 0.1.4
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -336,8 +360,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       '@lazyapps/readmodels':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-feature-encryption-20260314105512
+        version: 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/readmodelstorage-mongodb':
         specifier: ^0.1.2
         version: 0.1.2
@@ -353,6 +377,9 @@ importers:
       isomorphic-fetch:
         specifier: ^3.0.0
         version: 3.0.0
+      jwks-rsa:
+        specifier: ^3.1.0
+        version: 3.2.2
       xml-js:
         specifier: ^1.6.11
         version: 1.6.11
@@ -853,12 +880,12 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@lazyapps/aggregatestore-inmemory@0.1.2':
-    resolution: {integrity: sha512-T7A8IAAmR65Lb8RY5KfIX9qbE6o/YrMWU2/2KoBP1nIMH/mWXv1NUn2dVKtN+gbJyfFcsewtosvLd3/1Eh8Xmg==}
+  '@lazyapps/aggregatestore-inmemory@0.2.0-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-uD4sKvcUwaINnM54nA5qKzzmgmt6JVPU6ZFNPvVIucoTPNkgpS2JZt6tgksApCOLADb/G9LWRmdCUCyCdn/1qg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/bootstrap@0.2.0':
-    resolution: {integrity: sha512-zgZGtJQ094BEmYfV47xlhmWsAoEeLfZ7GYYWugWaW3hYY3tHPsrmcyt98R9D/9TqaxoIKUutavBUX8tYcJMb5w==}
+  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-VSVaIO7wcnK5WgdRZGpF+SmTTLhnoUpKJn4FOZintPzbwokHb8Ffyvq5Ltn0BbaIy/xoovzIHos88QWvL9S1kQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
     peerDependencies:
       '@sveltejs/kit': '>=2.0.0'
@@ -873,32 +900,41 @@ packages:
     resolution: {integrity: sha512-X+y7F28YpLHOhJj79ID97KgZmg6qQqjKhsNY11AFFh5uGBbK8Uu1CeJqWSEEflJbW9ajOAzxRGdl94S/U/CMRA==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/change-notifier-socket-io@0.1.3':
-    resolution: {integrity: sha512-QQ6zTWdhPOTd9RabneCu6JmA/8qVkDtju+GCBvr5Ataeo/d2Jzas4pXb8uIZNw1KicMFlTg7dJVbhI0AXxo4vg==}
+  '@lazyapps/change-notifier-socket-io@0.2.0-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-32tRWXXOsu6vQBmObWnRi4xI2chnk89AdRqv2yN48Mtt8Hwb/Eet706a5bTY3Y2hhv6XOoP+sZdY8SgAApdI/g==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/command-processor@0.1.2':
-    resolution: {integrity: sha512-pf/5oVlWxCfYusbzyH+bE5NPhe0yhX/D8HsDnagcyWFYbXO8pKcvI4CTRU6EcsTV05c4tLie+zmQZKqdB2YS8g==}
+  '@lazyapps/command-processor@0.2.0-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-4/HqYlchhr7E2TJgSYx+wUyTmhaDbe7RcdlVCvpvZL7gxWD37y4jrWuKquWqIaUvxTAO/RuExz9jSCkUdY5mZA==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/command-sender-fetch@0.1.2':
     resolution: {integrity: sha512-U6rMhQfR3ObZ5pxRKhf4gaFy76gy+pXP0eYecLDOvNz6W+hxgV/jwMoiN+dFbYBaHuk/Anm9K1kyzphUp/u/Ng==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.2':
-    resolution: {integrity: sha512-bhqp5mpZsXgR18zQULTRNP2qbHd3O/cjJ6e9l2QvQqRH0kXm4qgRegPujVUk0l0c3gZRfyRV0XMKT/pEM0TZfQ==}
+  '@lazyapps/encryption@0.2.0-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-ibp5sbYwVEYuFF/zhYqRTYrSqcQUae7pjLRPstrDPNNxQXav4GOwNMBAnUpcDkqu6pjHv/pX1Doy8q4SOCdZdg==}
+    engines: {node: '>=18.20.3 || >=20.18.0'}
+    peerDependencies:
+      mongodb: ^6.0.0
+    peerDependenciesMeta:
+      mongodb:
+        optional: true
+
+  '@lazyapps/eventbus-mqemitter-redis@0.1.3-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-A2DGD7RL4qRE7or1TwZL3CaxVbmATESNUFb9n21Mf11QAs/DzBpWCackRmgEV1i6+ntw2eDuy+glH43rm36O7w==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/eventbus-rabbitmq@0.1.2':
     resolution: {integrity: sha512-6qbFrU4wdvk+5O8dfy9gQb9Falz1LdXZMlmtUWQebNlHJZBrdKGdq7kfBIpgpqjnyMKIs0UNh3+D9LTL9SI0wg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventstore-mongodb@0.1.3':
-    resolution: {integrity: sha512-GwdzKTaMsoGjgOmILijGExlQbeZ4PnGFrjZ3nsvc1Gk5OXO327HQOZN/tnx2mVZUQgvNRA9CT5YCCbQPZVCAgw==}
+  '@lazyapps/eventstore-mongodb@0.2.0-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-afgX4c7HsN/nPb6pHTuXppfI2huLmmHfAaksALI4iR6LnRDlLftUrB21YOqlxQ0uX7dJEex1RW4HjWYT9+XqOA==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/express@0.1.4':
-    resolution: {integrity: sha512-bU2hwqItX3O0mT1hI3CHRaBArOa9WCjymhZnowLoukZ8ia4ajVPkNUFk6qdDByuGLAjYVWVGFP1rcuKmeoaXDg==}
+  '@lazyapps/express@0.2.0-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-WezzJK+3PbN7eo8/qs2CAdcMmX8iBguR5DnDXSF36KnaQD7b5vTdJpRg+8K3lq5GU4qOaecluyQ1XaskdBZe+w==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/log-highlight@0.1.1':
@@ -918,8 +954,8 @@ packages:
     resolution: {integrity: sha512-KQL2TC0WnU0aeF0sp/yNcp3Fx91l5dtx0w+Fz1hNLbsmEvUN/8tf93ZZc4K1qXlMjMBSmljgmPB5TmcYoKfjrg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/readmodels@0.1.2':
-    resolution: {integrity: sha512-52SvjIIZQyMplLoKuZxJMzib8d0flRbvT/B4jlr5z8Mkd0ghV2zT8xWclq5i6DIME+aYuC7Qn1ABfmPZzfj/KQ==}
+  '@lazyapps/readmodels@0.2.0-branch-feature-encryption-20260314105512':
+    resolution: {integrity: sha512-UdbnbvdssR2xu1xe+T5M71C8UMgjAuKj9z6Ih2eZOx3E/ILQsDrudoaiFDg6vsTnfYIrtL7Pegt1pgqeurwQPg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/readmodelstorage-mongodb@0.1.2':
@@ -1238,66 +1274,79 @@ packages:
     resolution: {integrity: sha512-F8sWbhZ7tyuEfsmOxwc2giKDQzN3+kuBLPwwZGyVkLlKGdV1nvnNwYD0fKQ8+XS6hp9nY7B+ZeK01EBUE7aHaw==}
     cpu: [arm]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm-musleabihf@4.57.1':
     resolution: {integrity: sha512-rGfNUfn0GIeXtBP1wL5MnzSj98+PZe/AXaGBCRmT0ts80lU5CATYGxXukeTX39XBKsxzFpEeK+Mrp9faXOlmrw==}
     cpu: [arm]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-arm64-gnu@4.57.1':
     resolution: {integrity: sha512-MMtej3YHWeg/0klK2Qodf3yrNzz6CGjo2UntLvk2RSPlhzgLvYEB3frRvbEF2wRKh1Z2fDIg9KRPe1fawv7C+g==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-arm64-musl@4.57.1':
     resolution: {integrity: sha512-1a/qhaaOXhqXGpMFMET9VqwZakkljWHLmZOX48R0I/YLbhdxr1m4gtG1Hq7++VhVUmf+L3sTAf9op4JlhQ5u1Q==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-loong64-gnu@4.57.1':
     resolution: {integrity: sha512-QWO6RQTZ/cqYtJMtxhkRkidoNGXc7ERPbZN7dVW5SdURuLeVU7lwKMpo18XdcmpWYd0qsP1bwKPf7DNSUinhvA==}
     cpu: [loong64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-loong64-musl@4.57.1':
     resolution: {integrity: sha512-xpObYIf+8gprgWaPP32xiN5RVTi/s5FCR+XMXSKmhfoJjrpRAjCuuqQXyxUa/eJTdAE6eJ+KDKaoEqjZQxh3Gw==}
     cpu: [loong64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-ppc64-gnu@4.57.1':
     resolution: {integrity: sha512-4BrCgrpZo4hvzMDKRqEaW1zeecScDCR+2nZ86ATLhAoJ5FQ+lbHVD3ttKe74/c7tNT9c6F2viwB3ufwp01Oh2w==}
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-ppc64-musl@4.57.1':
     resolution: {integrity: sha512-NOlUuzesGauESAyEYFSe3QTUguL+lvrN1HtwEEsU2rOwdUDeTMJdO5dUYl/2hKf9jWydJrO9OL/XSSf65R5+Xw==}
     cpu: [ppc64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-riscv64-gnu@4.57.1':
     resolution: {integrity: sha512-ptA88htVp0AwUUqhVghwDIKlvJMD/fmL/wrQj99PRHFRAG6Z5nbWoWG4o81Nt9FT+IuqUQi+L31ZKAFeJ5Is+A==}
     cpu: [riscv64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-riscv64-musl@4.57.1':
     resolution: {integrity: sha512-S51t7aMMTNdmAMPpBg7OOsTdn4tySRQvklmL3RpDRyknk87+Sp3xaumlatU+ppQ+5raY7sSTcC2beGgvhENfuw==}
     cpu: [riscv64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-linux-s390x-gnu@4.57.1':
     resolution: {integrity: sha512-Bl00OFnVFkL82FHbEqy3k5CUCKH6OEJL54KCyx2oqsmZnFTR8IoNqBF+mjQVcRCT5sB6yOvK8A37LNm/kPJiZg==}
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-gnu@4.57.1':
     resolution: {integrity: sha512-ABca4ceT4N+Tv/GtotnWAeXZUZuM/9AQyCyKYyKnpk4yoA7QIAuBt6Hkgpw8kActYlew2mvckXkvx0FfoInnLg==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rollup/rollup-linux-x64-musl@4.57.1':
     resolution: {integrity: sha512-HFps0JeGtuOR2convgRRkHCekD7j+gdAuXM+/i6kGzQtFhlCtQkpwtNzkNj6QhCDp7DRJ7+qC/1Vg2jt5iSOFw==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rollup/rollup-openbsd-x64@4.57.1':
     resolution: {integrity: sha512-H+hXEv9gdVQuDTgnqD+SQffoWoc0Of59AStSzTEj/feWTBAnSfSD3+Dql1ZruJQxmykT/JVY0dE8Ka7z0DH1hw==}
@@ -2543,6 +2592,12 @@ packages:
     resolution: {integrity: sha512-H0dkQoCa3b2VEeKQBOxFph+JAbcrQdE7KC0UkqwpLmv2EC4P41QXP+rqo9wYodACiG5/WM5s9oDApTU8utwj9g==}
     engines: {node: '>= 0.4'}
 
+  jose@4.15.9:
+    resolution: {integrity: sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA==}
+
+  jose@6.2.1:
+    resolution: {integrity: sha512-jUaKr1yrbfaImV7R2TN/b3IcZzsw38/chqMpo2XJ7i2F8AfM/lA4G1goC3JVEwg0H7UldTmSt3P68nt31W7/mw==}
+
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -2591,11 +2646,22 @@ packages:
   jwa@2.0.1:
     resolution: {integrity: sha512-hRF04fqJIP8Abbkq5NKGN0Bbr3JxlQ+qhZufXVr0DvujKy93ZCbXZMHDL4EOtodSbCWxOqR8MS1tXA5hwqCXDg==}
 
+  jwks-rsa@3.2.2:
+    resolution: {integrity: sha512-BqTyEDV+lS8F2trk3A+qJnxV5Q9EqKCBJOPti3W97r7qTympCZjb7h2X6f2kc+0K3rsSTY1/6YG2eaXKoj497w==}
+    engines: {node: '>=14'}
+
+  jwks-rsa@4.0.1:
+    resolution: {integrity: sha512-poXwUA8S4cP9P5N8tZS3xnUDJH8WmwSGfKK9gIaRPdjLHyJtd9iX/cngX9CUIe0Caof5JhK2EbN7N5lnnaf9NA==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >= 23.0.0}
+
   jws@3.2.3:
     resolution: {integrity: sha512-byiJ0FLRdLdSVSReO/U4E7RoEyOCKnEnEPMjq3HxWtvzLsV08/i5RQKsFVNkCldrCaPr2vDNAOMsfs8T/Hze7g==}
 
   jws@4.0.1:
     resolution: {integrity: sha512-EKI/M/yqPncGUUh44xz0PxSidXFr/+r0pA70+gIYhjv+et7yxM+s29Y+VGDkovRofQem0fs7Uvf4+YmAdyRduA==}
+
+  keycloak-js@26.2.3:
+    resolution: {integrity: sha512-widjzw/9T6bHRgEp6H/Se3NCCarU7u5CwFKBcwtu7xfA1IfdZb+7Q7/KGusAnBo34Vtls8Oz9vzSqkQvQ7+b4Q==}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -2619,6 +2685,9 @@ packages:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
     engines: {node: '>=10'}
 
+  limiter@1.1.5:
+    resolution: {integrity: sha512-FWWMIEOxz3GwUI4Ts/IvgVy6LPvoMPgjMdQ185nN6psJyBJ4yOpzqm695/h5umdLJg2vW3GR5iG11MAkR2AzJA==}
+
   locate-character@3.0.0:
     resolution: {integrity: sha512-SW13ws7BjaeJ6p7Q6CO2nchbYEc3X3J6WrmTTDto7yMPqVSZTUyY5Tjbid+Ab8gLnATtygYtiDIJGQRRn2ZOiA==}
 
@@ -2631,6 +2700,9 @@ packages:
 
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
+
+  lodash.clonedeep@4.5.0:
+    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
 
   lodash.defaults@4.2.0:
     resolution: {integrity: sha512-qjxPLHd3r5DnsdGacqOMU6pb/avJzdh9tFX2ymgoZE27BmjXrNy/y4LoaiTeAb+O3gL8AfpJGtqfX/ae2leYYQ==}
@@ -2691,12 +2763,26 @@ packages:
   lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
 
+  lru-cache@11.2.6:
+    resolution: {integrity: sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==}
+    engines: {node: 20 || >=22}
+
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
+
+  lru-cache@6.0.0:
+    resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
+    engines: {node: '>=10'}
 
   lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
+
+  lru-memoizer@2.3.0:
+    resolution: {integrity: sha512-GXn7gyHAMhO13WSKrIiNfztwxodVsP8IoZ3XfrJV4yH2x0/OeTO/FIaAHTY5YekdGgW94njfuKmyyt1E0mR6Ug==}
+
+  lru-memoizer@3.0.0:
+    resolution: {integrity: sha512-m83w/cYXLdUIboKSPxzPAGfYnk+vqeDYXuoSrQRw1q+yVEd8IXhvMufN8Q5TIPe7e2jyX4SRNrDJI2Skw1yznQ==}
 
   magic-string@0.22.5:
     resolution: {integrity: sha512-oreip9rJZkzvA8Qzk9HFs8fZGF/u7H/gtrE8EN6RjKJ9kh2HlC+yQ2QezifqTZfGyiuAV0dRv5a+y/8gBb1m9w==}
@@ -3969,6 +4055,9 @@ packages:
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
+  yallist@4.0.0:
+    resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+
   yaml@1.10.2:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
     engines: {node: '>= 6'}
@@ -4448,15 +4537,15 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@lazyapps/aggregatestore-inmemory@0.1.2':
+  '@lazyapps/aggregatestore-inmemory@0.2.0-branch-feature-encryption-20260314105512':
     dependencies:
       '@lazyapps/logger': 0.2.0
 
-  '@lazyapps/bootstrap@0.2.0(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260314105512(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.1.2
+      '@lazyapps/command-processor': 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/logger': 0.2.0
-      '@lazyapps/readmodels': 0.1.2
+      '@lazyapps/readmodels': 0.2.0-branch-feature-encryption-20260314105512
       '@opentelemetry/api': 1.9.0
     optionalDependencies:
       '@sveltejs/kit': 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
@@ -4469,11 +4558,11 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/bootstrap@0.2.0(vite@5.4.21(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.1.2
+      '@lazyapps/command-processor': 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/logger': 0.2.0
-      '@lazyapps/readmodels': 0.1.2
+      '@lazyapps/readmodels': 0.2.0-branch-feature-encryption-20260314105512
       '@opentelemetry/api': 1.9.0
     optionalDependencies:
       vite: 5.4.21(@types/node@25.2.1)
@@ -4492,7 +4581,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/change-notifier-socket-io@0.1.3':
+  '@lazyapps/change-notifier-socket-io@0.2.0-branch-feature-encryption-20260314105512':
     dependencies:
       '@lazyapps/logger': 0.2.0
       body-parser: 1.20.4
@@ -4502,6 +4591,7 @@ snapshots:
       express: 4.22.1
       express-jwt: 8.5.1
       jsonwebtoken: 9.0.3
+      jwks-rsa: 4.0.1
       morgan: 1.10.1
       nanoid: 5.1.6
       socket.io: 4.8.3
@@ -4511,11 +4601,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@lazyapps/command-processor@0.1.2':
+  '@lazyapps/command-processor@0.2.0-branch-feature-encryption-20260314105512':
     dependencies:
-      '@lazyapps/aggregatestore-inmemory': 0.1.2
-      '@lazyapps/eventbus-mqemitter-redis': 0.1.2
-      '@lazyapps/eventstore-mongodb': 0.1.3
+      '@lazyapps/aggregatestore-inmemory': 0.2.0-branch-feature-encryption-20260314105512
+      '@lazyapps/eventbus-mqemitter-redis': 0.1.3-branch-feature-encryption-20260314105512
+      '@lazyapps/eventstore-mongodb': 0.2.0-branch-feature-encryption-20260314105512
       '@lazyapps/logger': 0.2.0
       '@opentelemetry/api': 1.9.0
       nanoid: 5.1.6
@@ -4534,7 +4624,11 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.2':
+  '@lazyapps/encryption@0.2.0-branch-feature-encryption-20260314105512':
+    dependencies:
+      '@lazyapps/logger': 0.2.0
+
+  '@lazyapps/eventbus-mqemitter-redis@0.1.3-branch-feature-encryption-20260314105512':
     dependencies:
       '@lazyapps/logger': 0.2.0
       mqemitter-redis: 5.1.0
@@ -4548,7 +4642,7 @@ snapshots:
       amqplib: 0.10.9
       p-retry: 6.2.1
 
-  '@lazyapps/eventstore-mongodb@0.1.3':
+  '@lazyapps/eventstore-mongodb@0.2.0-branch-feature-encryption-20260314105512':
     dependencies:
       '@lazyapps/logger': 0.2.0
       mongodb: 5.9.2
@@ -4560,7 +4654,7 @@ snapshots:
       - mongodb-client-encryption
       - snappy
 
-  '@lazyapps/express@0.1.4':
+  '@lazyapps/express@0.2.0-branch-feature-encryption-20260314105512':
     dependencies:
       '@lazyapps/logger': 0.2.0
       body-parser: 1.20.4
@@ -4614,7 +4708,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@lazyapps/readmodels@0.1.2':
+  '@lazyapps/readmodels@0.2.0-branch-feature-encryption-20260314105512':
     dependencies:
       '@lazyapps/logger': 0.2.0
       '@opentelemetry/api': 1.9.0
@@ -6595,6 +6689,10 @@ snapshots:
       has-symbols: 1.1.0
       set-function-name: 2.0.2
 
+  jose@4.15.9: {}
+
+  jose@6.2.1: {}
+
   js-tokens@4.0.0: {}
 
   js-yaml@4.1.1:
@@ -6658,6 +6756,26 @@ snapshots:
       ecdsa-sig-formatter: 1.0.11
       safe-buffer: 5.2.1
 
+  jwks-rsa@3.2.2:
+    dependencies:
+      '@types/jsonwebtoken': 9.0.10
+      debug: 4.4.3
+      jose: 4.15.9
+      limiter: 1.1.5
+      lru-memoizer: 2.3.0
+    transitivePeerDependencies:
+      - supports-color
+
+  jwks-rsa@4.0.1:
+    dependencies:
+      '@types/jsonwebtoken': 9.0.10
+      debug: 4.4.3
+      jose: 6.2.1
+      limiter: 1.1.5
+      lru-memoizer: 3.0.0
+    transitivePeerDependencies:
+      - supports-color
+
   jws@3.2.3:
     dependencies:
       jwa: 1.4.2
@@ -6667,6 +6785,8 @@ snapshots:
     dependencies:
       jwa: 2.0.1
       safe-buffer: 5.2.1
+
+  keycloak-js@26.2.3: {}
 
   keyv@4.5.4:
     dependencies:
@@ -6688,6 +6808,8 @@ snapshots:
 
   lilconfig@2.1.0: {}
 
+  limiter@1.1.5: {}
+
   locate-character@3.0.0: {}
 
   locate-path@6.0.0:
@@ -6697,6 +6819,8 @@ snapshots:
   lodash-es@4.17.23: {}
 
   lodash.camelcase@4.3.0: {}
+
+  lodash.clonedeep@4.5.0: {}
 
   lodash.defaults@4.2.0: {}
 
@@ -6740,11 +6864,27 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  lru-cache@11.2.6: {}
+
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
 
+  lru-cache@6.0.0:
+    dependencies:
+      yallist: 4.0.0
+
   lru-cache@7.18.3: {}
+
+  lru-memoizer@2.3.0:
+    dependencies:
+      lodash.clonedeep: 4.5.0
+      lru-cache: 6.0.0
+
+  lru-memoizer@3.0.0:
+    dependencies:
+      lodash.clonedeep: 4.5.0
+      lru-cache: 11.2.6
 
   magic-string@0.22.5:
     dependencies:
@@ -8119,6 +8259,8 @@ snapshots:
   y18n@5.0.8: {}
 
   yallist@3.1.1: {}
+
+  yallist@4.0.0: {}
 
   yaml@1.10.2: {}
 

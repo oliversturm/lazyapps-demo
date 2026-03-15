@@ -1,10 +1,9 @@
 services:
   playwright:
     build: ../../tests/e2e
-    depends_on:
-      - frontend-svelte
-      - frontend-react
-      - keycloak
+    # No depends_on — the runner script ensures the stack is already up
+    # before invoking playwright. This avoids unnecessary health check
+    # re-evaluation on every test run.
     networks:
       default:
       e2e:
@@ -21,14 +20,3 @@ services:
       CI: 'true'
       MONGO_URL: 'mongodb://mongo:27017'
       VAULT_ADDR: 'http://vault:8200'
-    command:
-      [
-        'npx',
-        'playwright',
-        'test',
-        '--project=setup',
-        '--project=orchestrated-svelte',
-        '--project=orchestrated-svelte-forget',
-        '--project=orchestrated-react',
-        '--project=orchestrated-react-forget',
-      ]

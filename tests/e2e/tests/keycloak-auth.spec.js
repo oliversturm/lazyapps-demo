@@ -39,12 +39,12 @@ const createCustomerAsUser = async (page, { name, location }) => {
   await page.getByText('New Customer').waitFor();
   await page.getByText('New Customer').click();
   await page.waitForLoadState('networkidle');
-  await page.locator('input[name="name"]').waitFor({ timeout: 10000 });
+  await page.locator('input[name="name"]').waitFor({ timeout: 1000 });
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();
   // Wait for CQRS pipeline
-  await page.getByText(name).waitFor({ timeout: 30000 });
+  await page.getByText(name).first().waitFor({ timeout: 1000 });
 };
 
 test.describe('Keycloak authentication and role-based access', () => {
@@ -62,7 +62,7 @@ test.describe('Keycloak authentication and role-based access', () => {
           // Verify username is displayed in the nav bar
           await expect(
             page.locator('.bg-orange-100').getByText(user.username),
-          ).toBeVisible({ timeout: 5000 });
+          ).toBeVisible({ timeout: 1000 });
 
           // Verify the app loaded (Customers nav link is visible)
           await expect(
@@ -121,8 +121,8 @@ test.describe('Keycloak authentication and role-based access', () => {
 
         // Alice (admin) should see PII in plaintext
         await navigate(alicePage, 'Customers');
-        await expect(alicePage.getByText(customerName)).toBeVisible({
-          timeout: 10000,
+        await expect(alicePage.getByText(customerName).first()).toBeVisible({
+          timeout: 1000,
         });
       } finally {
         await aliceCtx.close();
@@ -140,8 +140,8 @@ test.describe('Keycloak authentication and role-based access', () => {
           USERS.bob.password,
         );
         await navigate(bobPage, 'Customers');
-        await expect(bobPage.getByText(customerName)).toBeVisible({
-          timeout: 10000,
+        await expect(bobPage.getByText(customerName).first()).toBeVisible({
+          timeout: 1000,
         });
       } finally {
         await bobCtx.close();
@@ -159,8 +159,8 @@ test.describe('Keycloak authentication and role-based access', () => {
           USERS.carol.password,
         );
         await navigate(carolPage, 'Customers');
-        await expect(carolPage.getByText(customerName)).toBeVisible({
-          timeout: 10000,
+        await expect(carolPage.getByText(customerName).first()).toBeVisible({
+          timeout: 1000,
         });
       } finally {
         await carolCtx.close();
@@ -180,12 +180,12 @@ test.describe('Keycloak authentication and role-based access', () => {
         await navigate(davePage, 'Customers');
         // Dave should NOT see the plaintext customer name
         await davePage.waitForTimeout(3000); // Allow read model to load
-        await expect(davePage.getByText(customerName)).toBeHidden({
-          timeout: 5000,
+        await expect(davePage.getByText(customerName).first()).toBeHidden({
+          timeout: 1000,
         });
         // Instead, dave should see [restricted] for the encrypted fields
         await expect(davePage.getByText('[restricted]').first()).toBeVisible({
-          timeout: 10000,
+          timeout: 1000,
         });
       } finally {
         await daveCtx.close();
@@ -223,8 +223,8 @@ test.describe('Keycloak authentication and role-based access', () => {
         // Dave should see his own customer data (self-access grants 'self' role
         // which is in the personal context's role list)
         await navigate(davePage, 'Customers');
-        await expect(davePage.getByText(daveName)).toBeVisible({
-          timeout: 10000,
+        await expect(davePage.getByText(daveName).first()).toBeVisible({
+          timeout: 1000,
         });
       } finally {
         await daveCtx.close();
@@ -242,8 +242,8 @@ test.describe('Keycloak authentication and role-based access', () => {
           USERS.alice.password,
         );
         await navigate(alicePage, 'Customers');
-        await expect(alicePage.getByText(daveName)).toBeVisible({
-          timeout: 10000,
+        await expect(alicePage.getByText(daveName).first()).toBeVisible({
+          timeout: 1000,
         });
       } finally {
         await aliceCtx.close();
@@ -298,18 +298,18 @@ test.describe('Keycloak authentication and role-based access', () => {
         await navigate(davePage, 'Customers');
 
         // Dave's own customer should be visible in plaintext
-        await expect(davePage.getByText(daveName)).toBeVisible({
-          timeout: 10000,
+        await expect(davePage.getByText(daveName).first()).toBeVisible({
+          timeout: 1000,
         });
 
         // Alice's customer name should NOT be visible to dave
-        await expect(davePage.getByText(aliceName)).toBeHidden({
-          timeout: 5000,
+        await expect(davePage.getByText(aliceName).first()).toBeHidden({
+          timeout: 1000,
         });
 
         // There should be at least one [restricted] entry for alice's data
         await expect(davePage.getByText('[restricted]').first()).toBeVisible({
-          timeout: 10000,
+          timeout: 1000,
         });
       } finally {
         await daveCtx.close();
@@ -386,15 +386,15 @@ test.describe('Keycloak authentication and role-based access', () => {
 
       try {
         // Bob (support) should see the customer name in plaintext via notification
-        await expect(bobPage.getByText(customerName)).toBeVisible({
-          timeout: 15000,
+        await expect(bobPage.getByText(customerName).first()).toBeVisible({
+          timeout: 1000,
         });
 
         // Dave (no roles) should NOT see the customer name — should see [restricted]
         // Wait for the change notification to arrive
         await davePage.waitForTimeout(3000);
-        await expect(davePage.getByText(customerName)).toBeHidden({
-          timeout: 5000,
+        await expect(davePage.getByText(customerName).first()).toBeHidden({
+          timeout: 1000,
         });
       } finally {
         await bobCtx.close();

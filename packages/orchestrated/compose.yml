@@ -231,10 +231,10 @@ services:
       - ./keycloak/themes/lazyapps-demo:/opt/keycloak/themes/lazyapps-demo:ro
     healthcheck:
       test: ['CMD-SHELL', 'exec 3<>/dev/tcp/127.0.0.1/9000; echo -e "GET /health/ready HTTP/1.1\r\nhost: localhost\r\nConnection: close\r\n\r\n" >&3; cat <&3 | grep -q 200']
-      interval: 10s
-      timeout: 5s
-      retries: 15
-      start_period: 30s
+      interval: 1s
+      timeout: 3s
+      retries: 30
+      start_period: 0s
 
   command-processor:
     build:
@@ -343,6 +343,7 @@ services:
     build:
       dockerfile: ./packages/orchestrated/readmodel-dotnet/Dockerfile
       context: ../..
+    stop_grace_period: 2s
     depends_on:
       - rabbit
     environment:

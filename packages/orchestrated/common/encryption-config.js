@@ -16,6 +16,10 @@ export const encryptionContexts = {
   personal: {
     roles: ['admin', 'support', 'self', 'customer-service', 'order-service'],
     autoForget: true,
+    // Field names protected by this context — used by the change-notifier's
+    // auto-redaction engine to replace these fields with [restricted] for
+    // users whose scopes don't include any of the context's roles.
+    fields: { name: {}, location: {}, customerName: {} },
   },
   'order-details': { roles: ['admin', 'support', 'sales', 'order-service'] },
 };

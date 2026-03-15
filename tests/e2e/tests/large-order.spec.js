@@ -35,7 +35,7 @@ test.describe('Large order workflow', () => {
 
       // page2: Customer arrives via change notification (already on Customers)
       await expect(page2.getByText(customerName)).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // page2: Navigate to Orders BEFORE the order exists
@@ -52,7 +52,7 @@ test.describe('Large order workflow', () => {
         has: page2.getByText(orderText, { exact: true }),
       });
       await expect(row2.getByText('unconfirmed', { exact: true })).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // page1: Navigate to Orders, verify unconfirmed
@@ -61,7 +61,7 @@ test.describe('Large order workflow', () => {
         has: page1.getByText(orderText, { exact: true }),
       });
       await expect(row1.getByText('unconfirmed', { exact: true })).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
 
 			// page1: Confirm the order (this navigates to Order Confirmation Requests)
@@ -75,12 +75,12 @@ test.describe('Large order workflow', () => {
       await expect(
         row1After.getByText('confirmed', { exact: true }),
       ).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
 
       // page2: Status changes to confirmed via change notification (still on Orders)
       await expect(row2.getByText('confirmed', { exact: true })).toBeVisible({
-        timeout: 10000,
+        timeout: 1000,
       });
     } finally {
       await context1.close();
