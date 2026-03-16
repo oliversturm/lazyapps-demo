@@ -12,4 +12,4 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 WORKDIR /src/packages/monolith
 EXPOSE 3005 5173 53008
-CMD ["node", "index.js"]
+CMD ["node", "--import", "./observability-init.js", "index.js"]

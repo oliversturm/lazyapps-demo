@@ -232,7 +232,7 @@ test.describe('Distributed catch-up lifecycle', () => {
       }
 
       // Now the gap should be filled — customerDuring should appear
-      const deadline = Date.now() + 15000;
+      const deadline = Date.now() + 2000;
       while (Date.now() < deadline) {
         try {
           await page.reload({ waitUntil: 'domcontentloaded' });

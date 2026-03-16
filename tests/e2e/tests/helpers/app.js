@@ -36,7 +36,7 @@ export const createCustomer = async (page, { name, location }) => {
   // After save, the app navigates to the customer list. The read model
   // may not be updated yet (async command processing), so poll with
   // page reloads until the customer name appears.
-  const deadline = Date.now() + 15000;
+  const deadline = Date.now() + 2000;
   while (Date.now() < deadline) {
     try {
       await page.getByText(name).waitFor({ timeout: 2000 });

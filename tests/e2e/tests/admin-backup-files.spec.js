@@ -295,7 +295,7 @@ test.describe('Admin backup API (file-based)', () => {
       // Customer should still exist (all events replayed from scratch).
       // The read model may still be rebuilding when the page reloads, so
       // poll with reloads until the data appears.
-      const deadline = Date.now() + 10000;
+      const deadline = Date.now() + 2000;
       let found = false;
       while (Date.now() < deadline) {
         await page.reload({ waitUntil: 'domcontentloaded' });

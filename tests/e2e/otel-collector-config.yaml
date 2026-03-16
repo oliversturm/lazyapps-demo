@@ -1,0 +1,20 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+exporters:
+  file/traces:
+    path: /otel-output/traces.jsonl
+  file/logs:
+    path: /otel-output/logs.jsonl
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [file/traces]
+    logs:
+      receivers: [otlp]
+      exporters: [file/logs]

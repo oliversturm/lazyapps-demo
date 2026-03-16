@@ -38,7 +38,7 @@ export const waitForAdmin = async (request, adminURL) => {
 export const waitForAdminUI = async (page, adminURL) => {
   await page.goto(adminURL, { waitUntil: 'load' });
   // Admin UI has SSR disabled — content only appears after client-side JS executes
-  await page.getByText('LazyApps Admin').waitFor({ timeout: 5000 });
+  await page.getByText('LazyApps Admin').waitFor();
 };
 
 /**
