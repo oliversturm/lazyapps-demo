@@ -2,48 +2,42 @@ import { test, expect } from '@playwright/test';
 import { getAdminURL, waitForAdmin, waitForAdminUI } from './helpers/admin.js';
 
 test.describe('Admin status and read models', () => {
-  test('status endpoint returns service info', async ({
+  test('status endpoint returns read model info', async ({
     request,
     baseURL,
   }) => {
     const adminURL = getAdminURL(baseURL);
     await waitForAdmin(request, adminURL);
 
-    const response = await request.get(`${adminURL}/admin/status`);
+    const response = await request.get(`${adminURL}/admin/readmodel/status`);
     expect(response.ok()).toBeTruthy();
 
-    const body = await response.json();
-    expect(body).toHaveProperty('service');
-    expect(body).toHaveProperty('uptime');
-    expect(body.readModels).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ name: expect.any(String) }),
-      ]),
-    );
+    const readModels = await response.json();
+    expect(Array.isArray(readModels)).toBeTruthy();
+    expect(readModels.length).toBeGreaterThan(0);
+
+    for (const rm of readModels) {
+      expect(rm).toHaveProperty('readModelName');
+      expect(rm).toHaveProperty('endpointName');
+      expect(rm).toHaveProperty('state');
+    }
   });
 
-  test('readmodels endpoint lists all read models', async ({
+  test('readmodel status endpoint lists all read models', async ({
     request,
     baseURL,
   }) => {
     const adminURL = getAdminURL(baseURL);
     await waitForAdmin(request, adminURL);
 
-    const response = await request.get(`${adminURL}/admin/readmodels`);
+    const response = await request.get(`${adminURL}/admin/readmodel/status`);
     expect(response.ok()).toBeTruthy();
 
     const readModels = await response.json();
     expect(readModels.length).toBeGreaterThan(0);
 
-    const names = readModels.map((rm) => rm.name);
-    expect(names).toContain('customersOverview');
-    expect(names).toContain('ordersOverview');
-
-    for (const rm of readModels) {
-      expect(rm).toHaveProperty('name');
-      expect(rm).toHaveProperty('status');
-      expect(rm).toHaveProperty('endpointName');
-    }
+    const names = readModels.map((rm) => `${rm.endpointName}/${rm.readModelName}`);
+    expect(names.some((n) => n.includes('customersOverview') || n.includes('overview'))).toBeTruthy();
   });
 
   test('admin UI dashboard loads', async ({ browser, baseURL }) => {

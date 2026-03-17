@@ -59,7 +59,20 @@ test.describe('Admin backup management via UI', () => {
       // Create a backup
       await adminPage.getByRole('button', { name: 'Create Backup' }).click();
 
-      // Wait for the backup to appear in the table (has a Delete button)
+      // Backup creation is async — poll for the backup to appear.
+      // Click Refresh until a Delete button shows up (backup listed).
+      for (let i = 0; i < 10; i++) {
+        await adminPage.waitForTimeout(500);
+        await adminPage
+          .getByRole('main')
+          .getByRole('button', { name: 'Refresh' })
+          .click();
+        await adminPage.waitForTimeout(200);
+        if (
+          (await adminPage.getByRole('button', { name: 'Delete' }).count()) > 0
+        )
+          break;
+      }
       await adminPage
         .getByRole('button', { name: 'Delete' })
         .first()
@@ -135,9 +148,9 @@ test.describe('Admin backup management via UI', () => {
         page.getByRole('button', { name: 'Create Backup' }),
       ).toBeVisible();
 
-      // Verify Refresh button is present
+      // Verify Refresh button is present (scope to main to avoid nav Refresh)
       await expect(
-        page.getByRole('button', { name: 'Refresh' }),
+        page.getByRole('main').getByRole('button', { name: 'Refresh' }),
       ).toBeVisible();
     } finally {
       await page.close();

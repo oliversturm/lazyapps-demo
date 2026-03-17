@@ -6,6 +6,7 @@ const adminPort = process.env.PORT || 3000;
 const readModelServiceUrl = process.env.ADMIN_READ_MODEL_SERVICES
   ? JSON.parse(process.env.ADMIN_READ_MODEL_SERVICES)
   : undefined;
+const commandProcessorUrl = process.env.ADMIN_COMMAND_PROCESSOR_URL || 'http://command-processor:3001';
 
 start({
   correlation: {
@@ -18,6 +19,7 @@ start({
       topic: 'events',
     }),
     readModelServiceUrl,
+    commandProcessorUrl,
     autoActivate: true,
   },
 });

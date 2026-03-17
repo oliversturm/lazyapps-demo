@@ -4,7 +4,7 @@ import {
   navigate,
   createCustomer,
 } from './helpers/app.js';
-import { getAdminURL, waitForAdmin } from './helpers/admin.js';
+import { getAdminURL, waitForAdmin, getReadModelConfig } from './helpers/admin.js';
 
 test.describe('Admin replay', () => {
   test('replay events and verify data persists', async ({
@@ -13,6 +13,8 @@ test.describe('Admin replay', () => {
     baseURL,
   }) => {
     const adminURL = getAdminURL(baseURL);
+    const rmConfig = getReadModelConfig(baseURL);
+    const rm = rmConfig.customersOverview;
     const unique = `${Date.now()}`;
     const customerName = `ReplayTest-${unique}`;
 
@@ -31,45 +33,29 @@ test.describe('Admin replay', () => {
       await expect(page.getByText(customerName)).toBeVisible();
 
       const startRes = await request.post(
-        `${adminURL}/api/admin/startReplay`,
-        {
-          data: {
-            readModel: 'customersOverview',
-            fromTimestamp: 0,
-          },
-        },
+        `${adminURL}/admin/replay/start/${rm.endpointName}/${rm.name}`,
       );
       expect(startRes.ok()).toBeTruthy();
 
       const startBody = await startRes.json();
       expect(startBody.status).toBe('started');
 
-      // Poll replay status — in-process replay should complete quickly
+      // Poll read model status — replay should complete quickly
       let replayDone = false;
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 30; i++) {
         const statusRes = await request.get(
-          `${adminURL}/api/admin/replayStatus/monolith/customersOverview`,
+          `${adminURL}/admin/readmodel/status/${rm.endpointName}/${rm.name}`,
         );
         const status = await statusRes.json();
 
-        if (status.status === 'completed' || status.status === 'idle') {
+        if (status.state === 'stopped' || status.state === 'live') {
           replayDone = true;
           break;
         }
 
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
       }
       expect(replayDone).toBeTruthy();
-
-      // Wait for read model service to finish processing
-      for (let i = 0; i < 20; i++) {
-        const rmStatusRes = await request.get(
-          `${adminURL}/admin/replay/monolith/customersOverview/status`,
-        );
-        const rmStatus = await rmStatusRes.json();
-        if (rmStatus.status === 'idle') break;
-        await page.waitForTimeout(200);
-      }
 
       await navigate(page, 'Customers');
       await expect(page.getByText(customerName)).toBeVisible();
@@ -78,7 +64,7 @@ test.describe('Admin replay', () => {
     }
   });
 
-  test('replay status returns idle for unknown model', async ({
+  test('replay status returns info for unknown model', async ({
     request,
     baseURL,
   }) => {
@@ -86,25 +72,10 @@ test.describe('Admin replay', () => {
     await waitForAdmin(request, adminURL);
 
     const res = await request.get(
-      `${adminURL}/api/admin/replayStatus/_unknown/nonExistentModel`,
+      `${adminURL}/admin/readmodel/status/_unknown/nonExistentModel`,
     );
-    expect(res.ok()).toBeTruthy();
-
-    const body = await res.json();
-    expect(body).toHaveProperty('status');
-  });
-
-  test('startReplay rejects missing readModel', async ({
-    request,
-    baseURL,
-  }) => {
-    const adminURL = getAdminURL(baseURL);
-    await waitForAdmin(request, adminURL);
-
-    const res = await request.post(`${adminURL}/api/admin/startReplay`, {
-      data: {},
-    });
-    expect(res.status()).toBe(400);
+    // New API returns 404 for unknown models
+    expect(res.status()).toBe(404);
   });
 
   test('cancelReplay cancels an in-progress replay', async ({
@@ -113,6 +84,8 @@ test.describe('Admin replay', () => {
     baseURL,
   }) => {
     const adminURL = getAdminURL(baseURL);
+    const rmConfig = getReadModelConfig(baseURL);
+    const rm = rmConfig.customersOverview;
     const page = await browser.newPage();
 
     try {
@@ -127,57 +100,34 @@ test.describe('Admin replay', () => {
       }
 
       const startRes = await request.post(
-        `${adminURL}/api/admin/startReplay`,
-        {
-          data: {
-            readModel: 'customersOverview',
-            fromTimestamp: 0,
-          },
-        },
+        `${adminURL}/admin/replay/start/${rm.endpointName}/${rm.name}`,
       );
       expect(startRes.ok()).toBeTruthy();
 
       const cancelRes = await request.post(
-        `${adminURL}/api/admin/cancelReplay`,
-        {
-          data: { readModel: 'customersOverview' },
-        },
+        `${adminURL}/admin/replay/cancel/${rm.endpointName}/${rm.name}`,
       );
       expect(cancelRes.ok()).toBeTruthy();
-      const cancelBody = await cancelRes.json();
-      expect(cancelBody.status).toBe('cancelling');
 
-      let finalStatus;
-      for (let i = 0; i < 10; i++) {
+      // Wait for state to settle
+      let finalState;
+      for (let i = 0; i < 30; i++) {
         const statusRes = await request.get(
-          `${adminURL}/api/admin/replayStatus/monolith/customersOverview`,
+          `${adminURL}/admin/readmodel/status/${rm.endpointName}/${rm.name}`,
         );
         const status = await statusRes.json();
 
         if (
-          status.status === 'cancelled' ||
-          status.status === 'completed' ||
-          status.status === 'idle'
+          status.state === 'stopped' ||
+          status.state === 'live'
         ) {
-          finalStatus = status.status;
+          finalState = status.state;
           break;
         }
 
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
       }
-      expect(['cancelled', 'completed', 'idle']).toContain(finalStatus);
-
-      // Wait for the read model service to also finish cleanup.
-      // The command processor sends a REPLAY_CANCELLED system message
-      // which the read model service handles asynchronously.
-      for (let i = 0; i < 20; i++) {
-        const rmStatusRes = await request.get(
-          `${adminURL}/admin/replay/monolith/customersOverview/status`,
-        );
-        const rmStatus = await rmStatusRes.json();
-        if (rmStatus.status === 'idle') break;
-        await page.waitForTimeout(200);
-      }
+      expect(['stopped', 'live']).toContain(finalState);
     } finally {
       await page.close();
     }

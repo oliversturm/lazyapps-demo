@@ -30,7 +30,7 @@ services:
       mongo-monolith:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3005/api/admin/replayStatus/_hc/_healthcheck',r=>{r.resume();if(r.statusCode>=500){process.exit(1)}require('http').get('http://localhost:5173/',r2=>{r2.resume();process.exit(r2.statusCode>=400?1:0)}).on('error',()=>process.exit(1))}).on('error',()=>process.exit(1))\""]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3005/admin/readmodel/status',r=>{r.resume();if(r.statusCode>=500){process.exit(1)}require('http').get('http://localhost:5173/',r2=>{r2.resume();process.exit(r2.statusCode>=400?1:0)}).on('error',()=>process.exit(1))}).on('error',()=>process.exit(1))\""]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -208,7 +208,8 @@ services:
       OTEL_SERVICE_NAME: 'admin-ui'
       ORIGIN: 'http://admin-ui:3000'
       RABBIT_URL: 'amqp://rabbit'
-      ADMIN_READ_MODEL_SERVICES: '{"readmodel-customers":"http://readmodel-customers","readmodel-orders":"http://readmodel-orders"}'
+      ADMIN_READ_MODEL_SERVICES: '{"customers":"http://readmodel-customers","orders":"http://readmodel-orders"}'
+      ADMIN_COMMAND_PROCESSOR_URL: 'http://command-processor'
       LOG_LEVEL: 'debug'
 
   frontend-react:

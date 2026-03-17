@@ -2,11 +2,6 @@ import { express } from '@lazyapps/express/command-receiver/index.js';
 import { inmemory } from '@lazyapps/aggregatestore-inmemory';
 import { mongodb } from '@lazyapps/eventstore-mongodb';
 import { rabbitMq } from '@lazyapps/eventbus-rabbitmq/command-receiver/index.js';
-import {
-  installReplayAdminApi,
-  installCatchupAdminApi,
-} from '@lazyapps/admin-api';
-import { createCatchupHandler } from '@lazyapps/command-processor/catchupHandler.js';
 import { start } from '@lazyapps/bootstrap';
 import * as aggregates from './aggregates/index.js';
 import path from 'path';
@@ -30,14 +25,6 @@ start({
   commands: {
     receiver: express({
       port: process.env.EXPRESS_PORT || 3001,
-      customizeExpress: (context, app) => {
-        installReplayAdminApi(context)(app);
-        context.catchupHandler = createCatchupHandler(
-          context.eventStore,
-          context.eventBus,
-        );
-        installCatchupAdminApi(context)(app);
-      },
     }),
     aggregateStore: inmemory(),
     eventStore: mongodb({

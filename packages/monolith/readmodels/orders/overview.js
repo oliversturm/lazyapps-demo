@@ -87,7 +87,7 @@ const confirmOrder = (
     ),
   ]);
 
-export default {
+const rm = {
   collections: [ordersCollectionName, customersCollectionName],
   projections: {
     CUSTOMER_CREATED: ({ storage }, { aggregateId, payload: { name } }) =>
@@ -203,3 +203,6 @@ export default {
         .toArray(),
   },
 };
+
+rm.replayRelevantEvents = Object.keys(rm.projections);
+export default rm;

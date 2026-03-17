@@ -1,6 +1,6 @@
 const collectionName = 'customers_editing';
 
-export default {
+const rm = {
   collections: [collectionName],
   projections: {
     CUSTOMER_CREATED: (
@@ -25,3 +25,6 @@ export default {
     },
   },
 };
+
+rm.replayRelevantEvents = Object.keys(rm.projections);
+export default rm;

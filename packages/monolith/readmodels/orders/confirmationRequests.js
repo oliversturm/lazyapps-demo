@@ -24,7 +24,7 @@ export const checkOrderValueSideEffect = (
         payload: {},
       });
 
-export default {
+const rm = {
   collections: [confirmationRequestsCollectionName],
   projections: {
     ORDER_CONFIRMATION_REQUIRED: (
@@ -116,3 +116,6 @@ export default {
         .toArray(),
   },
 };
+
+rm.replayRelevantEvents = Object.keys(rm.projections);
+export default rm;

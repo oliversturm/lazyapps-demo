@@ -3,6 +3,7 @@ import { mongodb } from '@lazyapps/readmodelstorage-mongodb';
 import { rabbitMq } from '@lazyapps/eventbus-rabbitmq/readmodels/index.js';
 import { changeNotificationSenderFetch } from '@lazyapps/change-notification-sender-fetch';
 import { installReadModelStatusApi } from '@lazyapps/admin-api';
+import { installAdminEndpoints } from '@lazyapps/readmodels';
 import { backup } from '@lazyapps/readmodelstorage-mongodb/backup.js';
 import { start } from '@lazyapps/bootstrap';
 import * as readModels from './readmodels/index.js';
@@ -21,6 +22,7 @@ start({
       customizeExpress: (context, app) => {
         customizeExpressGraphql(context, app);
         installReadModelStatusApi(context)(app);
+        installAdminEndpoints(context, app);
       },
     }),
     storage: mongodb({

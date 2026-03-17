@@ -1,6 +1,6 @@
 const collectionName = 'customers_overview';
 
-export default {
+const rm = {
   collections: [collectionName],
   projections: {
     CUSTOMER_CREATED: (
@@ -43,3 +43,6 @@ export default {
       storage.find(collectionName, {}).project({ _id: 0 }).toArray(),
   },
 };
+
+rm.replayRelevantEvents = Object.keys(rm.projections);
+export default rm;
