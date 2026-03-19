@@ -23,6 +23,52 @@ test.describe('Admin status and read models', () => {
     }
   });
 
+  test('all read models reach live state after auto-activation', async ({
+    request,
+    baseURL,
+  }) => {
+    const adminURL = getAdminURL(baseURL);
+    await waitForAdmin(request, adminURL);
+
+    // Poll until all read models are live (auto-activation may still
+    // be in progress when the test starts)
+    const maxPolls = 30;
+    for (let i = 0; i < maxPolls; i++) {
+      const response = await request.get(
+        `${adminURL}/admin/readmodel/status`,
+      );
+      const readModels = await response.json();
+
+      if (
+        readModels.length > 0 &&
+        readModels.every((rm) => rm.state === 'live')
+      ) {
+        // Verify each read model individually to ensure
+        // per-RM status endpoints also report live
+        for (const rm of readModels) {
+          const rmRes = await request.get(
+            `${adminURL}/admin/readmodel/status/${rm.endpointName}/${rm.readModelName}`,
+          );
+          expect(rmRes.ok()).toBeTruthy();
+          const rmStatus = await rmRes.json();
+          expect(rmStatus.state).toBe('live');
+        }
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    // If we get here, not all read models reached live
+    const finalRes = await request.get(
+      `${adminURL}/admin/readmodel/status`,
+    );
+    const finalRms = await finalRes.json();
+    const notLive = finalRms
+      .filter((rm) => rm.state !== 'live')
+      .map((rm) => `${rm.endpointName}/${rm.readModelName}=${rm.state}`);
+    expect(notLive).toEqual([]);
+  });
+
   test('readmodel status endpoint lists all read models', async ({
     request,
     baseURL,
