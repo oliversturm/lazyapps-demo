@@ -38,7 +38,7 @@ start({
     }),
     commandSender: commandSenderFetch({ url: process.env.COMMAND_URL }),
     backup: backup({
-      backupPath: process.env.BACKUP_PATH || '/tmp/lazyapps-backups',
+      backupPath: process.env.BACKUP_PATH || './backup',
     }),
     lifecycle: true,
     endpointName: 'customers',

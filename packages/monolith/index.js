@@ -26,10 +26,28 @@ const mqCommandsPort = process.env.MQ_COMMANDS_PORT || 51883;
 const mqQueriesPort = process.env.MQ_QUERIES_PORT || 51884;
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017';
 const adminPort = process.env.ADMIN_PORT || 3005;
-const backupPath = process.env.BACKUP_PATH || '/tmp/lazyapps-backups';
+const backupPath = process.env.BACKUP_PATH || './backup';
 const svelteHost = process.env.SVELTE_HOST || 'localhost';
 const sveltePort = 5173;
-const mongoBackup = backup({ backupPath });
+
+// When running locally, MongoDB is a standalone Docker container started
+// via `pnpm start-mongo`. Backup tools must run inside that container
+// via `docker exec`, and the backup volume is mounted at /backup.
+// When running inside Docker (e.g. e2e tests), the monolith container
+// has direct access to MongoDB and has mongodump/mongorestore installed
+// locally, so no docker exec is needed.
+const useDockerExec = !process.env.MONGO_URL;
+const dockerExecPrefix = ['docker', 'exec', 'mongo'];
+const mongoBackup = backup({
+  backupPath,
+  ...(useDockerExec && {
+    mongodumpCommand: [...dockerExecPrefix, 'mongodump'],
+    mongorestoreCommand: [...dockerExecPrefix, 'mongorestore'],
+    mongoexportCommand: [...dockerExecPrefix, 'mongoexport'],
+    mongoimportCommand: [...dockerExecPrefix, 'mongoimport'],
+    toolBackupPath: '/backup',
+  }),
+});
 
 // The activator queries read model state via HTTP. In the monolith, the
 // admin server and the read model listener share the same process. Pointing

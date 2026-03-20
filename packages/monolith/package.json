@@ -9,7 +9,7 @@
     "check-node": "node check-node-version.cjs",
     "just-start": "cross-env LOG_LEVEL=trace OTEL_SERVICE_NAME=lazyapps-monolith OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 OTEL_EXPORTER_OTLP_PROTOCOL=grpc OTEL_RESOURCE_ATTRIBUTES=service.namespace=lazyapps-demo,deployment.environment.name=development node --import ./observability-init.js index.js",
     "start-and-highlight": "cross-env LOG_LEVEL=trace OTEL_SERVICE_NAME=lazyapps-monolith OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 OTEL_EXPORTER_OTLP_PROTOCOL=grpc OTEL_RESOURCE_ATTRIBUTES=service.namespace=lazyapps-demo,deployment.environment.name=development node --import ./observability-init.js index.js | log-highlight",
-    "start-mongo": "docker run --rm -p 27017:27017 --name mongo -d mongo:latest",
+    "start-mongo": "docker run --rm -p 27017:27017 -v ./backup:/backup --name mongo -d mongo:latest",
     "start-aspire": "docker run --rm -e ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true -p 18888:18888 -p 4317:18889 --name aspire -d mcr.microsoft.com/dotnet/aspire-dashboard:latest",
     "stop-services": "docker stop mongo aspire 2>/dev/null; true"
   },
