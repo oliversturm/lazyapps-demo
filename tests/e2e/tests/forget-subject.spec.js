@@ -13,14 +13,14 @@ import {
 // in the same test suite without conflicting.
 const FORGET_USERS_BY_FRONTEND = {
   svelte: [
-    { username: 'bob', password: 'bob' },
-    { username: 'carol', password: 'carol' },
-    { username: 'dave', password: 'dave' },
+    { username: 'bob', password: 'bob', sub: 'a1b2c3d4-e5f6-7890-abcd-ef1234567002' },
+    { username: 'carol', password: 'carol', sub: 'a1b2c3d4-e5f6-7890-abcd-ef1234567003' },
+    { username: 'dave', password: 'dave', sub: 'a1b2c3d4-e5f6-7890-abcd-ef1234567004' },
   ],
   react: [
-    { username: 'eve', password: 'eve' },
-    { username: 'frank', password: 'frank' },
-    { username: 'grace', password: 'grace' },
+    { username: 'eve', password: 'eve', sub: 'a1b2c3d4-e5f6-7890-abcd-ef1234567005' },
+    { username: 'frank', password: 'frank', sub: 'a1b2c3d4-e5f6-7890-abcd-ef1234567006' },
+    { username: 'grace', password: 'grace', sub: 'a1b2c3d4-e5f6-7890-abcd-ef1234567007' },
   ],
 };
 
@@ -51,6 +51,7 @@ test.describe('Forget subject workflow', () => {
       await createCustomer(page1, {
         name: customerName,
         location: 'TestCity',
+        userId: user.sub,
       });
 
       // Place an order for the customer
@@ -83,9 +84,12 @@ test.describe('Forget subject workflow', () => {
       });
 
       // Customer row should still exist with placeholder values
-      const forgottenRow = page1
-        .locator('tr', { has: page1.getByText('[deleted]') })
-        .first();
+      // Locate the forgotten customer's row by user sub (unique ID visible
+      // in the table), not by '[deleted]' text — earlier tests may have left
+      // other forgotten rows with '[deleted]' that would match first.
+      const forgottenRow = page1.locator('tr', {
+        has: page1.getByText(user.sub, { exact: true }),
+      });
       await expect(forgottenRow).toBeVisible({ timeout: 1000 });
 
       // Edit button should be disabled for forgotten customer
@@ -133,6 +137,7 @@ test.describe('Forget subject workflow', () => {
       await createCustomer(page1, {
         name: customerName,
         location: 'CrossCity',
+        userId: user.sub,
       });
       await placeOrder(page1, customerName, {
         text: orderText,
@@ -159,9 +164,12 @@ test.describe('Forget subject workflow', () => {
         timeout: 1000,
       });
 
-      const forgottenRow = page1
-        .locator('tr', { has: page1.getByText('[deleted]') })
-        .first();
+      // Locate the forgotten customer's row by user sub (unique ID visible
+      // in the table), not by '[deleted]' text — earlier tests may have left
+      // other forgotten rows with '[deleted]' that would match first.
+      const forgottenRow = page1.locator('tr', {
+        has: page1.getByText(user.sub, { exact: true }),
+      });
       await expect(forgottenRow).toBeVisible({ timeout: 1000 });
 
       // Place Order button should be disabled for forgotten customer
@@ -213,6 +221,7 @@ test.describe('Forget subject workflow', () => {
       await createCustomer(page1, {
         name: customerName,
         location: customerLocation,
+        userId: user.sub,
       });
 
       // Place two orders with different values
@@ -247,9 +256,12 @@ test.describe('Forget subject workflow', () => {
       });
 
       // Personal fields should show [deleted] placeholder
-      const forgottenRow = page1
-        .locator('tr', { has: page1.getByText('[deleted]') })
-        .first();
+      // Locate the forgotten customer's row by user sub (unique ID visible
+      // in the table), not by '[deleted]' text — earlier tests may have left
+      // other forgotten rows with '[deleted]' that would match first.
+      const forgottenRow = page1.locator('tr', {
+        has: page1.getByText(user.sub, { exact: true }),
+      });
       await expect(forgottenRow).toBeVisible({ timeout: 1000 });
 
       // Customer name should be anonymized

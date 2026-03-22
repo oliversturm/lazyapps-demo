@@ -1,7 +1,9 @@
 <script>
+  import { v4 as uuid } from 'uuid';
+
   import Button from '$lib/Button.svelte';
   import CustomerTable from '$lib/CustomerTable.svelte';
-  import { getUserId } from '$lib/auth';
+  import { authState } from '$lib/auth';
 
   import { readModelStore } from '$lib/readModelStore';
 
@@ -18,7 +20,11 @@
     'all',
     data.correlationId
   );
+
+  $: isAdmin = ($authState.roles || []).includes('admin');
 </script>
 
 <CustomerTable {store} />
-<Button kind="separate" text="New Customer" target={`/customer/${getUserId()}`} />
+{#if isAdmin}
+  <Button kind="separate" text="New Customer" target={`/customer/${uuid()}`} />
+{/if}

@@ -2,6 +2,7 @@ import React from 'react';
 import Button from './Button';
 import { Table, Tbody, Td, Th, Thead, Tr } from './Table';
 import { Working } from './Working';
+import { useAuth } from './AuthProvider';
 
 const isStructured = (value) =>
   value && typeof value === 'object' && typeof value.text === 'string';
@@ -16,6 +17,8 @@ const displayValue = (value) =>
   isStructured(value) ? value.text : value;
 
 const CustomerTable = ({ data, rowEdit, onPlaceOrder, onForget }) => {
+  const { roles, sub } = useAuth();
+  const isAdmin = (roles || []).includes('admin');
   return data ? (
     <Table>
       <Thead>
@@ -30,27 +33,33 @@ const CustomerTable = ({ data, rowEdit, onPlaceOrder, onForget }) => {
           const forgotten = isForgotten(row.name);
           const restricted = isRestricted(row.name);
           const unavailable = forgotten || restricted;
+          const isOwner = row.id === sub;
+          const canAct = isAdmin || isOwner;
           return (
             <Tr key={row.id}>
               <Td>
-                <Button
-                  kind="inline"
-                  onClick={() => rowEdit(row.id)}
-                  text="Edit"
-                  disabled={unavailable}
-                />
-                <Button
-                  kind="inline"
-                  onClick={() => onPlaceOrder(row.id)}
-                  text="Place Order"
-                  disabled={unavailable}
-                />
-                {!unavailable && (
-                  <Button
-                    kind="inline"
-                    onClick={() => onForget(row.id, row.name)}
-                    text="Forget"
-                  />
+                {canAct && (
+                  <>
+                    <Button
+                      kind="inline"
+                      onClick={() => rowEdit(row.id)}
+                      text="Edit"
+                      disabled={unavailable}
+                    />
+                    <Button
+                      kind="inline"
+                      onClick={() => onPlaceOrder(row.id)}
+                      text="Place Order"
+                      disabled={unavailable}
+                    />
+                    {!unavailable && (
+                      <Button
+                        kind="inline"
+                        onClick={() => onForget(row.id, row.name)}
+                        text="Forget"
+                      />
+                    )}
+                  </>
                 )}
               </Td>
               <Td>{row.id}</Td>

@@ -81,13 +81,26 @@ export const navigate = async (page, name) => {
 
 /**
  * Create a customer with the given name and location.
+ * Admin users click "New Customer" (generates a UUID).
+ * Regular users navigate directly to /customer/<userId> to create their
+ * own customer — the "New Customer" button is hidden for non-admin users.
  */
-export const createCustomer = async (page, { name, location }) => {
-  await navigate(page, 'Customers');
-  await page.getByText('New Customer').waitFor();
-  await page.getByText('New Customer').click();
+export const createCustomer = async (page, { name, location, userId }) => {
+  if (userId) {
+    // Non-admin: navigate directly to the customer form with user's sub
+    const baseURL = page.url().split('/').slice(0, 3).join('/');
+    await page.goto(`${baseURL}/customer/${userId}`, {
+      waitUntil: 'domcontentloaded',
+    });
+  } else {
+    // Admin: use the "New Customer" button
+    await navigate(page, 'Customers');
+    await page.getByText('New Customer').waitFor();
+    await page.getByText('New Customer').click();
+  }
+  // Wait for Vite dev server to compile the route on first visit
   await page.waitForLoadState('networkidle');
-  await page.locator('input[name="name"]').waitFor();
+  await page.locator('input[name="name"]').waitFor({ timeout: 5000 });
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();

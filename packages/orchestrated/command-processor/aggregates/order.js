@@ -1,4 +1,14 @@
-import { doesntExist, exists, has, is, oneOf } from './validate.js';
+import {
+  doesntExist,
+  exists,
+  has,
+  is,
+  oneOf,
+  isAdmin,
+  hasRole,
+  requireRole,
+} from './validate.js';
+import { AuthorizationError } from '@lazyapps/command-processor/validation.js';
 
 const isCustomerForgotten = (aggregate, customerId) =>
   aggregate.relatedSubjectsForgotten &&
@@ -8,7 +18,11 @@ export default {
   initial: () => ({}),
 
   commands: {
-    CREATE: (aggregate, payload) => {
+    CREATE: (aggregate, payload, auth) => {
+      if (!isAdmin(auth) && (!auth || auth.sub !== payload.customerId))
+        throw new AuthorizationError(
+          'Regular users can only create orders for themselves',
+        );
       doesntExist(aggregate);
       has(payload, 'customerId');
       if (isCustomerForgotten(aggregate, payload.customerId)) {
@@ -35,13 +49,24 @@ export default {
       return { type: 'ORDER_CONFIRMATION_REQUIRED' };
     },
 
-    CONFIRM: (aggregate) => {
+    CONFIRM: (aggregate, payload, auth) => {
+      requireRole(auth, 'admin', 'customer-service', 'service');
       exists(aggregate);
       oneOf(aggregate, 'status', ['new', 'unconfirmed']);
       return { type: 'ORDER_CONFIRMED' };
     },
 
-    FORGET_RELATED_SUBJECT: (aggregate, payload) => {
+    FORGET_RELATED_SUBJECT: (aggregate, payload, auth) => {
+      // Admin or service account can forget any subject's related orders;
+      // regular users can only forget orders related to their own customer.
+      if (
+        !isAdmin(auth) &&
+        !hasRole(auth, 'service') &&
+        (!auth || auth.sub !== payload.relatedSubjectId)
+      )
+        throw new AuthorizationError(
+          'Regular users can only forget their own related data',
+        );
       if (!payload.relatedSubjectId) {
         throw new Error('Missing relatedSubjectId in payload');
       }

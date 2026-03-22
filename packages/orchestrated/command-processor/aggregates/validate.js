@@ -1,3 +1,5 @@
+import { AuthorizationError } from '@lazyapps/command-processor/validation.js';
+
 export const exists = (agg) => {
   if (!agg.creationTimestamp) throw new Error(`The aggregate doesn't exist`);
 };
@@ -41,5 +43,32 @@ export const oneOf = (ob, field, values) => {
       `The object's field '${field}' has an unexpected value '${
         ob[field]
       }' (expected one of [${values.map((v) => `'${v}'`).join(', ')}])`,
+    );
+};
+
+export const hasRole = (auth, role) =>
+  auth &&
+  auth.realm_access &&
+  auth.realm_access.roles &&
+  auth.realm_access.roles.includes(role);
+
+export const isAdmin = (auth) => hasRole(auth, 'admin');
+
+export const requireAdmin = (auth) => {
+  if (!isAdmin(auth))
+    throw new AuthorizationError('Admin role required');
+};
+
+export const requireRole = (auth, ...roles) => {
+  if (!roles.some((role) => hasRole(auth, role)))
+    throw new AuthorizationError(
+      `One of the following roles is required: ${roles.join(', ')}`,
+    );
+};
+
+export const requireOwnerOrAdmin = (auth, ownerId) => {
+  if (!isAdmin(auth) && (!auth || auth.sub !== ownerId))
+    throw new AuthorizationError(
+      'You can only access your own resources, or you need admin role',
     );
 };

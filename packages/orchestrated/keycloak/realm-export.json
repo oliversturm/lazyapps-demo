@@ -30,6 +30,10 @@
       {
         "name": "order-service",
         "description": "Access to order-service context"
+      },
+      {
+        "name": "service",
+        "description": "Internal service-to-service operations"
       }
     ]
   },
@@ -49,6 +53,18 @@
         "http://127.0.0.1:*/*"
       ],
       "webOrigins": ["+"],
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "lazyapps-service",
+      "name": "LazyApps Service Account",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "service-account-secret",
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
       "protocol": "openid-connect",
       "fullScopeAllowed": true
     }
@@ -223,6 +239,14 @@
         }
       ],
       "realmRoles": []
+    },
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567099",
+      "username": "service-account-lazyapps-service",
+      "enabled": true,
+      "emailVerified": true,
+      "serviceAccountClientId": "lazyapps-service",
+      "realmRoles": ["service"]
     }
   ]
 }

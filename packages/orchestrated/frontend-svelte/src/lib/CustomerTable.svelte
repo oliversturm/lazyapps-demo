@@ -3,6 +3,7 @@
 
   import Button from './Button.svelte';
   import { forgetSubject } from './commands';
+  import { authState } from './auth';
 
   import Table from './table/Table.svelte';
   import Tbody from './table/Tbody.svelte';
@@ -13,6 +14,9 @@
   import Working from './Working.svelte';
 
   export let store;
+
+  $: isAdmin = ($authState.roles || []).includes('admin');
+  $: userSub = $authState.sub;
 
   const isStructured = (value) =>
     value && typeof value === 'object' && typeof value.text === 'string';
@@ -52,26 +56,30 @@
         {@const forgotten = isForgotten(row.name)}
         {@const restricted = isRestricted(row.name)}
         {@const unavailable = forgotten || restricted}
+        {@const isOwner = row.id === userSub}
+        {@const canAct = isAdmin || isOwner}
         <Tr>
           <Td>
-            <Button
-              kind="inline"
-              text="Edit"
-              target={unavailable ? null : `/customer/${row.id}`}
-              disabled={unavailable}
-            />
-            <Button
-              kind="inline"
-              text="Place Order"
-              target={unavailable ? null : `/order/${row.id}/${uuid()}`}
-              disabled={unavailable}
-            />
-            {#if !unavailable}
+            {#if canAct}
               <Button
                 kind="inline"
-                text="Forget"
-                on:click={() => handleForget(row.id, row.name)}
+                text="Edit"
+                target={unavailable ? null : `/customer/${row.id}`}
+                disabled={unavailable}
               />
+              <Button
+                kind="inline"
+                text="Place Order"
+                target={unavailable ? null : `/order/${row.id}/${uuid()}`}
+                disabled={unavailable}
+              />
+              {#if !unavailable}
+                <Button
+                  kind="inline"
+                  text="Forget"
+                  on:click={() => handleForget(row.id, row.name)}
+                />
+              {/if}
             {/if}
           </Td>
           <Td>{row.id}</Td>

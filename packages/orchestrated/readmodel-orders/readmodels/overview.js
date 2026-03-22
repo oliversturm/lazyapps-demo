@@ -202,12 +202,48 @@ export default {
           ),
         ),
 
-    SUBJECT_FORGOTTEN: ({
-      changeNotification: { sendChangeNotification, createChangeInfo },
-    }) =>
-      sendChangeNotification(
-        createChangeInfo('orders', 'overview', 'all', 'all'),
-      ),
+    SUBJECT_FORGOTTEN: (
+      {
+        storage,
+        commands,
+        sideEffects,
+        changeNotification: { sendChangeNotification, createChangeInfo },
+      },
+      { aggregateId, payload },
+    ) =>
+      // Find all orders for the forgotten customer and send
+      // FORGET_RELATED_SUBJECT commands to cascade the forget operation.
+      // This is a readmodel side-effect: the orders readmodel knows which
+      // orders reference the forgotten customer, so it triggers the cascade
+      // rather than requiring the frontend to query and iterate.
+      storage
+        .find(ordersCollectionName, { customerId: aggregateId })
+        .project({ _id: 0, id: 1 })
+        .toArray()
+        .then((orders) =>
+          Promise.all(
+            orders.map((order) =>
+              sideEffects.schedule(
+                commands.execute({
+                  aggregateName: 'order',
+                  aggregateId: order.id,
+                  command: 'FORGET_RELATED_SUBJECT',
+                  payload: {
+                    relatedSubjectId: aggregateId,
+                    relatedSubjectType: 'customer',
+                    contexts: payload.contexts || ['personal'],
+                  },
+                }),
+                { name: `Forget related order ${order.id}` },
+              ),
+            ),
+          ),
+        )
+        .then(() =>
+          sendChangeNotification(
+            createChangeInfo('orders', 'overview', 'all', 'all'),
+          ),
+        ),
   },
 
   resolvers: {

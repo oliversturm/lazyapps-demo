@@ -15,10 +15,10 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@lazyapps/bootstrap": "0.3.0-branch-feature-encryption-20260314105512",
-    "@lazyapps/change-notifier-socket-io": "0.2.0-branch-feature-encryption-20260314105512",
+    "@lazyapps/bootstrap": "0.3.0-branch-feature-encryption-20260320202938",
+    "@lazyapps/change-notifier-socket-io": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/logger": "^0.2.0",
-    "@lazyapps/encryption": "0.2.0-branch-feature-encryption-20260314105512",
+    "@lazyapps/encryption": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/observability": "^0.3.0"
   },
   "type": "module"

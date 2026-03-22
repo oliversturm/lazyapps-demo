@@ -15,15 +15,15 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@lazyapps/bootstrap": "0.3.0-branch-feature-encryption-20260314105512",
+    "@lazyapps/bootstrap": "0.3.0-branch-feature-encryption-20260320202938",
     "@lazyapps/change-notification-sender-fetch": "^0.1.2",
-    "@lazyapps/encryption": "0.2.0-branch-feature-encryption-20260314105512",
-    "@lazyapps/command-sender-fetch": "^0.1.2",
+    "@lazyapps/encryption": "0.2.0-branch-feature-encryption-20260320202938",
+    "@lazyapps/command-sender-fetch": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/eventbus-rabbitmq": "^0.1.2",
-    "@lazyapps/express": "0.2.0-branch-feature-encryption-20260314105512",
+    "@lazyapps/express": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/logger": "^0.2.0",
     "@lazyapps/observability": "^0.3.0",
-    "@lazyapps/readmodels": "0.2.0-branch-feature-encryption-20260314105512",
+    "@lazyapps/readmodels": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/readmodelstorage-mongodb": "^0.1.2",
     "jwks-rsa": "^3.1.0"
   },

@@ -15,12 +15,12 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@lazyapps/aggregatestore-inmemory": "0.2.0-branch-feature-encryption-20260314105512",
-    "@lazyapps/bootstrap": "0.3.0-branch-feature-encryption-20260314105512",
-    "@lazyapps/encryption": "0.2.0-branch-feature-encryption-20260314105512",
+    "@lazyapps/aggregatestore-inmemory": "0.2.0-branch-feature-encryption-20260320202938",
+    "@lazyapps/bootstrap": "0.3.0-branch-feature-encryption-20260320202938",
+    "@lazyapps/encryption": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/eventbus-rabbitmq": "^0.1.2",
-    "@lazyapps/eventstore-mongodb": "0.2.0-branch-feature-encryption-20260314105512",
-    "@lazyapps/express": "0.2.0-branch-feature-encryption-20260314105512",
+    "@lazyapps/eventstore-mongodb": "0.2.0-branch-feature-encryption-20260320202938",
+    "@lazyapps/express": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/logger": "^0.2.0",
     "@lazyapps/observability": "^0.3.0",
     "jwks-rsa": "^3.1.0"

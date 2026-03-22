@@ -18,26 +18,26 @@ importers:
   packages/monolith:
     dependencies:
       '@lazyapps/aggregatestore-inmemory':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/bootstrap':
-        specifier: 0.3.0-branch-feature-encryption-20260314105512
-        version: 0.3.0-branch-feature-encryption-20260314105512(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260320202938
+        version: 0.3.0-branch-feature-encryption-20260320202938(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/change-notifier-socket-io':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/eventbus-mqemitter-redis':
-        specifier: 0.1.3-branch-feature-encryption-20260314105512
-        version: 0.1.3-branch-feature-encryption-20260314105512
+        specifier: 0.1.3-branch-feature-encryption-20260320202938
+        version: 0.1.3-branch-feature-encryption-20260320202938
       '@lazyapps/eventstore-mongodb':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/express':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -112,14 +112,14 @@ importers:
   packages/orchestrated/change-notifier:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: 0.3.0-branch-feature-encryption-20260314105512
-        version: 0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260320202938
+        version: 0.3.0-branch-feature-encryption-20260320202938(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notifier-socket-io':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/encryption':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -137,23 +137,23 @@ importers:
   packages/orchestrated/command-processor:
     dependencies:
       '@lazyapps/aggregatestore-inmemory':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/bootstrap':
-        specifier: 0.3.0-branch-feature-encryption-20260314105512
-        version: 0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260320202938
+        version: 0.3.0-branch-feature-encryption-20260320202938(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/encryption':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/eventbus-rabbitmq':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/eventstore-mongodb':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/express':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -293,23 +293,23 @@ importers:
   packages/orchestrated/readmodel-customers:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: 0.3.0-branch-feature-encryption-20260314105512
-        version: 0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260320202938
+        version: 0.3.0-branch-feature-encryption-20260320202938(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/command-sender-fetch':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/encryption':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/eventbus-rabbitmq':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/express':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -317,8 +317,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       '@lazyapps/readmodels':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/readmodelstorage-mongodb':
         specifier: ^0.1.2
         version: 0.1.2
@@ -336,23 +336,23 @@ importers:
   packages/orchestrated/readmodel-orders:
     dependencies:
       '@lazyapps/bootstrap':
-        specifier: 0.3.0-branch-feature-encryption-20260314105512
-        version: 0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))
+        specifier: 0.3.0-branch-feature-encryption-20260320202938
+        version: 0.3.0-branch-feature-encryption-20260320202938(vite@5.4.21(@types/node@25.2.1))
       '@lazyapps/change-notification-sender-fetch':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/command-sender-fetch':
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/encryption':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/eventbus-rabbitmq':
         specifier: ^0.1.2
         version: 0.1.2
       '@lazyapps/express':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/logger':
         specifier: ^0.2.0
         version: 0.2.0
@@ -360,8 +360,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       '@lazyapps/readmodels':
-        specifier: 0.2.0-branch-feature-encryption-20260314105512
-        version: 0.2.0-branch-feature-encryption-20260314105512
+        specifier: 0.2.0-branch-feature-encryption-20260320202938
+        version: 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/readmodelstorage-mongodb':
         specifier: ^0.1.2
         version: 0.1.2
@@ -880,12 +880,12 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@lazyapps/aggregatestore-inmemory@0.2.0-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-uD4sKvcUwaINnM54nA5qKzzmgmt6JVPU6ZFNPvVIucoTPNkgpS2JZt6tgksApCOLADb/G9LWRmdCUCyCdn/1qg==}
+  '@lazyapps/aggregatestore-inmemory@0.2.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-V1lGe2aJrd+kSr0tU2ENwObnuoE75XQJYpr0U5L4ubo2xpDyA0z9isv11zxLzzXHVUgX5wKGzOHB/nhvrjMELQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-VSVaIO7wcnK5WgdRZGpF+SmTTLhnoUpKJn4FOZintPzbwokHb8Ffyvq5Ltn0BbaIy/xoovzIHos88QWvL9S1kQ==}
+  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-QEiCWimtRIrwczVGl2KI8fEdvJ4kLiM3qch6C0dQ91HsAjMKQqjnkNS7tPoL8NvN7vROiwtc8HyDyhKbsTNxRQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
     peerDependencies:
       '@sveltejs/kit': '>=2.0.0'
@@ -900,20 +900,20 @@ packages:
     resolution: {integrity: sha512-X+y7F28YpLHOhJj79ID97KgZmg6qQqjKhsNY11AFFh5uGBbK8Uu1CeJqWSEEflJbW9ajOAzxRGdl94S/U/CMRA==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/change-notifier-socket-io@0.2.0-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-32tRWXXOsu6vQBmObWnRi4xI2chnk89AdRqv2yN48Mtt8Hwb/Eet706a5bTY3Y2hhv6XOoP+sZdY8SgAApdI/g==}
+  '@lazyapps/change-notifier-socket-io@0.2.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-6m5Slqkvczc6r9GmdyqsGtm6e7NNuKD2fUz2ZgK2jTUzQjwSXP1FE4N/IFZYBWlBX7XM6hHP1SGI48dxGq7xtw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/command-processor@0.2.0-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-4/HqYlchhr7E2TJgSYx+wUyTmhaDbe7RcdlVCvpvZL7gxWD37y4jrWuKquWqIaUvxTAO/RuExz9jSCkUdY5mZA==}
+  '@lazyapps/command-processor@0.2.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-DwxyyYKnTvxxiv+qvKHfE9NRoh7Jcuu0irYgw9/4EJHqy9MBph/qMj9BtCcdNvxWGCLszyA0De0caNGvl1ys8Q==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/command-sender-fetch@0.1.2':
-    resolution: {integrity: sha512-U6rMhQfR3ObZ5pxRKhf4gaFy76gy+pXP0eYecLDOvNz6W+hxgV/jwMoiN+dFbYBaHuk/Anm9K1kyzphUp/u/Ng==}
+  '@lazyapps/command-sender-fetch@0.2.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-TFxgQOXOLmWWq38Mwyp62rsyMpKK8+9JlwD82+sJ9GSIHmtCk/GcK9bYX+eaPoCusP793pMONIY5RDghVrJqqQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/encryption@0.2.0-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-ibp5sbYwVEYuFF/zhYqRTYrSqcQUae7pjLRPstrDPNNxQXav4GOwNMBAnUpcDkqu6pjHv/pX1Doy8q4SOCdZdg==}
+  '@lazyapps/encryption@0.2.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-8S3jz4zzKHTvprxu9+xZU7MnG8CllazzpeM4QltLfEIFhqFBnmmf2VW1fkAA7AOdGvcKKz+OJJCdirzBKf5Ofg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
     peerDependencies:
       mongodb: ^6.0.0
@@ -921,20 +921,20 @@ packages:
       mongodb:
         optional: true
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.3-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-A2DGD7RL4qRE7or1TwZL3CaxVbmATESNUFb9n21Mf11QAs/DzBpWCackRmgEV1i6+ntw2eDuy+glH43rm36O7w==}
+  '@lazyapps/eventbus-mqemitter-redis@0.1.3-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-HK0nxedR7sgiZ+v/5J2HMInfttIY51Cu9Q/M85UX+d0frWt1gX6QgcZ92wnk8vLVPYJqbThHspxtV3PQZ4sTOw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/eventbus-rabbitmq@0.1.2':
     resolution: {integrity: sha512-6qbFrU4wdvk+5O8dfy9gQb9Falz1LdXZMlmtUWQebNlHJZBrdKGdq7kfBIpgpqjnyMKIs0UNh3+D9LTL9SI0wg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/eventstore-mongodb@0.2.0-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-afgX4c7HsN/nPb6pHTuXppfI2huLmmHfAaksALI4iR6LnRDlLftUrB21YOqlxQ0uX7dJEex1RW4HjWYT9+XqOA==}
+  '@lazyapps/eventstore-mongodb@0.2.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-jAZ2oLjj7zz3V/5nKJZrOJYNbPoWkp8I+JMFGJweOJWa4ktlfHM3mfqjFShmPfIb3QPzFqq5m3oorJF30/vDTQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/express@0.2.0-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-WezzJK+3PbN7eo8/qs2CAdcMmX8iBguR5DnDXSF36KnaQD7b5vTdJpRg+8K3lq5GU4qOaecluyQ1XaskdBZe+w==}
+  '@lazyapps/express@0.2.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-M9YDqm6YgrXjeOqpy2xldUe0B/7Rd5leen9CHH/7jyBrvzGSPP2RJ/zRnjjHwmKj8x2WCTQBd5Qe/pdkjdqMQQ==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/log-highlight@0.1.1':
@@ -954,8 +954,8 @@ packages:
     resolution: {integrity: sha512-KQL2TC0WnU0aeF0sp/yNcp3Fx91l5dtx0w+Fz1hNLbsmEvUN/8tf93ZZc4K1qXlMjMBSmljgmPB5TmcYoKfjrg==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
-  '@lazyapps/readmodels@0.2.0-branch-feature-encryption-20260314105512':
-    resolution: {integrity: sha512-UdbnbvdssR2xu1xe+T5M71C8UMgjAuKj9z6Ih2eZOx3E/ILQsDrudoaiFDg6vsTnfYIrtL7Pegt1pgqeurwQPg==}
+  '@lazyapps/readmodels@0.2.0-branch-feature-encryption-20260320202938':
+    resolution: {integrity: sha512-MfxvgNDSfXj35XItKTlnpk/Q5ZxpYhGHl/Uyd99b7VoYMc+f57R+w/ekKDK+8qh0gcDlhYDPAmnsg4S2sKxJvw==}
     engines: {node: '>=18.20.3 || >=20.18.0'}
 
   '@lazyapps/readmodelstorage-mongodb@0.1.2':
@@ -4537,15 +4537,15 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@lazyapps/aggregatestore-inmemory@0.2.0-branch-feature-encryption-20260314105512':
+  '@lazyapps/aggregatestore-inmemory@0.2.0-branch-feature-encryption-20260320202938':
     dependencies:
       '@lazyapps/logger': 0.2.0
 
-  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260314105512(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260320202938(@sveltejs/kit@1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1)))(vite@4.5.14(@types/node@25.2.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.2.0-branch-feature-encryption-20260314105512
+      '@lazyapps/command-processor': 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/logger': 0.2.0
-      '@lazyapps/readmodels': 0.2.0-branch-feature-encryption-20260314105512
+      '@lazyapps/readmodels': 0.2.0-branch-feature-encryption-20260320202938
       '@opentelemetry/api': 1.9.0
     optionalDependencies:
       '@sveltejs/kit': 1.30.4(svelte@4.2.20)(vite@4.5.14(@types/node@25.2.1))
@@ -4558,11 +4558,11 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260314105512(vite@5.4.21(@types/node@25.2.1))':
+  '@lazyapps/bootstrap@0.3.0-branch-feature-encryption-20260320202938(vite@5.4.21(@types/node@25.2.1))':
     dependencies:
-      '@lazyapps/command-processor': 0.2.0-branch-feature-encryption-20260314105512
+      '@lazyapps/command-processor': 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/logger': 0.2.0
-      '@lazyapps/readmodels': 0.2.0-branch-feature-encryption-20260314105512
+      '@lazyapps/readmodels': 0.2.0-branch-feature-encryption-20260320202938
       '@opentelemetry/api': 1.9.0
     optionalDependencies:
       vite: 5.4.21(@types/node@25.2.1)
@@ -4581,7 +4581,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/change-notifier-socket-io@0.2.0-branch-feature-encryption-20260314105512':
+  '@lazyapps/change-notifier-socket-io@0.2.0-branch-feature-encryption-20260320202938':
     dependencies:
       '@lazyapps/logger': 0.2.0
       body-parser: 1.20.4
@@ -4601,11 +4601,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@lazyapps/command-processor@0.2.0-branch-feature-encryption-20260314105512':
+  '@lazyapps/command-processor@0.2.0-branch-feature-encryption-20260320202938':
     dependencies:
-      '@lazyapps/aggregatestore-inmemory': 0.2.0-branch-feature-encryption-20260314105512
-      '@lazyapps/eventbus-mqemitter-redis': 0.1.3-branch-feature-encryption-20260314105512
-      '@lazyapps/eventstore-mongodb': 0.2.0-branch-feature-encryption-20260314105512
+      '@lazyapps/aggregatestore-inmemory': 0.2.0-branch-feature-encryption-20260320202938
+      '@lazyapps/eventbus-mqemitter-redis': 0.1.3-branch-feature-encryption-20260320202938
+      '@lazyapps/eventstore-mongodb': 0.2.0-branch-feature-encryption-20260320202938
       '@lazyapps/logger': 0.2.0
       '@opentelemetry/api': 1.9.0
       nanoid: 5.1.6
@@ -4617,18 +4617,18 @@ snapshots:
       - snappy
       - supports-color
 
-  '@lazyapps/command-sender-fetch@0.1.2':
+  '@lazyapps/command-sender-fetch@0.2.0-branch-feature-encryption-20260320202938':
     dependencies:
       '@lazyapps/logger': 0.2.0
       isomorphic-fetch: 3.0.0
     transitivePeerDependencies:
       - encoding
 
-  '@lazyapps/encryption@0.2.0-branch-feature-encryption-20260314105512':
+  '@lazyapps/encryption@0.2.0-branch-feature-encryption-20260320202938':
     dependencies:
       '@lazyapps/logger': 0.2.0
 
-  '@lazyapps/eventbus-mqemitter-redis@0.1.3-branch-feature-encryption-20260314105512':
+  '@lazyapps/eventbus-mqemitter-redis@0.1.3-branch-feature-encryption-20260320202938':
     dependencies:
       '@lazyapps/logger': 0.2.0
       mqemitter-redis: 5.1.0
@@ -4642,7 +4642,7 @@ snapshots:
       amqplib: 0.10.9
       p-retry: 6.2.1
 
-  '@lazyapps/eventstore-mongodb@0.2.0-branch-feature-encryption-20260314105512':
+  '@lazyapps/eventstore-mongodb@0.2.0-branch-feature-encryption-20260320202938':
     dependencies:
       '@lazyapps/logger': 0.2.0
       mongodb: 5.9.2
@@ -4654,7 +4654,7 @@ snapshots:
       - mongodb-client-encryption
       - snappy
 
-  '@lazyapps/express@0.2.0-branch-feature-encryption-20260314105512':
+  '@lazyapps/express@0.2.0-branch-feature-encryption-20260320202938':
     dependencies:
       '@lazyapps/logger': 0.2.0
       body-parser: 1.20.4
@@ -4708,7 +4708,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@lazyapps/readmodels@0.2.0-branch-feature-encryption-20260314105512':
+  '@lazyapps/readmodels@0.2.0-branch-feature-encryption-20260320202938':
     dependencies:
       '@lazyapps/logger': 0.2.0
       '@opentelemetry/api': 1.9.0

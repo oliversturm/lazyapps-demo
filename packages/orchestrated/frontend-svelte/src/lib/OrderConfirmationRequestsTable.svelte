@@ -8,8 +8,11 @@
   import Working from './Working.svelte';
   import Button from '$lib/Button.svelte';
   import { postCommand } from '$lib/commands.js';
+  import { authState } from './auth';
 
   export let store;
+
+  $: canConfirm = ($authState.roles || []).includes('admin') || ($authState.roles || []).includes('customer-service');
 
   const displayValue = (value) =>
     value && typeof value === 'object' && typeof value.text === 'string'
@@ -52,7 +55,7 @@
         <Td>{displayValue(row.customerName)}</Td>
         <Td warn={row.status !== 'confirmed'}>{row.status}</Td>
         <Td>
-          {#if row.status === 'unconfirmed'}
+          {#if row.status === 'unconfirmed' && canConfirm}
             <Button kind="inline" text="Confirm" on:click={confirm(row.id)} />
           {/if}
         </Td>

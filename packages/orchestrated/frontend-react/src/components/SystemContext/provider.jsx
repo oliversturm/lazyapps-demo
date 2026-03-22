@@ -42,6 +42,9 @@ const SystemProvider = ({
         }),
         {},
       ),
+      // The forget cascade (FORGET_RELATED_SUBJECT to orders) is handled by
+      // the orders readmodel projection, not the frontend. The frontend only
+      // sends FORGET_SUBJECT for the customer aggregate.
       forgetSubject: (subjectId) =>
         postCommand(commandEndpoint, {
           aggregateName: 'customer',
@@ -49,31 +52,7 @@ const SystemProvider = ({
           command: 'FORGET_SUBJECT',
           payload: { subjectId },
           correlationId: `REACT-${nanoid()}`,
-        }).then(() =>
-          query(readModelEndpoints.orders)(
-            `REACT-${nanoid()}`,
-            'overview',
-            'all',
-          ).then((orders) =>
-            Promise.all(
-              (orders || [])
-                .filter((o) => o.customerId === subjectId)
-                .map((order) =>
-                  postCommand(commandEndpoint, {
-                    aggregateName: 'order',
-                    aggregateId: order.id,
-                    command: 'FORGET_RELATED_SUBJECT',
-                    payload: {
-                      relatedSubjectId: subjectId,
-                      relatedSubjectType: 'customer',
-                      contexts: ['personal'],
-                    },
-                    correlationId: `REACT-${nanoid()}`,
-                  }),
-                ),
-            ),
-          ),
-        ),
+        }),
     }),
     [aggregates, readModelEndpoints, commandEndpoint, changeNotifierEndpoint],
   );

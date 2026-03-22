@@ -2,7 +2,6 @@ import { nanoid } from 'nanoid';
 import { getToken } from './auth';
 
 const commandEndpoint = import.meta.env.VITE_COMMAND_URL || 'http://127.0.0.1:3001/api/command';
-const ordersReadModelEndpoint = import.meta.env.VITE_RM_ORDERS_URL || 'http://127.0.0.1:3005';
 
 // Same code as React
 const _postCommand = (endpoint, content) => {
@@ -31,40 +30,14 @@ const _postCommand = (endpoint, content) => {
 
 export const postCommand = (content) => _postCommand(commandEndpoint, content);
 
-const queryOrders = (customerId) => {
-	const headers = { 'Content-Type': 'application/json' };
-	const token = getToken();
-	if (token) headers['Authorization'] = `Bearer ${token}`;
-	return fetch(new URL('/query/overview/all', ordersReadModelEndpoint), {
-		method: 'POST',
-		headers,
-		body: JSON.stringify({})
-	})
-		.then((res) => res.json())
-		.then((orders) => orders.filter((o) => o.customerId === customerId));
-};
-
+// The forget cascade (FORGET_RELATED_SUBJECT to orders) is handled by the
+// orders readmodel projection, not the frontend. The frontend only sends
+// FORGET_SUBJECT for the customer aggregate; the readmodel takes care of
+// finding and forgetting related orders via service-to-service auth.
 export const forgetSubject = (subjectId) =>
 	postCommand({
 		aggregateName: 'customer',
 		aggregateId: subjectId,
 		command: 'FORGET_SUBJECT',
 		payload: { subjectId }
-	}).then(() =>
-		queryOrders(subjectId).then((orders) =>
-			Promise.all(
-				orders.map((order) =>
-					postCommand({
-						aggregateName: 'order',
-						aggregateId: order.id,
-						command: 'FORGET_RELATED_SUBJECT',
-						payload: {
-							relatedSubjectId: subjectId,
-							relatedSubjectType: 'customer',
-							contexts: ['personal']
-						}
-					})
-				)
-			)
-		)
-	);
+	});

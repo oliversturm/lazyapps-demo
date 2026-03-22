@@ -34,16 +34,24 @@ const USERS = {
  * In the orchestrated app, the aggregateId defaults to getUserId() (the
  * Keycloak sub), so each user creates "their own" customer record.
  */
-const createCustomerAsUser = async (page, { name, location }) => {
-  await navigate(page, 'Customers');
-  await page.getByText('New Customer').waitFor();
-  await page.getByText('New Customer').click();
+const createCustomerAsUser = async (page, { name, location, userId }) => {
+  if (userId) {
+    // Non-admin: navigate directly to customer form
+    const baseURL = page.url().split('/').slice(0, 3).join('/');
+    await page.goto(`${baseURL}/customer/${userId}`, {
+      waitUntil: 'domcontentloaded',
+    });
+  } else {
+    // Admin: use the "New Customer" button
+    await navigate(page, 'Customers');
+    await page.getByText('New Customer').waitFor();
+    await page.getByText('New Customer').click();
+  }
   await page.waitForLoadState('networkidle');
-  await page.locator('input[name="name"]').waitFor({ timeout: 1000 });
+  await page.locator('input[name="name"]').waitFor({ timeout: 5000 });
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();
-  // Wait for CQRS pipeline
   await page.getByText(name).first().waitFor({ timeout: 1000 });
 };
 
@@ -218,6 +226,7 @@ test.describe('Keycloak authentication and role-based access', () => {
         await createCustomerAsUser(davePage, {
           name: daveName,
           location: 'DaveCity',
+          userId: USERS.dave.sub,
         });
 
         // Dave should see his own customer data (self-access grants 'self' role
@@ -292,6 +301,7 @@ test.describe('Keycloak authentication and role-based access', () => {
         await createCustomerAsUser(davePage, {
           name: daveName,
           location: 'DaveCity',
+          userId: USERS.dave.sub,
         });
 
         // Navigate to Customers list
@@ -339,8 +349,10 @@ test.describe('Keycloak authentication and role-based access', () => {
           USERS.dave.password,
         );
         await navigate(davePage, 'Customers');
-        // Ensure route is compiled and socket.io connection established
-        await davePage.getByText('New Customer').waitFor();
+        // Ensure route is compiled and socket.io connection established.
+        // Dave is not admin, so "New Customer" is hidden — wait for the
+        // table to be rendered instead.
+        await davePage.locator('table').waitFor();
       } catch (err) {
         await daveCtx.close();
         throw err;
@@ -358,7 +370,7 @@ test.describe('Keycloak authentication and role-based access', () => {
           USERS.bob.password,
         );
         await navigate(bobPage, 'Customers');
-        await bobPage.getByText('New Customer').waitFor();
+        await bobPage.locator('table').waitFor();
       } catch (err) {
         await bobCtx.close();
         await daveCtx.close();

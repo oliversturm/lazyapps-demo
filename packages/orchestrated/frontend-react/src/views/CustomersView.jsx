@@ -1,18 +1,22 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { v4 as uuid } from 'uuid';
 import Button from '../components/Button';
 import CustomerTable from '../components/CustomerTable';
 
 import { useReadModelStore } from '../hooks/useReadModelStore';
 import { useForgetSubject } from '../components/SystemContext';
+import { useAuth } from '../components/AuthProvider';
 import { dataLoaded as customersViewDataLoaded, dataChanged as customersViewDataChanged } from '../state/customersView.slice';
 import { customerView, orderView } from '../state/navigation.slice';
 
 const CustomersView = () => {
   const dispatch = useDispatch();
   const forgetSubject = useForgetSubject();
+  const { roles } = useAuth();
+  const isAdmin = (roles || []).includes('admin');
   const onNewCustomer = useCallback(() => {
-    dispatch(customerView());
+    dispatch(customerView(uuid()));
   }, [dispatch]);
   const rowEdit = useCallback(
     id => {
@@ -60,7 +64,7 @@ const CustomersView = () => {
         onPlaceOrder={onPlaceOrder}
         onForget={onForget}
       />
-      <Button kind="separate" onClick={onNewCustomer} text="New Customer" />
+      {isAdmin && <Button kind="separate" onClick={onNewCustomer} text="New Customer" />}
     </div>
   );
 };

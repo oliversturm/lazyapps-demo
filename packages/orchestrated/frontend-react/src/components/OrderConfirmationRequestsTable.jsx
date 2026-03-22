@@ -2,6 +2,7 @@ import React from 'react';
 import { Table, Tbody, Td, Th, Thead, Tr } from './Table';
 import { Working } from './Working';
 import Button from './Button.jsx';
+import { useAuth } from './AuthProvider';
 
 const displayValue = (value) =>
   value && typeof value === 'object' && typeof value.text === 'string'
@@ -9,6 +10,8 @@ const displayValue = (value) =>
     : value;
 
 const OrderConfirmationRequestsTable = ({ data, onConfirm }) => {
+  const { roles } = useAuth();
+  const canConfirm = (roles || []).includes('admin') || (roles || []).includes('customer-service');
   return data ? (
     <Table>
       <Thead>
@@ -30,7 +33,7 @@ const OrderConfirmationRequestsTable = ({ data, onConfirm }) => {
             <Td>{displayValue(row.customerName)}</Td>
             <Td warn={row.status !== 'confirmed'}>{row.status}</Td>
             <Td>
-              {row.status !== 'confirmed' && (
+              {row.status === 'unconfirmed' && canConfirm && (
                 <Button
                   kind="inline"
                   onClick={() => onConfirm(row.id)}
