@@ -10,7 +10,7 @@ import {
   encryptionContexts,
   encryptionSubjects,
 } from '../common/encryption-config.js';
-import { jwtSecret, jwtAlgorithms } from '../common/jwt-config.js';
+import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
 import { isAdmin } from './aggregates/validate.js';
 import * as aggregates from './aggregates/index.js';
 import path from 'path';
@@ -60,7 +60,7 @@ start({
   commands: {
     receiver: express({
       port: process.env.EXPRESS_PORT || 3001,
-      jwtSecret,
+      jwtAuth,
       jwtAlgorithms,
       credentialsRequired: true,
     }),

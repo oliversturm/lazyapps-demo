@@ -16,7 +16,7 @@ import {
   encryptionContexts,
   readModelEncryptionConfig,
 } from '../common/encryption-config.js';
-import { jwtSecret, jwtAlgorithms } from '../common/jwt-config.js';
+import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
 
 const encryption = createEncryption({
   schema: encryptionSchema,
@@ -44,8 +44,9 @@ start({
     })),
     listener: express({
       port: process.env.EXPRESS_PORT || 3003,
-      jwtSecret,
+      jwtAuth,
       jwtAlgorithms,
+      credentialsRequired: true,
     }),
     storage: mongodb({
       url: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',
