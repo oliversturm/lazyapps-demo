@@ -75,6 +75,7 @@ start({
     aggregates: {
       ...aggregates,
     },
+    isAdmin,
     commandRecording: commandRecordingConfig,
   },
 });
