@@ -52,7 +52,7 @@ const navigateToReplayPage = async (page, rmInfo) => {
 };
 
 test.describe('Admin replay workflow via UI', () => {
-  test('replay from current state via admin UI', async ({
+  test('replay from scratch via admin UI', async ({
     browser,
     request,
     baseURL,
@@ -85,7 +85,7 @@ test.describe('Admin replay workflow via UI', () => {
       await waitForAdminUI(adminPage, adminURL);
       await navigateToReplayPage(adminPage, rmConfig.customersOverview);
 
-      // Default mode is "From current state" — click Start Replay
+      // Default mode is "From scratch" — click Start Replay
       await adminPage.getByRole('button', { name: 'Start Replay' }).click();
 
       // Wait for replay to complete (SSE push notification)
