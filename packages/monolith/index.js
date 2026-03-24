@@ -15,7 +15,9 @@ import { express as changeNotifierExpress } from '@lazyapps/change-notifier-sock
 import { changeNotificationSenderFetch } from '@lazyapps/change-notification-sender-fetch';
 import * as aggregates from './aggregates/index.js';
 import * as readModels from './readmodels/index.js';
-import { getLogger } from '@lazyapps/logger';
+import { getLogger, configurePiiPaths } from '@lazyapps/logger';
+
+configurePiiPaths(['payload.name']);
 
 const log = getLogger('Monolith', 'INIT');
 

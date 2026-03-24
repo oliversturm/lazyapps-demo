@@ -17,6 +17,9 @@ import {
   readModelEncryptionConfig,
 } from '../common/encryption-config.js';
 import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
+import { configurePiiPaths } from '@lazyapps/logger';
+
+configurePiiPaths(encryptionSchema.getPiiPaths());
 
 const encryption = createEncryption({
   schema: encryptionSchema,

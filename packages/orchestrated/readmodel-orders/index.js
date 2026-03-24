@@ -5,7 +5,7 @@ import { changeNotificationSenderFetch } from '@lazyapps/change-notification-sen
 import { start } from '@lazyapps/bootstrap';
 import * as readModels from './readmodels/index.js';
 import { commandSenderFetch } from '@lazyapps/command-sender-fetch';
-import { getLogger } from '@lazyapps/logger';
+import { getLogger, configurePiiPaths } from '@lazyapps/logger';
 import { customizeExpress } from './graphql-server.js';
 import {
   createEncryption,
@@ -19,6 +19,8 @@ import {
   readModelEncryptionConfig,
 } from '../common/encryption-config.js';
 import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
+
+configurePiiPaths(encryptionSchema.getPiiPaths());
 
 const encryption = createEncryption({
   schema: encryptionSchema,

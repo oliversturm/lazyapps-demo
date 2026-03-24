@@ -5,6 +5,7 @@ import { rabbitMq } from '@lazyapps/eventbus-rabbitmq/command-receiver/index.js'
 import { start } from '@lazyapps/bootstrap';
 import { createEncryption, vaultKeyStore, appRole } from '@lazyapps/encryption';
 import { AuthorizationError } from '@lazyapps/command-processor/validation.js';
+import { configurePiiPaths } from '@lazyapps/logger';
 import {
   encryptionSchema,
   encryptionContexts,
@@ -14,6 +15,8 @@ import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
 import { isAdmin } from './aggregates/validate.js';
 import * as aggregates from './aggregates/index.js';
 import path from 'path';
+
+configurePiiPaths(encryptionSchema.getPiiPaths());
 
 // Configure command recording based on COMMAND_RECORD_PATH
 const commandRecordingConfig = process.env.COMMAND_RECORD_PATH
