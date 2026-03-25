@@ -14,6 +14,7 @@ import {
 } from '@lazyapps/mqemitter';
 import { express as changeNotifierExpress } from '@lazyapps/change-notifier-socket-io';
 import { changeNotificationSenderFetch } from '@lazyapps/change-notification-sender-fetch';
+import { filesystemTimestampStorage } from '@lazyapps/readmodels/secondaryTimestampStorage.js';
 import * as aggregates from './aggregates/index.js';
 import * as readModels from './readmodels/index.js';
 import { getLogger } from '@lazyapps/logger';
@@ -27,6 +28,8 @@ const mqQueriesPort = process.env.MQ_QUERIES_PORT || 51884;
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017';
 const adminPort = process.env.ADMIN_PORT || 3005;
 const backupPath = process.env.BACKUP_PATH || './backup';
+const developmentMode = process.env.DEVELOPMENT_MODE === 'true';
+const secondaryTsPath = process.env.SECONDARY_TS_PATH || './secondary-timestamps';
 const svelteHost = process.env.SVELTE_HOST || 'localhost';
 const sveltePort = 5173;
 
@@ -107,6 +110,8 @@ start({
     commandSender: commandSenderMqEmitter({ mqName: 'commands' }),
     backup: mongoBackup,
     endpointName: 'monolith',
+    developmentMode,
+    secondaryTimestampStorage: filesystemTimestampStorage(secondaryTsPath),
     readModels,
   },
   changeNotifier: {
@@ -132,5 +137,6 @@ start({
     eventBus: commandProcessorEventBusMqEmitter({ mqName: 'events' }),
     readModelServiceUrl,
     autoActivate: true,
+    developmentMode,
   },
 });

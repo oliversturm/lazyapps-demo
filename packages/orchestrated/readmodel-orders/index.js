@@ -6,11 +6,14 @@ import { installReadModelStatusApi } from '@lazyapps/admin-api';
 import { installAdminEndpoints } from '@lazyapps/readmodels';
 import { backup } from '@lazyapps/readmodelstorage-mongodb/backup.js';
 import { start } from '@lazyapps/bootstrap';
+import { filesystemTimestampStorage } from '@lazyapps/readmodels/secondaryTimestampStorage.js';
 import * as readModels from './readmodels/index.js';
 import { commandSenderFetch } from '@lazyapps/command-sender-fetch';
 import { customizeExpress as customizeExpressGraphql } from './graphql-server.js';
 
 const expressPort = process.env.EXPRESS_PORT || 3005;
+const developmentMode = process.env.DEVELOPMENT_MODE === 'true';
+const secondaryTsPath = process.env.SECONDARY_TS_PATH || './secondary-timestamps';
 
 start({
   correlation: {
@@ -44,6 +47,8 @@ start({
     }),
     lifecycle: true,
     endpointName: 'orders',
+    developmentMode,
+    secondaryTimestampStorage: filesystemTimestampStorage(secondaryTsPath),
     readModels,
   },
 });

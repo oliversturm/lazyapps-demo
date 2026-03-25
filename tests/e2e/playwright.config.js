@@ -46,7 +46,7 @@ export default defineConfig({
     },
     {
       name: 'admin-orchestrated',
-      testMatch: ['**/admin-*-ui.spec.js', '**/admin-backup-files.spec.js'],
+      testMatch: ['**/admin-*-ui.spec.js', '**/admin-backup-files.spec.js', '**/admin-devmode.spec.js'],
       use: {
         baseURL: 'http://frontend-svelte:5173',
       },

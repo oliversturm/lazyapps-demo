@@ -46,6 +46,7 @@ services:
       ORIGIN: 'http://monolith:3005'
       ADMIN_COMMAND_PROCESSOR_URL: 'http://monolith:3005'
       ADMIN_READ_MODEL_SERVICES: '{"monolith":"http://monolith:3005"}'
+      DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
 
   # Orchestrated stack
   mongo:
@@ -114,6 +115,7 @@ services:
       CHANGENOTIFICATION_FETCH_URL: 'http://change-notifier/change'
       COMMAND_URL: 'http://command-processor/api/command'
       LOG_LEVEL: 'debug'
+      DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
       <<: *otel-env
       OTEL_SERVICE_NAME: 'readmodel-customers'
 
@@ -142,6 +144,7 @@ services:
       CHANGENOTIFICATION_FETCH_URL: 'http://change-notifier/change'
       COMMAND_URL: 'http://command-processor/api/command'
       LOG_LEVEL: 'debug'
+      DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
       <<: *otel-env
       OTEL_SERVICE_NAME: 'readmodel-orders'
 
@@ -211,6 +214,7 @@ services:
       ADMIN_READ_MODEL_SERVICES: '{"customers":"http://readmodel-customers","orders":"http://readmodel-orders"}'
       ADMIN_COMMAND_PROCESSOR_URL: 'http://command-processor'
       LOG_LEVEL: 'debug'
+      DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
 
   frontend-react:
     build:
@@ -256,6 +260,7 @@ services:
       - otel-output:/otel-output
     environment:
       CI: 'true'
+      DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
 
 volumes:
   otel-output:

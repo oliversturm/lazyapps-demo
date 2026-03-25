@@ -3,6 +3,7 @@ import { rabbitMq } from '@lazyapps/eventbus-rabbitmq/command-receiver/index.js'
 
 const rabbitUrl = process.env.RABBIT_URL || 'amqp://localhost';
 const adminPort = process.env.PORT || 3000;
+const developmentMode = process.env.DEVELOPMENT_MODE === 'true';
 const readModelServiceUrl = process.env.ADMIN_READ_MODEL_SERVICES
   ? JSON.parse(process.env.ADMIN_READ_MODEL_SERVICES)
   : undefined;
@@ -21,5 +22,6 @@ start({
     readModelServiceUrl,
     commandProcessorUrl,
     autoActivate: true,
+    developmentMode,
   },
 });
