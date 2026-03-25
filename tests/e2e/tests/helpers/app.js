@@ -87,11 +87,14 @@ export const navigate = async (page, name) => {
  */
 export const createCustomer = async (page, { name, location, userId }) => {
   if (userId) {
-    // Non-admin: navigate directly to the customer form with user's sub
+    // Non-admin: navigate directly to the customer form with user's sub.
+    // Full page load triggers Keycloak auth redirect chain — wait for the
+    // nav bar (auth-complete indicator) before looking for the form.
     const baseURL = page.url().split('/').slice(0, 3).join('/');
     await page.goto(`${baseURL}/customer/${userId}`, {
       waitUntil: 'domcontentloaded',
     });
+    await page.locator('.bg-orange-100').waitFor({ timeout: 15000 });
   } else {
     // Admin: use the "New Customer" button
     await navigate(page, 'Customers');
@@ -100,7 +103,7 @@ export const createCustomer = async (page, { name, location, userId }) => {
   }
   // Wait for Vite dev server to compile the route on first visit
   await page.waitForLoadState('networkidle');
-  await page.locator('input[name="name"]').waitFor({ timeout: 5000 });
+  await page.locator('input[name="name"]').waitFor({ timeout: 10000 });
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();

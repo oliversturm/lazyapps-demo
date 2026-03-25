@@ -2,6 +2,7 @@ import React, { useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { withFormik } from 'formik';
 
+import Button from '../components/Button';
 import CustomerForm from '../components/CustomerForm';
 import { useReadModel, useCommands } from '../components/SystemContext';
 import customerEditSchema from '../schemas/customerEditSchema';
@@ -9,6 +10,15 @@ import customerEditSchema from '../schemas/customerEditSchema';
 import { dataLoaded as customerViewDataLoaded } from '../state/customerView.slice';
 import { customersView } from '../state/navigation.slice';
 import { Working } from '../components/Working';
+
+const isStructured = (value) =>
+  value && typeof value === 'object' && typeof value.text === 'string';
+
+const isFieldUnavailable = (value) =>
+  isStructured(value) &&
+  (value.forgotten === true ||
+    value.restricted === true ||
+    value.unauthorized === true);
 
 const FormikCustomerForm = withFormik({
   mapPropsToValues: ({ data }) => customerEditSchema.cast(data || {}),
@@ -61,6 +71,26 @@ const CustomerView = () => {
 
   const data = useSelector(({ customerView: { data } }) => data);
   const dataObject = (data && data.length && data[0]) || null;
+
+  const unavailable =
+    dataObject &&
+    (isFieldUnavailable(dataObject.name) ||
+      isFieldUnavailable(dataObject.location));
+
+  if (unavailable) {
+    return (
+      <div className="container">
+        <div className="p-4 bg-red-100 border border-red-300 rounded my-4">
+          <p className="font-bold text-red-800">Access Denied</p>
+          <p className="text-red-700">
+            You are not authorized to edit this customer, or the customer data is
+            no longer available.
+          </p>
+          <Button onClick={onCancel} kind="separate" text="Back to Customers" />
+        </div>
+      </div>
+    );
+  }
 
   return data ? (
     <div className="container">

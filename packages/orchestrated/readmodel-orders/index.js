@@ -5,7 +5,7 @@ import { changeNotificationSenderFetch } from '@lazyapps/change-notification-sen
 import { start } from '@lazyapps/bootstrap';
 import * as readModels from './readmodels/index.js';
 import { commandSenderFetch } from '@lazyapps/command-sender-fetch';
-import { getLogger, configurePiiPaths } from '@lazyapps/logger';
+import { configurePiiPaths } from '@lazyapps/logger';
 import { customizeExpress } from './graphql-server.js';
 import {
   createEncryption,
@@ -19,6 +19,7 @@ import {
   readModelEncryptionConfig,
 } from '../common/encryption-config.js';
 import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
+import { createServiceTokenProvider } from '../common/service-token.js';
 
 configurePiiPaths(encryptionSchema.getPiiPaths());
 
@@ -65,42 +66,11 @@ start({
       url:
         process.env.CHANGENOTIFICATION_FETCH_URL ||
         'http://localhost:3008/change',
+      jwt: createServiceTokenProvider({ label: 'RM/ORD/JWT' }),
     }),
     commandSender: commandSenderFetch({
       url: process.env.COMMAND_URL,
-      jwt: (() => {
-        const log = getLogger('RM/ORD/JWT', 'INIT');
-        const tokenUrl =
-          process.env.KEYCLOAK_TOKEN_URL ||
-          'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/token';
-        const clientId = process.env.SERVICE_CLIENT_ID || 'lazyapps-service';
-        const clientSecret =
-          process.env.SERVICE_CLIENT_SECRET || 'service-account-secret';
-        let cached = null;
-        let expiresAt = 0;
-        return () => {
-          if (cached && Date.now() < expiresAt) return Promise.resolve(cached);
-          return fetch(tokenUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`,
-          })
-            .then((res) =>
-              res.ok
-                ? res.json()
-                : res.text().then((t) => {
-                    throw new Error(`Token fetch failed: ${res.status} ${t}`);
-                  }),
-            )
-            .then((data) => {
-              cached = data.access_token;
-              // Refresh 30 seconds before expiry
-              expiresAt = Date.now() + (data.expires_in - 30) * 1000;
-              log.info('Service account token acquired');
-              return cached;
-            });
-        };
-      })(),
+      jwt: createServiceTokenProvider({ label: 'RM/ORD/CMD-JWT' }),
     }),
     readModels,
   },

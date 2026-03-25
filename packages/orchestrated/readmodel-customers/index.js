@@ -17,6 +17,7 @@ import {
   readModelEncryptionConfig,
 } from '../common/encryption-config.js';
 import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
+import { createServiceTokenProvider } from '../common/service-token.js';
 import { configurePiiPaths } from '@lazyapps/logger';
 
 configurePiiPaths(encryptionSchema.getPiiPaths());
@@ -63,8 +64,12 @@ start({
       url:
         process.env.CHANGENOTIFICATION_FETCH_URL ||
         'http://localhost:3008/change',
+      jwt: createServiceTokenProvider({ label: 'RM/CUS/JWT' }),
     }),
-    commandSender: commandSenderFetch({ url: process.env.COMMAND_URL }),
+    commandSender: commandSenderFetch({
+      url: process.env.COMMAND_URL,
+      jwt: createServiceTokenProvider({ label: 'RM/CUS/CMD-JWT' }),
+    }),
     readModels,
   },
 });

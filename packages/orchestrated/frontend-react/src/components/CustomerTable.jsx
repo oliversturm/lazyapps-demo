@@ -13,6 +13,9 @@ const isForgotten = (value) =>
 const isRestricted = (value) =>
   isStructured(value) && value.restricted === true;
 
+const isUnauthorized = (value) =>
+  isStructured(value) && value.unauthorized === true;
+
 const displayValue = (value) =>
   isStructured(value) ? value.text : value;
 
@@ -32,7 +35,8 @@ const CustomerTable = ({ data, rowEdit, onPlaceOrder, onForget }) => {
         {data.map((row) => {
           const forgotten = isForgotten(row.name);
           const restricted = isRestricted(row.name);
-          const unavailable = forgotten || restricted;
+          const unauthorized = isUnauthorized(row.name);
+          const unavailable = forgotten || restricted || unauthorized;
           const isOwner = row.id === sub;
           const canAct = isAdmin || isOwner;
           return (

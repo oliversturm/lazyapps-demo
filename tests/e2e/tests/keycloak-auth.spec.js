@@ -36,11 +36,14 @@ const USERS = {
  */
 const createCustomerAsUser = async (page, { name, location, userId }) => {
   if (userId) {
-    // Non-admin: navigate directly to customer form
+    // Non-admin: navigate directly to customer form.
+    // Full page load triggers Keycloak auth redirect chain — wait for the
+    // nav bar (auth-complete indicator) before looking for the form.
     const baseURL = page.url().split('/').slice(0, 3).join('/');
     await page.goto(`${baseURL}/customer/${userId}`, {
       waitUntil: 'domcontentloaded',
     });
+    await page.locator('.bg-orange-100').waitFor({ timeout: 15000 });
   } else {
     // Admin: use the "New Customer" button
     await navigate(page, 'Customers');
@@ -48,7 +51,7 @@ const createCustomerAsUser = async (page, { name, location, userId }) => {
     await page.getByText('New Customer').click();
   }
   await page.waitForLoadState('networkidle');
-  await page.locator('input[name="name"]').waitFor({ timeout: 5000 });
+  await page.locator('input[name="name"]').waitFor({ timeout: 10000 });
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
   await page.getByText('Save').click();

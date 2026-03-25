@@ -31,6 +31,7 @@ ALL_SPECS=(
   vault-auth
   encryption
   keycloak-auth
+  authorization-ui
   forget-subject
 )
 

@@ -20,13 +20,14 @@
   const isRestricted = (value) =>
     isStructured(value) && value.restricted === true;
 
-  $: unavailable =
-    isForgotten(data.name) || isForgotten(data.location) ||
-    isRestricted(data.name) || isRestricted(data.location);
+  const isUnauthorized = (value) =>
+    isStructured(value) && value.unauthorized === true;
 
-  $: if (unavailable) {
-    goto('/customers');
-  }
+  const isFieldUnavailable = (value) =>
+    isForgotten(value) || isRestricted(value) || isUnauthorized(value);
+
+  $: unavailable =
+    isFieldUnavailable(data.name) || isFieldUnavailable(data.location);
 
   const validator = createValidator(customerEditSchema);
   const { errors, isValid } = validator;
@@ -46,40 +47,48 @@
   };
 </script>
 
-<!-- svelte-ignore a11y-label-has-associated-control -->
-<form>
-  <div>
-    <div class="my-4 flex">
-      <label class="mr-4">
-        Name
-        <TextInput
-          name="name"
-          autoFocus
-          bind:value={data.name}
-          on:input={validate}
-        />
-        <ValidationLabel {errors} field="name" />
-      </label>
-      <label>
-        Location
-        <TextInput
-          name="location"
-          bind:value={data.location}
-          on:input={validate}
-        />
-        <ValidationLabel {errors} field="location" />
-      </label>
-    </div>
+{#if unavailable}
+  <div class="p-4 bg-red-100 border border-red-300 rounded my-4">
+    <p class="font-bold text-red-800">Access Denied</p>
+    <p class="text-red-700">You are not authorized to edit this customer, or the customer data is no longer available.</p>
+    <Button kind="separate" text="Back to Customers" target="/customers" />
+  </div>
+{:else}
+  <!-- svelte-ignore a11y-label-has-associated-control -->
+  <form>
     <div>
+      <div class="my-4 flex">
+        <label class="mr-4">
+          Name
+          <TextInput
+            name="name"
+            autoFocus
+            bind:value={data.name}
+            on:input={validate}
+          />
+          <ValidationLabel {errors} field="name" />
+        </label>
+        <label>
+          Location
+          <TextInput
+            name="location"
+            bind:value={data.location}
+            on:input={validate}
+          />
+          <ValidationLabel {errors} field="location" />
+        </label>
+      </div>
       <div>
-        <Button
-          kind="separate"
-          text="Save"
-          on:click={save}
-          disabled={!$isValid}
-        />
-        <Button kind="separate" text="Cancel" target="/customers" />
+        <div>
+          <Button
+            kind="separate"
+            text="Save"
+            on:click={save}
+            disabled={!$isValid}
+          />
+          <Button kind="separate" text="Cancel" target="/customers" />
+        </div>
       </div>
     </div>
-  </div>
-</form>
+  </form>
+{/if}
