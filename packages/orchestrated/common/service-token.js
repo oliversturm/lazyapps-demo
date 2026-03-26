@@ -21,7 +21,9 @@ export const createServiceTokenProvider = ({
   const getConfig = () => {
     if (!configPromise) {
       configPromise = client
-        .discovery(new URL(issuerUrl), clientId, clientSecret)
+        .discovery(new URL(issuerUrl), clientId, clientSecret, undefined, {
+          execute: [client.allowInsecureRequests],
+        })
         .then((config) => {
           log.info('OpenID Connect discovery completed');
           return config;
