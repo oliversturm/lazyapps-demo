@@ -85,6 +85,19 @@ run_spec() {
 
 # --- Main ---
 
+# Resolve Traefik's container IP for Playwright's host-resolver-rules.
+# This avoids hardcoding a fixed subnet and allows multiple compose stacks
+# to run simultaneously without network collisions.
+echo "Resolving Traefik IP..."
+TRAEFIK_IP=$(docker compose -f "$COMPOSE_FILE" exec -T traefik hostname -i | tr -d '[:space:]')
+if [ -z "$TRAEFIK_IP" ]; then
+  echo "ERROR: Could not resolve Traefik IP. Is the stack running?"
+  echo "Start it with: docker compose -f $COMPOSE_FILE up -d"
+  exit 1
+fi
+export TRAEFIK_IP
+echo "  Traefik IP: $TRAEFIK_IP"
+
 # Build the Playwright container once
 echo "Building Playwright container..."
 docker compose -f "$COMPOSE_FILE" -f "$E2E_OVERLAY" build playwright 2>&1 | tail -1

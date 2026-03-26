@@ -4,19 +4,17 @@ services:
     # No depends_on — the runner script ensures the stack is already up
     # before invoking playwright. This avoids unnecessary health check
     # re-evaluation on every test run.
-    networks:
-      default:
-      e2e:
     ipc: host
     extra_hosts:
-      - 'commands.localhost:172.28.0.100'
-      - 'rm-customers.localhost:172.28.0.100'
-      - 'rm-orders.localhost:172.28.0.100'
-      - 'change-notifier.localhost:172.28.0.100'
-      - 'keycloak.localhost:172.28.0.100'
-      - 'svelte.localhost:172.28.0.100'
-      - 'react.localhost:172.28.0.100'
+      - 'commands.localhost:${TRAEFIK_IP}'
+      - 'rm-customers.localhost:${TRAEFIK_IP}'
+      - 'rm-orders.localhost:${TRAEFIK_IP}'
+      - 'change-notifier.localhost:${TRAEFIK_IP}'
+      - 'keycloak.localhost:${TRAEFIK_IP}'
+      - 'svelte.localhost:${TRAEFIK_IP}'
+      - 'react.localhost:${TRAEFIK_IP}'
     environment:
       CI: 'true'
       MONGO_URL: 'mongodb://mongo:27017'
       VAULT_ADDR: 'http://vault:8200'
+      TRAEFIK_IP: ${TRAEFIK_IP}

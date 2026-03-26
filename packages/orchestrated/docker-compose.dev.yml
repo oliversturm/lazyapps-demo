@@ -1,0 +1,14 @@
+# Dev overlay — adds host port mappings for manual browser testing.
+# Usage: docker compose -f compose.yml -f docker-compose.dev.yml up -d
+
+services:
+  traefik:
+    ports:
+      - '80:80'
+      - '8080:8080'
+  mongo:
+    ports:
+      - '27017:27017'
+  vault:
+    ports:
+      - '8200:8200'

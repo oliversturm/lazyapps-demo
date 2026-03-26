@@ -16,8 +16,9 @@ export default defineConfig({
     launchOptions: {
       args: [
         // Chromium resolves .localhost to 127.0.0.1 per RFC 6761, bypassing
-        // /etc/hosts. Override to route through Traefik's static IP instead.
-        '--host-resolver-rules=MAP *.localhost 172.28.0.100',
+        // /etc/hosts. Override to route through Traefik's dynamic container IP.
+        // TRAEFIK_IP is resolved by run-orchestrated.sh at runtime.
+        `--host-resolver-rules=MAP *.localhost ${process.env.TRAEFIK_IP || '127.0.0.1'}`,
       ],
     },
   },

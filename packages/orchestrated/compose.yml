@@ -17,21 +17,12 @@ services:
       - '--tracing.otlp.grpc.endpoint=${OTLP_HOST:-dashboard}:${OTLP_PORT:-18889}'
       - '--tracing.otlp.grpc.insecure=true'
       - '--entrypoints.web.address=:80'
-    ports:
-      - '80:80'
-      - '8080:8080'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik.yml:/etc/traefik/dynamic.yml
-    networks:
-      default:
-      e2e:
-        ipv4_address: 172.28.0.100
 
   mongo:
     image: mongo:latest
-    ports:
-      - '27017:27017'
 
   rabbit:
     image: rabbitmq:latest
@@ -44,8 +35,6 @@ services:
       VAULT_DEV_ROOT_TOKEN_ID: 'dev-root-token'
       VAULT_DEV_LISTEN_ADDRESS: '0.0.0.0:8200'
       VAULT_ADDR: 'http://127.0.0.1:8200'
-    ports:
-      - '8200:8200'
     volumes:
       - ./vault-init.sh:/vault-init.sh:ro
     healthcheck:
@@ -418,13 +407,6 @@ services:
       VITE_KEYCLOAK_URL: 'http://keycloak.localhost'
       VITE_KEYCLOAK_REALM: 'lazyapps-demo'
       VITE_KEYCLOAK_CLIENT_ID: 'lazyapps-frontend'
-
-networks:
-  e2e:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.28.0.0/16
 
 volumes:
   signoz-user-scripts:
