@@ -28,7 +28,13 @@ services:
     image: rabbitmq:latest
 
   vault:
-    image: hashicorp/vault:latest
+    # Pinned to 1.18 — hashicorp/vault:2.0.0 (current :latest, 2026-04-13)
+    # made the image non-root by default (intentional hardening), which
+    # prevents the entrypoint's `setcap cap_ipc_lock=+ep $(which vault)`
+    # call from working without explicit `cap_add: [SETFCAP, IPC_LOCK]` in
+    # compose. 1.x runs as root and works without extra caps. Revisit when
+    # adopting 2.x or migrating to OpenBao.
+    image: hashicorp/vault:1.18
     cap_add:
       - IPC_LOCK
     environment:
@@ -44,7 +50,13 @@ services:
       retries: 10
 
   vault-init:
-    image: hashicorp/vault:latest
+    # Pinned to 1.18 — hashicorp/vault:2.0.0 (current :latest, 2026-04-13)
+    # made the image non-root by default (intentional hardening), which
+    # prevents the entrypoint's `setcap cap_ipc_lock=+ep $(which vault)`
+    # call from working without explicit `cap_add: [SETFCAP, IPC_LOCK]` in
+    # compose. 1.x runs as root and works without extra caps. Revisit when
+    # adopting 2.x or migrating to OpenBao.
+    image: hashicorp/vault:1.18
     depends_on:
       vault:
         condition: service_healthy

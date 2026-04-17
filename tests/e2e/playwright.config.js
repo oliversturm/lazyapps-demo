@@ -33,6 +33,7 @@ export default defineConfig({
         /cors/,
         /keycloak-auth/,
         /health/,
+        /authorization-ui/,
       ],
       use: {
         baseURL: 'http://monolith:5173',
