@@ -25,7 +25,8 @@
     "@lazyapps/observability": "^0.3.0",
     "@lazyapps/readmodels": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/readmodelstorage-mongodb": "^0.1.2",
-    "jwks-rsa": "^3.1.0"
+    "jwks-rsa": "^3.1.0",
+    "openid-client": "^6.0.0"
   },
   "type": "module"
 }
