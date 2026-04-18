@@ -13,6 +13,7 @@ import {
 } from '@lazyapps/mqemitter';
 import { express as changeNotifierExpress } from '@lazyapps/change-notifier-socket-io';
 import { changeNotificationSenderFetch } from '@lazyapps/change-notification-sender-fetch';
+import { rateLimit } from 'express-rate-limit';
 import * as aggregates from './aggregates/index.js';
 import * as readModels from './readmodels/index.js';
 import { getLogger, configurePiiPaths } from '@lazyapps/logger';
@@ -25,6 +26,16 @@ log.debug('Starting up');
 
 const mqCommandsPort = process.env.MQ_COMMANDS_PORT || 51883;
 const mqQueriesPort = process.env.MQ_QUERIES_PORT || 51884;
+
+// Demo rate limiter: 100 requests per IP per minute. In a real deployment
+// this would be tuned per-endpoint and likely backed by a shared store
+// (Redis, Memcached) so limits apply across replicas.
+const rateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 registerSharedMqEmitter('commands', mqemitter(), mqCommandsPort);
 registerSharedMqEmitter('events', mqemitter());
@@ -74,12 +85,24 @@ start({
     //
     changeNotificationSender: changeNotificationSenderFetch({
       url: 'http://127.0.0.1:53008/change',
+      fetchTimeoutMs: 5000,
     }),
     commandSender: commandSenderMqEmitter({ mqName: 'commands' }),
     readModels,
   },
   changeNotifier: {
-    listener: changeNotifierExpress({ port: 53008 }),
+    listener: changeNotifierExpress({
+      port: 53008,
+      // E2E runs the monolith in a Docker network where the browser's
+      // Origin header is `http://monolith:5173` (see
+      // tests/e2e/docker-compose.monolith.yml). Local `pnpm mono:start`
+      // leaves CORS_ORIGIN unset and falls back to the SvelteKit dev
+      // server's default origin on localhost.
+      corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+      bodyLimit: '100kb',
+      helmet: true,
+      rateLimiter,
+    }),
   },
   svelte: {
     port: 5173,

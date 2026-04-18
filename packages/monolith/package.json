@@ -41,6 +41,7 @@
     "@sveltejs/adapter-auto": "^2.1.0",
     "@sveltejs/kit": "^1.22.4",
     "@sveltejs/vite-plugin-svelte": "^2.4.4",
+    "express-rate-limit": "^8.0.0",
     "mqemitter": "^5.0.0",
     "nanoid": "^5.0.0",
     "semver": "^7.6.3",

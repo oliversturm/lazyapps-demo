@@ -12,6 +12,7 @@ services:
       MONGO_URL: 'mongodb://mongo-monolith:27017'
       VITE_CHANGENOTIFIER_URL: 'http://monolith:53008'
       SVELTE_HOST: '0.0.0.0'
+      CORS_ORIGIN: 'http://monolith:5173'
       LOG_LEVEL: 'warn'
 
   playwright:

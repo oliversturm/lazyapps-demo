@@ -23,6 +23,7 @@
     "@lazyapps/express": "0.2.0-branch-feature-encryption-20260320202938",
     "@lazyapps/logger": "^0.2.0",
     "@lazyapps/observability": "^0.3.0",
+    "express-rate-limit": "^8.0.0",
     "jwks-rsa": "^3.1.0"
   },
   "type": "module"

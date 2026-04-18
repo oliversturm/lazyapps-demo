@@ -1,5 +1,6 @@
 import { start } from '@lazyapps/bootstrap';
 import { express } from '@lazyapps/change-notifier-socket-io';
+import { rateLimit } from 'express-rate-limit';
 import {
   encryptionSchema,
   encryptionContexts,
@@ -16,6 +17,14 @@ const keycloakScopeMapper = (decodedToken) => {
   return [...roles].sort();
 };
 
+// Demo rate limiter: 100 requests per IP per minute.
+const rateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 start({
   correlation: {
     serviceId: 'CHNG',
@@ -27,6 +36,10 @@ start({
       scopeMapper: keycloakScopeMapper,
       encryptionSchema,
       encryptionContexts,
+      corsOrigin: ['http://svelte.localhost', 'http://react.localhost'],
+      bodyLimit: '100kb',
+      helmet: true,
+      rateLimiter,
     }),
   },
 });

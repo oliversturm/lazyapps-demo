@@ -14,7 +14,19 @@ import {
 import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
 import { isAdmin } from './aggregates/validate.js';
 import * as aggregates from './aggregates/index.js';
+import { rateLimit } from 'express-rate-limit';
 import path from 'path';
+
+// Demo rate limiter: 100 requests per IP per minute. Inter-service traffic
+// from the read model services shares this budget because it arrives from
+// the same Docker network source IP — fine for the demo, a real deployment
+// would split public and service-to-service paths.
+const rateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 configurePiiPaths(encryptionSchema.getPiiPaths());
 
@@ -66,6 +78,10 @@ start({
       jwtAuth,
       jwtAlgorithms,
       credentialsRequired: true,
+      corsOrigin: ['http://svelte.localhost', 'http://react.localhost'],
+      bodyLimit: '100kb',
+      helmet: true,
+      rateLimiter,
     }),
     aggregateStore: inmemory(),
     eventStore: mongodb({

@@ -19,8 +19,17 @@ import {
 import { jwtAuth, jwtAlgorithms } from '../common/jwt-config.js';
 import { createServiceTokenProvider } from '../common/service-token.js';
 import { configurePiiPaths } from '@lazyapps/logger';
+import { rateLimit } from 'express-rate-limit';
 
 configurePiiPaths(encryptionSchema.getPiiPaths());
+
+// Demo rate limiter: 100 requests per IP per minute.
+const rateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const encryption = createEncryption({
   schema: encryptionSchema,
@@ -51,6 +60,10 @@ start({
       jwtAuth,
       jwtAlgorithms,
       credentialsRequired: true,
+      corsOrigin: ['http://svelte.localhost', 'http://react.localhost'],
+      bodyLimit: '100kb',
+      helmet: true,
+      rateLimiter,
     }),
     storage: mongodb({
       url: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',
@@ -65,10 +78,12 @@ start({
         process.env.CHANGENOTIFICATION_FETCH_URL ||
         'http://localhost:3008/change',
       jwt: createServiceTokenProvider({ label: 'RM/CUS/JWT' }),
+      fetchTimeoutMs: 5000,
     }),
     commandSender: commandSenderFetch({
       url: process.env.COMMAND_URL,
       jwt: createServiceTokenProvider({ label: 'RM/CUS/CMD-JWT' }),
+      fetchTimeoutMs: 5000,
     }),
     readModels,
   },
