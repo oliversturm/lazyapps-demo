@@ -1,4 +1,5 @@
 <script>
+  import '../app.css';
   import { page } from '$app/stores';
   import { browser } from '$app/environment';
   import Button from '$lib/Button.svelte';

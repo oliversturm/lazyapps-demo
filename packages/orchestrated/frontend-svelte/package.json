@@ -11,11 +11,14 @@
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
+		"autoprefixer": "^10.4.20",
 		"eslint": "^8.46.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-svelte": "^2.32.4",
+		"postcss": "^8.5.3",
 		"prettier": "^3.0.1",
 		"prettier-plugin-svelte": "^3.0.3",
+		"tailwindcss": "^3.4.17",
 		"vitest": "^2.1.8"
 	},
 	"type": "module",
