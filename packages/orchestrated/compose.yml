@@ -38,7 +38,7 @@ services:
     cap_add:
       - IPC_LOCK
     environment:
-      VAULT_DEV_ROOT_TOKEN_ID: 'dev-root-token'
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN_ID}
       VAULT_DEV_LISTEN_ADDRESS: '0.0.0.0:8200'
       VAULT_ADDR: 'http://127.0.0.1:8200'
     volumes:
@@ -62,7 +62,7 @@ services:
         condition: service_healthy
     environment:
       VAULT_ADDR: 'http://vault:8200'
-      VAULT_TOKEN: 'dev-root-token'
+      VAULT_TOKEN: ${VAULT_TOKEN}
     entrypoint: /bin/sh
     command: ['/vault-init.sh']
     volumes:
@@ -224,8 +224,11 @@ services:
     image: quay.io/keycloak/keycloak:26.1
     command: ['start-dev', '--import-realm', '--health-enabled=true']
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      # Interpolated into realm-export.json's service-account client.secret
+      # at import time (Keycloak supports ${VAR} placeholders in realm imports).
+      SERVICE_CLIENT_SECRET: ${SERVICE_CLIENT_SECRET}
       KC_HTTP_PORT: '8080'
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
@@ -266,8 +269,8 @@ services:
       COMMAND_RECORD_PATH: '/command-records'
       OTEL_SERVICE_NAME: 'command-processor'
       VAULT_ADDR: 'http://vault:8200'
-      VAULT_ROLE_ID: 'command-processor-role-id'
-      VAULT_SECRET_ID: 'command-processor-secret-id'
+      VAULT_ROLE_ID: ${COMMAND_PROCESSOR_VAULT_ROLE_ID}
+      VAULT_SECRET_ID: ${COMMAND_PROCESSOR_VAULT_SECRET_ID}
       JWKS_URI: 'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/certs'
 
   readmodel-customers:
@@ -301,8 +304,8 @@ services:
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'readmodel-customers'
       VAULT_ADDR: 'http://vault:8200'
-      VAULT_ROLE_ID: 'readmodel-customers-role-id'
-      VAULT_SECRET_ID: 'readmodel-customers-secret-id'
+      VAULT_ROLE_ID: ${READMODEL_CUSTOMERS_VAULT_ROLE_ID}
+      VAULT_SECRET_ID: ${READMODEL_CUSTOMERS_VAULT_SECRET_ID}
       JWKS_URI: 'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/certs'
 
   readmodel-orders:
@@ -335,12 +338,12 @@ services:
       COMMAND_URL: 'http://command-processor/api/command'
       KEYCLOAK_TOKEN_URL: 'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/token'
       SERVICE_CLIENT_ID: 'lazyapps-service'
-      SERVICE_CLIENT_SECRET: 'service-account-secret'
+      SERVICE_CLIENT_SECRET: ${SERVICE_CLIENT_SECRET}
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'readmodel-orders'
       VAULT_ADDR: 'http://vault:8200'
-      VAULT_ROLE_ID: 'readmodel-orders-role-id'
-      VAULT_SECRET_ID: 'readmodel-orders-secret-id'
+      VAULT_ROLE_ID: ${READMODEL_ORDERS_VAULT_ROLE_ID}
+      VAULT_SECRET_ID: ${READMODEL_ORDERS_VAULT_SECRET_ID}
       JWKS_URI: 'http://keycloak:8080/realms/lazyapps-demo/protocol/openid-connect/certs'
 
   readmodel-dotnet:

@@ -43,14 +43,12 @@
       "name": "LazyApps Frontend",
       "enabled": true,
       "publicClient": true,
-      "directAccessGrantsEnabled": true,
+      "directAccessGrantsEnabled": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "redirectUris": [
         "http://svelte.localhost/*",
-        "http://react.localhost/*",
-        "http://localhost:*/*",
-        "http://127.0.0.1:*/*"
+        "http://react.localhost/*"
       ],
       "webOrigins": ["+"],
       "protocol": "openid-connect",
@@ -61,7 +59,7 @@
       "name": "LazyApps Service Account",
       "enabled": true,
       "publicClient": false,
-      "secret": "service-account-secret",
+      "secret": "${SERVICE_CLIENT_SECRET}",
       "serviceAccountsEnabled": true,
       "directAccessGrantsEnabled": false,
       "standardFlowEnabled": false,
