@@ -4,85 +4,127 @@ http:
       rule: "Host(`dashboardUI.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: dashboardUI
 
     dashboardOtlpGrpc:
       rule: "Host(`dashboard-otlp-grpc.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: dashboardOtlpGrpc
 
     dashboardOtlpHttp:
       rule: "Host(`dashboard-otlp-http.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: dashboardOtlpHttp
 
     command-processor-orchestrated:
       rule: "Host(`commands.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: command-processor-orchestrated
 
     readmodel-customers-orchestrated:
       rule: "Host(`rm-customers.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: readmodel-customers-orchestrated
 
     readmodel-orders-orchestrated:
       rule: "Host(`rm-orders.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: readmodel-orders-orchestrated
 
     readmodel-dotnet-orchestrated:
       rule: "Host(`rm-dotnet.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: readmodel-dotnet-orchestrated
 
     change-notifier-orchestrated:
       rule: "Host(`change-notifier.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: change-notifier-orchestrated
 
     frontend-react-orchestrated:
       rule: "Host(`react.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: frontend-react-orchestrated
 
     frontend-svelte-orchestrated:
       rule: "Host(`svelte.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: frontend-svelte-orchestrated
 
     keycloak:
       rule: "Host(`keycloak.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: keycloak
 
     grafanaUI:
       rule: "Host(`grafana.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: grafanaUI
 
     jaegerUI:
       rule: "Host(`jaeger.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: jaegerUI
 
     signozUI:
       rule: "Host(`signoz.localhost`)"
       entrypoints:
         - web
+      middlewares:
+        - security-headers@file
       service: signozUI
+
+  middlewares:
+    # Baseline security response headers applied to every router. STS
+    # (Strict-Transport-Security) is intentionally OMITTED: this demo runs
+    # over plain HTTP, and STS is meaningless without TLS — browsers ignore
+    # it on http:// responses, and setting it would also be misleading for
+    # readers reviewing the config. STS will be added when TLS is configured
+    # in the future deployment-style demo project.
+    security-headers:
+      headers:
+        contentTypeNosniff: true
+        frameDeny: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        permissionsPolicy: "camera=(), microphone=(), geolocation=()"
 
   services:
     dashboardUI:
