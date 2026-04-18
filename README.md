@@ -73,6 +73,33 @@ All services are exposed via Traefik on port 80 using `.localhost` subdomains:
 
 The Traefik dashboard itself is available at `http://localhost:8080`.
 
+### Demo users
+
+The Keycloak realm (`packages/orchestrated/keycloak/realm-export.json`) is
+seeded with ten demo users. Each user's password is the same as their
+username (e.g. `alice` / `alice`). These are deliberately trivial so the
+demo is easy to try out — none of these credentials are secrets, and
+every one of them would be unacceptable in any real deployment.
+
+| Username | Roles | Notes |
+| -------- | ----- | ----- |
+| `alice`  | `admin`, `customer-service` | Full access plus customer service context |
+| `bob`    | `support` | Support-only access |
+| `carol`  | `customer-service` | Customer service context only |
+| `dave`   | _(none)_ | Authenticated but no context roles |
+| `eve`    | `admin`, `order-service` | Full access plus order service context |
+| `frank`  | `support`, `order-service` | Support plus order service context |
+| `grace`  | _(none)_ | Authenticated but no context roles |
+| `heidi`  | `customer-service`, `order-service` | Both service contexts |
+| `ivan`   | `support` | Support-only access |
+| `judy`   | _(none)_ | Authenticated but no context roles |
+
+The realm also includes bootstrap admin credentials (`admin` / `admin`) and a
+service-account client secret, both of which are now read from the
+`packages/orchestrated/.env` file at container start. Copy
+`.env.example` to `.env` before the first `orch:start`; change the
+values in `.env` if you want anything other than the demo defaults.
+
 ## Utility Scripts
 
 | Command | Description |
