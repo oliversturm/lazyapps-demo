@@ -1,0 +1,22 @@
+x-registry: &registry
+  build:
+    args:
+      - NPM_CONFIG_REGISTRY=http://host-gateway:4873
+    extra_hosts:
+      - "host-gateway:host-gateway"
+      
+services:
+  command-processor:
+    <<: *registry
+  change-notifier:
+    <<: *registry
+  readmodel-customers:
+    <<: *registry
+  readmodel-orders:
+    <<: *registry
+  frontend-react: 
+    <<: *registry
+  admin-ui: 
+    <<: *registry
+  frontend-svelte:
+    <<: *registry
