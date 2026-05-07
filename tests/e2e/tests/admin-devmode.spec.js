@@ -8,7 +8,15 @@ import {
   findReadModelRow,
   ensureCleanReplayState,
   ensureLive,
+  isOrchestrated,
 } from './helpers/admin.js';
+import { execSync } from 'node:child_process';
+import {
+  killService,
+  startService,
+  waitForServiceHealthy,
+  getProjectContainers,
+} from './helpers/docker.js';
 
 const isDevMode = process.env.DEVELOPMENT_MODE === 'true';
 
@@ -95,31 +103,7 @@ test.describe('Admin dev-mode features', () => {
       expect(res.status()).toBe(404);
     });
 
-    test('preflight returns tzero true for read model with no events', async ({
-      request,
-      baseURL,
-    }) => {
-      // In a fresh environment, the RM is live but has no projected events
-      // Only reliable in the second pass (fresh devmode env)
-      test.skip(!isDevMode, 'Requires fresh environment');
-
-      const adminURL = getAdminURL(baseURL);
-      const rmConfig = getReadModelConfig(baseURL);
-
-      await waitForAdmin(request, adminURL);
-      await ensureLive(request, rmConfig.ordersOverview);
-
-      const res = await request.get(
-        `${adminURL}/admin/replay/preflight/${rmConfig.ordersOverview.endpointName}/${rmConfig.ordersOverview.name}`,
-      );
-      expect(res.ok()).toBe(true);
-
-      const preflight = await res.json();
-      expect(preflight.found).toBe(true);
-      // ordersOverview should be T=0 in a fresh env (no orders created yet)
-      expect(preflight.tzero).toBe(true);
-      expect(preflight.lastProjectedEventTimestamp).toBe(0);
-    });
+    // T=0 preflight test moved to admin-tzero.spec.js (must run before app tests)
   });
 
   test.describe('dev-mode config endpoint', () => {
@@ -246,40 +230,7 @@ test.describe('Admin dev-mode features', () => {
       }
     });
 
-    test('T=0 dialog appears on replay page for fresh read model', async ({
-      browser,
-      request,
-      baseURL,
-    }) => {
-      const adminURL = getAdminURL(baseURL);
-      const rmConfig = getReadModelConfig(baseURL);
-
-      // Use ordersOverview which has no events in a fresh env
-      await ensureCleanReplayState(request, rmConfig.ordersOverview);
-
-      const page = await browser.newPage();
-      try {
-        await waitForAdmin(request, adminURL);
-        await ensureLive(request, rmConfig.ordersOverview);
-        await waitForAdminUI(page, adminURL);
-
-        // Navigate to replay page for ordersOverview
-        await page.getByRole('link', { name: 'Read Models' }).click();
-        await page
-          .getByRole('heading', { name: 'Read Models' })
-          .waitFor();
-        await page.getByText(rmConfig.ordersOverview.name).first().waitFor();
-        const row = findReadModelRow(page, rmConfig.ordersOverview);
-        await row.getByRole('link', { name: 'Replay' }).click();
-
-        // T=0 dialog should appear since no events have been projected
-        await expect(
-          page.getByText('Fresh Read Model Detected'),
-        ).toBeVisible();
-      } finally {
-        await page.close();
-      }
-    });
+    // T=0 UI tests moved to admin-tzero.spec.js (must run before app tests)
 
     test('dev-mode overrides visible on replay page', async ({
       browser,
@@ -396,6 +347,278 @@ test.describe('Admin dev-mode features', () => {
         await expect(adminPage.getByText('ExcludeByName')).toBeVisible();
       } finally {
         await appPage.close();
+        await adminPage.close();
+      }
+    });
+
+    test('side effects checkbox is included in replay execution', async ({
+      browser,
+      request,
+      baseURL,
+    }) => {
+      const adminURL = getAdminURL(baseURL);
+      const rmConfig = getReadModelConfig(baseURL);
+
+      await ensureCleanReplayState(request, rmConfig.customersOverview);
+
+      const appPage = await browser.newPage();
+      const adminPage = await browser.newPage();
+      try {
+        // Create test data so the RM has events (avoids T=0 dialog)
+        await waitForApp(appPage, baseURL);
+        await createCustomer(appPage, {
+          name: `DevSideEffects-${Date.now()}`,
+          location: 'SideEffectCity',
+        });
+
+        await waitForAdmin(request, adminURL);
+        await ensureLive(request, rmConfig.customersOverview);
+        await waitForAdminUI(adminPage, adminURL);
+        await navigateToReplayPage(adminPage, rmConfig.customersOverview);
+
+        // Enable side effects during replay
+        await adminPage
+          .getByText('Enable side effects during replay')
+          .click();
+
+        // Verify the side-effect filter section appeared
+        await expect(
+          adminPage.getByText('Side-effect filter (optional)'),
+        ).toBeVisible();
+
+        // Start replay with side effects enabled
+        await adminPage
+          .getByRole('button', { name: 'Start Replay' })
+          .click();
+
+        // Wait for replay to complete — side effects enabled during replay
+        await expect(
+          adminPage.getByRole('heading', { name: /Replay Complete/ }),
+        ).toBeVisible();
+      } finally {
+        await appPage.close();
+        await adminPage.close();
+      }
+    });
+
+    test('activate without catch-up transitions RM to live', async ({
+      browser,
+      request,
+      baseURL,
+    }) => {
+      const adminURL = getAdminURL(baseURL);
+      const rmConfig = getReadModelConfig(baseURL);
+      const rm = rmConfig.customersOverview;
+
+      await ensureCleanReplayState(request, rm);
+
+      const appPage = await browser.newPage();
+      const adminPage = await browser.newPage();
+      try {
+        // Ensure RM has data and is live
+        await waitForApp(appPage, baseURL);
+        await createCustomer(appPage, {
+          name: `DevActivate-${Date.now()}`,
+          location: 'ActivateCity',
+        });
+
+        await waitForAdmin(request, adminURL);
+        await ensureLive(request, rm);
+
+        // Stop the RM via API so we can test activate without catch-up
+        await request.post(
+          `${rm.adminUrl}/admin/readmodel/stop/${rm.endpointName}/${rm.name}`,
+        );
+
+        // Poll until the RM is in idle state
+        for (let i = 0; i < 30; i++) {
+          const statusRes = await request.get(
+            `${rm.adminUrl}/admin/readmodel/status/${rm.endpointName}/${rm.name}`,
+          );
+          const status = await statusRes.json();
+          if (status.state === 'idle') break;
+          await new Promise((r) => setTimeout(r, 300));
+        }
+
+        // Navigate to the RM detail page
+        await waitForAdminUI(adminPage, adminURL);
+        await adminPage
+          .getByRole('link', { name: 'Read Models' })
+          .click();
+        await adminPage
+          .getByRole('heading', { name: 'Read Models' })
+          .waitFor();
+        await adminPage.getByText(rm.name).first().waitFor();
+
+        const row = findReadModelRow(adminPage, rm);
+        await row
+          .getByRole('link', { name: rm.name })
+          .click();
+
+        // Wait for the detail page with RM name heading
+        await expect(
+          adminPage.getByRole('heading', { name: rm.name }),
+        ).toBeVisible();
+
+        // The "Activate without Catch-up" button should be visible (dev mode + idle)
+        const activateBtn = adminPage.getByRole('button', {
+          name: 'Activate without Catch-up',
+        });
+        await expect(activateBtn).toBeVisible();
+
+        // Click it
+        await activateBtn.click();
+
+        // Verify the RM transitions to live (via the status badge on the page)
+        // Use the Stop button as evidence of live state — it only appears when live.
+        // Avoids strict mode violation from getByText('live') matching badge + definition.
+        await expect(
+          adminPage.getByRole('button', { name: 'Stop' }),
+        ).toBeVisible();
+      } finally {
+        // Ensure RM is live for subsequent tests
+        await ensureLive(request, rm);
+        await appPage.close();
+        await adminPage.close();
+      }
+    });
+
+    // Extended timeout: container kill + restart + health check takes 30-60s
+    test('dismiss invalid state after crash recovery', async ({
+      browser,
+      request,
+      baseURL,
+    }) => {
+      // Killing the monolith container kills everything — only works orchestrated
+      test.skip(
+        !isOrchestrated(baseURL),
+        'Requires orchestrated mode for container control',
+      );
+      test.setTimeout(120000);
+
+      const adminURL = getAdminURL(baseURL);
+      const rmConfig = getReadModelConfig(baseURL);
+      // Use ordersOverview (readmodel-orders) to avoid killing readmodel-customers,
+      // which would break createCustomer in subsequent tests.
+      const rm = rmConfig.ordersOverview;
+
+      await ensureCleanReplayState(request, rm);
+
+      const adminPage = await browser.newPage();
+      try {
+        await waitForAdmin(request, adminURL);
+        await ensureLive(request, rm);
+
+        // Simulate a crash with stale replayInProgress flag:
+        // 1. Insert the flag directly into MongoDB (the replay may complete
+        //    too fast to reliably kill mid-flight in the orchestrated setup)
+        // 2. Kill the container so it restarts and detects the stale flag
+        const mongoService =
+          rm.service === 'monolith' ? 'mongo-monolith' : 'mongo';
+        const mongoContainer = getProjectContainers().find(
+          (c) => c.service === mongoService,
+        );
+        expect(mongoContainer).toBeTruthy();
+
+        // Set replayInProgress flag in the readmodel's state collection.
+        // The monolith uses a single 'monolith' database; orchestrated
+        // services each have their own (e.g. 'readmodel-orders').
+        const mongoDb =
+          rm.service === 'monolith' ? 'monolith' : rm.service;
+        const mongoCmd =
+          `db.getSiblingDB("${mongoDb}")` +
+          `.getCollection("readmodel.state")` +
+          '.updateOne({name:"' + rm.name + '"},{$set:{replayInProgress:true}},{upsert:true})';
+        execSync(
+          `docker exec ${mongoContainer.id} mongosh --quiet --eval '${mongoCmd}'`,
+          { encoding: 'utf-8', timeout: 10000 },
+        );
+
+        // SIGKILL the RM container (simulates crash, no graceful cleanup)
+        killService(rm.service);
+
+        // Restart the RM container
+        startService(rm.service);
+
+        // Wait for the container to be healthy
+        const healthy = await waitForServiceHealthy(rm.service, 60000);
+        expect(healthy).toBe(true);
+
+        // Poll the RM service DIRECTLY for invalid state.
+        let invalidDetected = false;
+        for (let i = 0; i < 60; i++) {
+          try {
+            const res = await request.get(
+              `${rm.serviceUrl}/admin/status/${rm.endpointName}/${rm.name}`,
+            );
+            if (res.ok()) {
+              const status = await res.json();
+              if (status.state === 'invalid') {
+                invalidDetected = true;
+                break;
+              }
+            }
+          } catch {
+            // Container may still be starting up
+          }
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+        expect(invalidDetected).toBe(true);
+
+        // Restart admin-ui to clear its SSE cache. After the RM container
+        // restart, the RM's stateVersion resets to 1, but admin-ui's cache
+        // still holds the old (higher) version and silently rejects updates.
+        // This is a known bug (stateVersion monotonicity assumption).
+        killService('admin-ui');
+        startService('admin-ui');
+        const adminHealthy = await waitForServiceHealthy('admin-ui', 60000);
+        expect(adminHealthy).toBe(true);
+
+        // Navigate to the RM detail page in admin UI
+        await waitForAdminUI(adminPage, adminURL);
+        await adminPage
+          .getByRole('link', { name: 'Read Models' })
+          .click();
+        await adminPage
+          .getByRole('heading', { name: 'Read Models' })
+          .waitFor();
+        await adminPage.getByText(rm.name).first().waitFor();
+
+        const row = findReadModelRow(adminPage, rm);
+        await row.getByRole('link', { name: rm.name }).click();
+
+        await expect(
+          adminPage.getByRole('heading', { name: rm.name }),
+        ).toBeVisible();
+
+        // Verify the invalid state warning is displayed
+        await expect(
+          adminPage.getByRole('heading', { name: 'Invalid State' }),
+        ).toBeVisible({ timeout: 10000 });
+
+        // Click "Dismiss Invalid State" (dev-mode only)
+        const dismissBtn = adminPage.getByRole('button', {
+          name: 'Dismiss Invalid State',
+        });
+        await expect(dismissBtn).toBeVisible();
+        await dismissBtn.click();
+
+        // After dismissing, RM should transition to idle (Activate button appears)
+        const activateBtn = adminPage.getByRole('button', {
+          name: 'Activate',
+          exact: true,
+        });
+        await expect(activateBtn).toBeVisible({ timeout: 5000 });
+
+        // Activate to restore the RM for subsequent tests
+        await activateBtn.click();
+      } finally {
+        // Ensure RM is live regardless of test outcome
+        try {
+          await ensureLive(request, rm);
+        } catch {
+          // Best effort — container might still be recovering
+        }
         await adminPage.close();
       }
     });

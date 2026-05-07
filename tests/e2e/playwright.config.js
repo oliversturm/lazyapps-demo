@@ -15,6 +15,21 @@ export default defineConfig({
     actionTimeout: 2000,
   },
   projects: [
+    // T=0 tests must run BEFORE app tests that create events
+    {
+      name: 'tzero-monolith',
+      testMatch: '**/admin-tzero.spec.js',
+      use: {
+        baseURL: 'http://monolith:5173',
+      },
+    },
+    {
+      name: 'tzero-orchestrated',
+      testMatch: '**/admin-tzero.spec.js',
+      use: {
+        baseURL: 'http://frontend-svelte:5173',
+      },
+    },
     {
       name: 'monolith-svelte',
       testIgnore: '**/admin-*.spec.js',
@@ -39,7 +54,7 @@ export default defineConfig({
     {
       name: 'admin-monolith',
       testMatch: '**/admin-*.spec.js',
-      testIgnore: '**/admin-*-distributed.spec.js',
+      testIgnore: ['**/admin-*-distributed.spec.js', '**/admin-tzero.spec.js'],
       use: {
         baseURL: 'http://monolith:5173',
       },

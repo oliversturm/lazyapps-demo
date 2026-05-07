@@ -27,25 +27,37 @@ export const navigate = async (page, name) => {
  */
 export const createCustomer = async (page, { name, location }) => {
   await navigate(page, 'Customers');
-  await page.getByText('New Customer').waitFor();
-  await page.getByText('New Customer').click();
+  // Use role-based selectors to avoid strict mode violations from getByText
+  // matching multiple elements during DOM transitions. "New Customer" renders
+  // as <a> in Svelte and <button> in React.
+  const newCustomerBtn = page
+    .getByRole('link', { name: 'New Customer' })
+    .or(page.getByRole('button', { name: 'New Customer' }));
+  await newCustomerBtn.waitFor();
+  await newCustomerBtn.click();
   await page.locator('input[name="name"]').waitFor();
   await page.locator('input[name="name"]').fill(name);
   await page.locator('input[name="location"]').fill(location);
-  await page.getByText('Save').click();
+  // "Save" renders as <button> in monolith/React, <a> in orchestrated Svelte.
+  // The orchestrated Svelte <a> has no href so it lacks the link role —
+  // fall back to matching <a> inside the form by text.
+  const saveBtn = page
+    .getByRole('button', { name: 'Save' })
+    .or(page.locator('form a').filter({ hasText: /^Save$/ }));
+  await saveBtn.click();
   // After save, the app navigates to the customer list. The read model
   // may not be updated yet (async command processing), so poll with
   // page reloads until the customer name appears.
   const deadline = Date.now() + 2000;
   while (Date.now() < deadline) {
     try {
-      await page.getByText(name).waitFor({ timeout: 2000 });
+      await page.getByText(name).first().waitFor({ timeout: 2000 });
       return;
     } catch {
       await page.reload({ waitUntil: 'domcontentloaded' });
     }
   }
-  await page.getByText(name).waitFor({ timeout: 2000 });
+  await page.getByText(name).first().waitFor({ timeout: 2000 });
 };
 
 /**
@@ -61,7 +73,10 @@ export const placeOrder = async (page, customerName, { text, value }) => {
   await page.locator('input[name="text"]').waitFor();
   await page.locator('input[name="text"]').fill(text);
   await page.locator('input[name="value"]').fill(String(value));
-  await page.getByText('Save').click();
+  const saveBtn = page
+    .getByRole('button', { name: 'Save' })
+    .or(page.locator('form a').filter({ hasText: /^Save$/ }));
+  await saveBtn.click();
   await page.getByText(customerName).waitFor();
 };
 

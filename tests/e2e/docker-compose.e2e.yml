@@ -257,10 +257,12 @@ services:
         condition: service_healthy
     ipc: host
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - otel-output:/otel-output
     environment:
       CI: 'true'
       DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
+      COMPOSE_PROJECT_NAME: 'e2e'
 
 volumes:
   otel-output:

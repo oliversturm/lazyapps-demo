@@ -104,7 +104,7 @@ test.describe('Distributed catch-up lifecycle', () => {
     expect(status).toHaveProperty('readModelName');
     expect(status).toHaveProperty('state');
     expect([
-      'stopped',
+      'idle',
       'activating',
       'catchup',
       'live',
@@ -134,14 +134,14 @@ test.describe('Distributed catch-up lifecycle', () => {
     expect(stopBody.status).toBe('stopping');
 
     // Verify state changed
-    const stoppedState = await pollForState(
+    const idleState = await pollForState(
       request,
       adminUrl,
       endpointName,
       readModel,
-      'stopped',
+      'idle',
     );
-    expect(stoppedState).toBe('stopped');
+    expect(idleState).toBe('idle');
 
     // Re-activate via admin-ui orchestrator
     const activateRes = await request.post(
@@ -197,9 +197,9 @@ test.describe('Distributed catch-up lifecycle', () => {
         `${cpUrl}/admin/readmodel/stop/${endpointName}/${readModel}`,
       );
       expect(stopRes.ok()).toBeTruthy();
-      await pollForState(request, adminUrl, endpointName, readModel, 'stopped');
+      await pollForState(request, adminUrl, endpointName, readModel, 'idle');
 
-      // Create a customer while read model is stopped — this creates an
+      // Create a customer while read model is idle — this creates an
       // event gap that catch-up must fill
       const customerDuring = `DistDuring-${unique}`;
       await createCustomer(page, {
@@ -207,7 +207,7 @@ test.describe('Distributed catch-up lifecycle', () => {
         location: 'DuringCity',
       });
 
-      // The stopped read model won't process events, so customerDuring
+      // The idle read model won't process events, so customerDuring
       // should not be visible yet (reload to confirm)
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.locator('.bg-orange-100').waitFor();
@@ -276,7 +276,7 @@ test.describe('Distributed catch-up lifecycle', () => {
       await request.post(
         `${cpUrl}/admin/readmodel/stop/${endpointName}/${readModel}`,
       );
-      await pollForState(request, adminUrl, endpointName, readModel, 'stopped');
+      await pollForState(request, adminUrl, endpointName, readModel, 'idle');
 
       await request.post(
         `${cpUrl}/admin/readmodel/activate/${endpointName}/${readModel}`,

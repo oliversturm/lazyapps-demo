@@ -156,4 +156,74 @@ test.describe('Admin backup management via UI', () => {
       await page.close();
     }
   });
+
+  test('backup page shows Activate button when RM is idle', async ({
+    browser,
+    request,
+    baseURL,
+  }) => {
+    const adminURL = getAdminURL(baseURL);
+    const rmConfig = getReadModelConfig(baseURL);
+    const rm = rmConfig.customersOverview;
+
+    const adminPage = await browser.newPage();
+
+    try {
+      await waitForAdmin(request, adminURL);
+      await ensureLive(request, rm);
+
+      // Stop the RM via API
+      await request.post(
+        `${rm.adminUrl}/admin/readmodel/stop/${rm.endpointName}/${rm.name}`,
+      );
+
+      // Poll until idle
+      for (let i = 0; i < 30; i++) {
+        const res = await request.get(
+          `${rm.adminUrl}/admin/readmodel/status/${rm.endpointName}/${rm.name}`,
+        );
+        const status = await res.json();
+        if (status.state === 'idle') break;
+        await new Promise((r) => setTimeout(r, 300));
+      }
+
+      // Navigate to the backups page
+      await waitForAdminUI(adminPage, adminURL);
+      await adminPage
+        .getByRole('link', { name: 'Read Models' })
+        .click();
+      await adminPage
+        .getByRole('heading', { name: 'Read Models' })
+        .waitFor();
+      await adminPage.getByText(rm.name).first().waitFor();
+
+      const row = findReadModelRow(adminPage, rm);
+      await row.getByRole('link', { name: 'Backups' }).click();
+
+      await adminPage
+        .getByRole('heading', { name: /Backups:/ })
+        .waitFor();
+
+      // "Read model is stopped" banner with Activate button should be visible
+      await expect(
+        adminPage.getByText('Read model is stopped'),
+      ).toBeVisible();
+
+      const activateBtn = adminPage.getByRole('button', {
+        name: 'Activate',
+      });
+      await expect(activateBtn).toBeVisible();
+
+      // Click Activate
+      await activateBtn.click();
+
+      // The "stopped" banner should disappear as RM goes live
+      await expect(
+        adminPage.getByText('Read model is stopped'),
+      ).not.toBeVisible();
+    } finally {
+      await ensureLive(request, rm);
+      await adminPage.close();
+    }
+  });
 });

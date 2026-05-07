@@ -138,7 +138,7 @@ const pollForState = async (
  * Ensure a read model is in 'live' state. If it is not live, activate it
  * via the admin API and poll until it reaches 'live'. This is needed because
  * when the admin section is configured, bootstrap enables lifecycle
- * management and read models start in 'stopped' state. Auto-activation may
+ * management and read models start in 'idle' state. Auto-activation may
  * not have completed by the time tests start running.
  */
 export const ensureLive = async (request, rmInfo) => {
@@ -183,8 +183,8 @@ export const ensureLive = async (request, rmInfo) => {
 /**
  * Wait for a replay to complete by polling the admin readmodel status endpoint.
  *
- * Replay flow: state goes from 'stopped' → 'replay' → 'stopped' (replayDone)
- * → 'live' (after activation). We wait for 'stopped' or 'live' state.
+ * Replay flow: state goes from 'idle' → 'replay' → 'replay-done'
+ * → 'live' (after activation). We wait for 'replay-done' or 'live' state.
  */
 export const waitForReplayComplete = async (
   request,
@@ -194,11 +194,11 @@ export const waitForReplayComplete = async (
   const deadline = Date.now() + maxWaitMs;
   const statusUrl = `${rmInfo.adminUrl}/admin/readmodel/status/${rmInfo.endpointName}/${rmInfo.name}`;
 
-  // Wait for state to reach 'stopped' (replay done) or 'live' (activated after replay)
+  // Wait for state to reach 'replay-done' (replay done) or 'live' (activated after replay)
   while (Date.now() < deadline) {
     const res = await request.get(statusUrl);
     const status = await res.json();
-    if (status.state === 'stopped' || status.state === 'live') return;
+    if (status.state === 'replay-done' || status.state === 'live') return;
     await new Promise((resolve) => setTimeout(resolve, 300));
   }
 
@@ -208,19 +208,83 @@ export const waitForReplayComplete = async (
 };
 
 /**
- * Ensure a read model is not stuck in a stale replay state. If the RM is
- * in 'replay' state, cancel via admin API. If 'stopped' or 'live', it's clean.
+ * Wait for the command processor to have no active replays or catchups
+ * for the given read model. Background orchestrations continue running even
+ * after the RM transitions to its final state — this ensures they've
+ * fully settled before starting a new operation.
+ */
+const waitForCPIdle = async (request, rmInfo, maxPolls = 20) => {
+  const cpUrl = `${rmInfo.cpUrl}/admin/commandprocessor/status`;
+  for (let i = 0; i < maxPolls; i++) {
+    try {
+      const res = await request.get(cpUrl);
+      if (res.ok()) {
+        const cp = await res.json();
+        const hasActiveReplay = (cp.activeReplays || []).some(
+          (r) =>
+            r.readModel === rmInfo.name &&
+            r.targetEndpointName === rmInfo.endpointName,
+        );
+        const hasActiveCatchup = (cp.activeCatchUps || []).some(
+          (c) =>
+            c.readModel === rmInfo.name &&
+            c.targetEndpointName === rmInfo.endpointName,
+        );
+        if (!hasActiveReplay && !hasActiveCatchup) return;
+      }
+    } catch {
+      // CP might not be reachable yet
+    }
+    await new Promise((r) => setTimeout(r, 200));
+  }
+};
+
+/**
+ * Ensure a read model is not stuck in a stale replay or invalid state.
+ * Checks both the admin-ui cache and the RM service directly (the admin-ui
+ * SSE cache may be stale after container restarts due to stateVersion
+ * monotonicity assumptions).
+ *
+ * Also waits for the CP to be idle w.r.t. this read model, ensuring that
+ * background orchestrations from previous tests have fully completed.
  */
 export const ensureCleanReplayState = async (request, rmInfo) => {
+  // Wait for any in-flight orchestrations to complete first
+  await waitForCPIdle(request, rmInfo);
+
+  // Check admin-ui cache first
   const res = await request.get(
     `${rmInfo.adminUrl}/admin/readmodel/status/${rmInfo.endpointName}/${rmInfo.name}`,
   );
   const status = await res.json();
-  if (!status || status.state !== 'replay') return;
 
-  // Cancel the in-progress replay
-  await request.post(
-    `${rmInfo.adminUrl}/admin/replay/cancel/${rmInfo.endpointName}/${rmInfo.name}`,
-    { data: { reset: true } },
-  );
+  if (status && status.state === 'replay') {
+    await request.post(
+      `${rmInfo.adminUrl}/admin/replay/cancel/${rmInfo.endpointName}/${rmInfo.name}`,
+      { data: { reset: true } },
+    );
+    // Wait for cancellation + any background orchestration to settle
+    await waitForCPIdle(request, rmInfo);
+    return;
+  }
+
+  // Also check the RM service directly — admin-ui cache may be stale
+  try {
+    const directRes = await request.get(
+      `${rmInfo.serviceUrl}/admin/status/${rmInfo.endpointName}/${rmInfo.name}`,
+    );
+    if (directRes.ok()) {
+      const directStatus = await directRes.json();
+      if (directStatus && directStatus.state === 'invalid') {
+        // Dismiss invalid via admin-ui API (dev-mode only)
+        await request.post(
+          `${rmInfo.adminUrl}/admin/readmodel/dismiss-invalid/${rmInfo.endpointName}/${rmInfo.name}`,
+        );
+        // Wait for RM to transition to idle
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    }
+  } catch {
+    // RM service might not be reachable
+  }
 };

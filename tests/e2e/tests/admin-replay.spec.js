@@ -4,7 +4,12 @@ import {
   navigate,
   createCustomer,
 } from './helpers/app.js';
-import { getAdminURL, waitForAdmin, getReadModelConfig } from './helpers/admin.js';
+import {
+  getAdminURL,
+  waitForAdmin,
+  getReadModelConfig,
+  ensureLive,
+} from './helpers/admin.js';
 
 test.describe('Admin replay', () => {
   test('replay events and verify data persists', async ({
@@ -48,7 +53,7 @@ test.describe('Admin replay', () => {
         );
         const status = await statusRes.json();
 
-        if (status.state === 'stopped' || status.state === 'live') {
+        if (status.state === 'replay-done' || status.state === 'live') {
           replayDone = true;
           break;
         }
@@ -60,6 +65,7 @@ test.describe('Admin replay', () => {
       await navigate(page, 'Customers');
       await expect(page.getByText(customerName)).toBeVisible();
     } finally {
+      await ensureLive(request, rm);
       await page.close();
     }
   });
@@ -118,7 +124,7 @@ test.describe('Admin replay', () => {
         const status = await statusRes.json();
 
         if (
-          status.state === 'stopped' ||
+          status.state === 'idle' ||
           status.state === 'live'
         ) {
           finalState = status.state;
@@ -127,8 +133,9 @@ test.describe('Admin replay', () => {
 
         await page.waitForTimeout(300);
       }
-      expect(['stopped', 'live']).toContain(finalState);
+      expect(['idle', 'live']).toContain(finalState);
     } finally {
+      await ensureLive(request, rm);
       await page.close();
     }
   });

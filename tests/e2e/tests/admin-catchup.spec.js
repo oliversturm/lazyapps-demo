@@ -62,7 +62,7 @@ test.describe('Admin catch-up lifecycle', () => {
     const status = await res.json();
     expect(status).toHaveProperty('state');
     expect([
-      'stopped',
+      'idle',
       'activating',
       'catchup',
       'live',
@@ -92,7 +92,7 @@ test.describe('Admin catch-up lifecycle', () => {
         `${cpUrl}/admin/readmodel/stop/${endpointName}/${readModel}`,
       );
       expect(stopRes.ok()).toBeTruthy();
-      await pollForState(request, adminUrl, endpointName, readModel, 'stopped');
+      await pollForState(request, adminUrl, endpointName, readModel, 'idle');
     }
 
     // Activate via admin server (triggers activator orchestration)
@@ -132,7 +132,7 @@ test.describe('Admin catch-up lifecycle', () => {
     expect(Array.isArray(body.readModels)).toBeTruthy();
   });
 
-  test('stop read model changes state to stopped', async ({
+  test('stop read model changes state to idle', async ({
     request,
     baseURL,
   }) => {
@@ -160,9 +160,9 @@ test.describe('Admin catch-up lifecycle', () => {
       adminUrl,
       endpointName,
       readModel,
-      'stopped',
+      'idle',
     );
-    expect(afterState).toBe('stopped');
+    expect(afterState).toBe('idle');
 
     // Re-activate so other tests aren't affected
     await request.post(
@@ -206,9 +206,9 @@ test.describe('Admin catch-up lifecycle', () => {
         `${cpUrl}/admin/readmodel/stop/${endpointName}/${readModel}`,
       );
       expect(stopRes.ok()).toBeTruthy();
-      await pollForState(request, adminUrl, endpointName, readModel, 'stopped');
+      await pollForState(request, adminUrl, endpointName, readModel, 'idle');
 
-      // Create a customer while read model is stopped — this creates an
+      // Create a customer while read model is idle — this creates an
       // event gap that catch-up must fill
       const customerDuring = `CatchupDuring-${unique}`;
       await createCustomer(page, {
@@ -216,7 +216,7 @@ test.describe('Admin catch-up lifecycle', () => {
         location: 'DuringCity',
       });
 
-      // The stopped read model won't process events, so customerDuring
+      // The idle read model won't process events, so customerDuring
       // should not be visible yet (reload to confirm)
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.locator('.bg-orange-100').waitFor();

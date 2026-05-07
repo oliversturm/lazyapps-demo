@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { waitForApp, navigate, createCustomer } from './helpers/app.js';
 import {
   getAdminURL,
+  isOrchestrated,
   waitForAdmin,
   waitForAdminUI,
   getReadModelConfig,
@@ -400,6 +401,193 @@ test.describe('Admin replay workflow via UI', () => {
       ).toBeVisible();
     } finally {
       await page.close();
+    }
+  });
+
+  test('replay with activateAfter=false reaches replay-done', async ({
+    browser,
+    request,
+    baseURL,
+  }) => {
+    const adminURL = getAdminURL(baseURL);
+    const rmConfig = getReadModelConfig(baseURL);
+    const unique = `${Date.now()}`;
+    const customerName = `UIReplayNoActivate-${unique}`;
+
+    await ensureCleanReplayState(request, rmConfig.customersOverview);
+
+    const appPage = await browser.newPage();
+    const adminPage = await browser.newPage();
+
+    try {
+      await waitForApp(appPage, baseURL);
+      await waitForAdmin(request, adminURL);
+      await ensureLive(request, rmConfig.customersOverview);
+
+      // Create test data
+      await createCustomer(appPage, {
+        name: customerName,
+        location: 'NoActivateCity',
+      });
+      await navigate(appPage, 'Customers');
+      await expect(appPage.getByText(customerName).first()).toBeVisible();
+
+      // Navigate to replay page
+      await waitForAdminUI(adminPage, adminURL);
+      await navigateToReplayPage(adminPage, rmConfig.customersOverview);
+
+      // Uncheck "Activate after replay (go live)"
+      const activateCheckbox = adminPage.getByText(
+        'Activate after replay (go live)',
+      );
+      await activateCheckbox.click();
+
+      // Start replay
+      await adminPage
+        .getByRole('button', { name: 'Start Replay' })
+        .click();
+
+      // Should show "Replay Complete — Stopped" (not "Replay Complete")
+      await expect(
+        adminPage.getByRole('heading', {
+          name: 'Replay Complete — Stopped',
+        }),
+      ).toBeVisible();
+
+      // "Activate (Go Live)" button should be present
+      const activateBtn = adminPage.getByRole('button', {
+        name: 'Activate (Go Live)',
+      });
+      await expect(activateBtn).toBeVisible();
+
+      // Click Activate to go live
+      await activateBtn.click();
+
+      // Should transition to "Replay Complete" (live)
+      await expect(
+        adminPage.getByRole('heading', { name: 'Replay Complete' }),
+      ).toBeVisible();
+    } finally {
+      await ensureLive(request, rmConfig.customersOverview);
+      await appPage.close();
+      await adminPage.close();
+    }
+  });
+
+  test('stop and activate RM via detail page', async ({
+    browser,
+    request,
+    baseURL,
+  }) => {
+    const adminURL = getAdminURL(baseURL);
+    const rmConfig = getReadModelConfig(baseURL);
+
+    await ensureCleanReplayState(request, rmConfig.customersOverview);
+
+    const page = await browser.newPage();
+
+    try {
+      await waitForAdmin(request, adminURL);
+      await ensureLive(request, rmConfig.customersOverview);
+      await waitForAdminUI(page, adminURL);
+
+      // Navigate to RM detail page
+      await page.getByRole('link', { name: 'Read Models' }).click();
+      await page
+        .getByRole('heading', { name: 'Read Models' })
+        .waitFor();
+      await page
+        .getByText(rmConfig.customersOverview.name)
+        .first()
+        .waitFor();
+
+      const row = findReadModelRow(page, rmConfig.customersOverview);
+      await row
+        .getByRole('link', { name: rmConfig.customersOverview.name })
+        .click();
+
+      await expect(
+        page.getByRole('heading', {
+          name: rmConfig.customersOverview.name,
+        }),
+      ).toBeVisible();
+
+      // RM should be live — Stop button should be visible
+      const stopBtn = page.getByRole('button', { name: 'Stop' });
+      await expect(stopBtn).toBeVisible();
+
+      // Click Stop
+      await stopBtn.click();
+
+      // Activate button should appear (RM transitioned to idle via SSE)
+      // Use exact: true to avoid matching "Activate without Catch-up" in dev mode
+      const activateBtn = page.getByRole('button', {
+        name: 'Activate',
+        exact: true,
+      });
+      await expect(activateBtn).toBeVisible();
+
+      // Click Activate
+      await activateBtn.click();
+
+      // Stop button should reappear (RM transitioned back to live)
+      await expect(stopBtn).toBeVisible();
+    } finally {
+      await ensureLive(request, rmConfig.customersOverview);
+      await page.close();
+    }
+  });
+
+  test('T=0 dialog not shown for RM with existing events', async ({
+    browser,
+    request,
+    baseURL,
+  }) => {
+    const adminURL = getAdminURL(baseURL);
+    const rmConfig = getReadModelConfig(baseURL);
+
+    await ensureCleanReplayState(request, rmConfig.customersOverview);
+
+    const appPage = await browser.newPage();
+    const adminPage = await browser.newPage();
+
+    try {
+      // Ensure RM has events (create a customer)
+      await waitForApp(appPage, baseURL);
+      await createCustomer(appPage, {
+        name: `TzeroNeg-${Date.now()}`,
+        location: 'TzeroNegCity',
+      });
+
+      await waitForAdmin(request, adminURL);
+      await ensureLive(request, rmConfig.customersOverview);
+      await waitForAdminUI(adminPage, adminURL);
+
+      // Navigate to replay page for customersOverview (has events)
+      await adminPage
+        .getByRole('link', { name: 'Read Models' })
+        .click();
+      await adminPage
+        .getByRole('heading', { name: 'Read Models' })
+        .waitFor();
+      await adminPage
+        .getByText(rmConfig.customersOverview.name)
+        .first()
+        .waitFor();
+
+      const row = findReadModelRow(adminPage, rmConfig.customersOverview);
+      await row.getByRole('link', { name: 'Replay' }).click();
+
+      // "Configure Replay" should appear WITHOUT T=0 dialog
+      await expect(
+        adminPage.getByRole('heading', { name: 'Configure Replay' }),
+      ).toBeVisible();
+      await expect(
+        adminPage.getByText('Fresh Read Model Detected'),
+      ).not.toBeVisible();
+    } finally {
+      await appPage.close();
+      await adminPage.close();
     }
   });
 });
