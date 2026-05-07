@@ -1,9 +1,9 @@
 FROM node:lts
 RUN ARCH=$(dpkg --print-architecture) && \
-    if [ "$ARCH" = "amd64" ]; then MONGO_ARCH="x86_64"; \
-    elif [ "$ARCH" = "arm64" ]; then MONGO_ARCH="aarch64"; \
+    if [ "$ARCH" = "amd64" ]; then MONGO_PKG="debian12-x86_64"; \
+    elif [ "$ARCH" = "arm64" ]; then MONGO_PKG="ubuntu2204-arm64"; \
     else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
-    wget -q "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-debian12-${MONGO_ARCH}-100.12.0.deb" && \
+    wget -q "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-${MONGO_PKG}-100.12.0.deb" && \
     dpkg -i mongodb-database-tools-*.deb && \
     rm mongodb-database-tools-*.deb
 RUN npm install -g pnpm
