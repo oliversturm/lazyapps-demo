@@ -293,6 +293,7 @@ services:
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'admin-service'
       ADMIN_READ_MODEL_SERVICES: '{"customers":"http://readmodel-customers","orders":"http://readmodel-orders"}'
+      ADMIN_COMMAND_PROCESSOR_URL: 'http://command-processor'
 
   frontend-react:
     build: ./frontend-react
