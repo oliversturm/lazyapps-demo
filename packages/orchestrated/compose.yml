@@ -292,7 +292,7 @@ services:
       RABBIT_URL: 'amqp://rabbit'
       LOG_LEVEL: 'trace'
       OTEL_SERVICE_NAME: 'admin-service'
-      ADMIN_READ_MODEL_SERVICES: '{"readmodel-customers":"http://readmodel-customers","readmodel-orders":"http://readmodel-orders"}'
+      ADMIN_READ_MODEL_SERVICES: '{"customers":"http://readmodel-customers","orders":"http://readmodel-orders"}'
 
   frontend-react:
     build: ./frontend-react
