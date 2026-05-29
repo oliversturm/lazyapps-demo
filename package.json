@@ -8,7 +8,7 @@
     "test:e2e": "./tests/e2e/run.sh",
     "use-branch": "node scripts/use-branch-packages.js",
     "use-released": "node scripts/use-released-packages.js",
-    "npmcache": "docker run -d -p 4873:4873 -v ~/.verdaccio/storage:/verdaccio/storage  -v ~/.verdaccio/config:/verdaccio/conf   verdaccio/verdaccio",
+    "npmcache": "docker run -d --rm -p 4873:4873 -v ~/.verdaccio/storage:/verdaccio/storage  -v ~/.verdaccio/config:/verdaccio/conf   verdaccio/verdaccio",
     "orch:build": "docker compose -f packages/orchestrated/compose.yml build --no-cache",
     "orch:build:npmcache": "docker compose -f packages/orchestrated/compose.yml -f packages/orchestrated/compose.npm-cache.yml build --no-cache",
     "orch:start": "docker compose -f packages/orchestrated/compose.yml --profile aspire up -d",
