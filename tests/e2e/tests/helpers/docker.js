@@ -88,6 +88,20 @@ const findContainer = (serviceName) => {
 };
 
 /**
+ * Fetch recent logs of a service container (stdout+stderr combined).
+ * `sinceSeconds` limits how far back to look (default: full log).
+ */
+export const getServiceLogs = (serviceName, sinceSeconds) => {
+  const container = findContainer(serviceName);
+  const sinceArg = sinceSeconds ? `--since ${sinceSeconds}s ` : '';
+  return execSync(`docker logs ${sinceArg}${container.id} 2>&1`, {
+    encoding: 'utf-8',
+    timeout: 15000,
+    maxBuffer: 32 * 1024 * 1024,
+  });
+};
+
+/**
  * SIGKILL a service container to simulate a crash.
  * Uses docker kill (not stop) for immediate termination without cleanup.
  */

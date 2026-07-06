@@ -29,6 +29,11 @@ const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017';
 const adminPort = process.env.ADMIN_PORT || 3005;
 const backupPath = process.env.BACKUP_PATH || './backup';
 const developmentMode = process.env.DEVELOPMENT_MODE === 'true';
+// Idle grace before the admin service tears down its on-demand SSE
+// subscriptions (ms). E2E tests set this low to observe the lifecycle.
+const sseIdleGraceMs = process.env.SSE_IDLE_GRACE_MS
+  ? Number(process.env.SSE_IDLE_GRACE_MS)
+  : undefined;
 const secondaryTsPath = process.env.SECONDARY_TS_PATH || './secondary-timestamps';
 const svelteHost = process.env.SVELTE_HOST || 'localhost';
 const sveltePort = 5173;
@@ -138,5 +143,6 @@ start({
     readModelServiceUrl,
     autoActivate: true,
     developmentMode,
+    sseIdleGraceMs,
   },
 });

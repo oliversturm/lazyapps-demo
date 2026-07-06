@@ -47,6 +47,8 @@ services:
       ADMIN_COMMAND_PROCESSOR_URL: 'http://monolith:3005'
       ADMIN_READ_MODEL_SERVICES: '{"monolith":"http://monolith:3005"}'
       DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
+      # Short SSE idle grace so the e2e lifecycle spec can observe teardown
+      SSE_IDLE_GRACE_MS: '3000'
 
   # Orchestrated stack
   mongo:
@@ -215,6 +217,8 @@ services:
       ADMIN_COMMAND_PROCESSOR_URL: 'http://command-processor'
       LOG_LEVEL: 'debug'
       DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
+      # Short SSE idle grace so the e2e lifecycle spec can observe teardown
+      SSE_IDLE_GRACE_MS: '3000'
 
   frontend-react:
     build:
