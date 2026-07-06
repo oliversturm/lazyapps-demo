@@ -6,7 +6,9 @@ RUN ARCH=$(dpkg --print-architecture) && \
     wget -q "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-${MONGO_PKG}-100.12.0.deb" && \
     dpkg -i mongodb-database-tools-*.deb && \
     rm mongodb-database-tools-*.deb
-RUN npm install -g pnpm
+# Pin pnpm to the version used to generate the workspace lockfile —
+# unpinned latest has diverging lockfile/overrides/policy behavior
+RUN npm install -g pnpm@10.30.3
 WORKDIR /src
 COPY . .
 RUN pnpm install --frozen-lockfile

@@ -1,2 +1,8 @@
 packages:
   - 'packages/**'
+
+# Supply-chain policy: current pnpm enforces a minimum release age for
+# newly published packages by default. Branch snapshots of our own scope
+# are minutes old by design — exempt them, keep the check for 3rd parties.
+minimumReleaseAgeExclude:
+  - '@lazyapps/*'
