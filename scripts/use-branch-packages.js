@@ -6,7 +6,7 @@ const branchArg = process.argv[2];
 if (!branchArg) {
   console.error(
     'Usage: node scripts/use-branch-packages.js <branch-name>\n' +
-      '  e.g.: node scripts/use-branch-packages.js feature/observability'
+      '  e.g.: node scripts/use-branch-packages.js feature/observability',
   );
   process.exit(1);
 }
@@ -85,17 +85,22 @@ for (const pkg of [...allScopePackages].sort()) {
 if (snapshotVersions.size === 0) {
   console.log('No snapshot versions found for any @lazyapps/* packages.');
   console.log(
-    'Make sure the snapshot workflow has run on the branch and published successfully.'
+    'Make sure the snapshot workflow has run on the branch and published successfully.',
   );
   process.exit(1);
 }
 
 // Build sorted overrides object from all snapshot versions
 const overridesObj = Object.fromEntries(
-  [...snapshotVersions].sort(([a], [b]) => a.localeCompare(b))
+  [...snapshotVersions].sort(([a], [b]) => a.localeCompare(b)),
 );
 
-// Update package.json files: direct dependencies + overrides
+// Update package.json files: direct dependency versions only. Transitive
+// @lazyapps/* resolution is pinned via pnpm `overrides` in pnpm-workspace.yaml
+// (below), not in package.json: pnpm >= 11 no longer reads the `pnpm` field
+// from package.json, and Docker builds resolve from the lockfile
+// (pnpm install --frozen-lockfile), so the previous npm-style `overrides` in
+// sub-packages were vestigial and are no longer written.
 let totalUpdates = 0;
 for (const { path: pkgPath, content } of packageJsonData) {
   let modified = false;
@@ -113,30 +118,20 @@ for (const { path: pkgPath, content } of packageJsonData) {
     }
   }
 
-  const isRoot = pkgPath === 'package.json';
-  const hasLazyappsDeps = hasAnyLazyappsDep(content);
-
-  // Root package.json: set pnpm.overrides for ALL snapshot packages
-  if (isRoot) {
-    if (!content.pnpm) content.pnpm = {};
-    content.pnpm.overrides = { ...overridesObj };
-    modified = true;
-    console.log(`Set pnpm.overrides in root (${snapshotVersions.size} packages)`);
-  }
-
-  // Sub-packages with @lazyapps/* deps: set npm overrides for ALL snapshot packages
-  // (needed for orchestrated services that use npm install in Docker)
-  if (!isRoot && hasLazyappsDeps) {
-    content.overrides = { ...overridesObj };
-    modified = true;
-    console.log(`Set npm overrides in ${pkgPath} (${snapshotVersions.size} packages)`);
-  }
-
   if (modified) {
     writeFileSync(pkgPath, JSON.stringify(content, null, 2) + '\n');
     console.log(`Updated: ${pkgPath}`);
   }
 }
+
+// Pin transitive @lazyapps/* resolution via pnpm overrides in
+// pnpm-workspace.yaml (the settings home for pnpm >= 11). This replaces the
+// managed block in place; `pnpm run use-released` restores the committed
+// baseline via git checkout.
+setWorkspaceOverrides(overridesObj);
+console.log(
+  `Set pnpm overrides in pnpm-workspace.yaml (${snapshotVersions.size} packages)`,
+);
 
 // Summary
 console.log('\n--- Summary ---');
@@ -153,20 +148,38 @@ if (unchanged.length > 0) {
 console.log(`\nTotal dependency entries updated: ${totalUpdates}`);
 console.log('\nRun `pnpm install` or `npm install` to fetch the new versions.');
 
-function hasAnyLazyappsDep(pkgJson) {
-  for (const depType of ['dependencies', 'devDependencies']) {
-    if (pkgJson[depType]) {
-      for (const name of Object.keys(pkgJson[depType])) {
-        if (
-          name.startsWith('@lazyapps/') &&
-          !name.startsWith('@lazyapps/demo')
-        ) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
+// Rewrite the managed `overrides:` block in pnpm-workspace.yaml. Removes any
+// existing managed block and appends a fresh one at the end of the file,
+// leaving the rest of the workspace config (packages, policies) untouched.
+function setWorkspaceOverrides(overridesObj) {
+  // Managed-block markers — must match the committed baseline block so this
+  // replaces it in place rather than appending a duplicate.
+  const OVERRIDES_BEGIN =
+    '# === @lazyapps snapshot overrides (managed by scripts/use-branch-packages.js) ===';
+  const OVERRIDES_END = '# === end @lazyapps snapshot overrides ===';
+  const wsPath = 'pnpm-workspace.yaml';
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const entries = Object.entries(overridesObj).sort(([a], [b]) =>
+    a.localeCompare(b),
+  );
+  const block = [
+    OVERRIDES_BEGIN,
+    '# pnpm >= 11 no longer reads the `pnpm` field from package.json, so @lazyapps',
+    '# snapshot overrides live here. `pnpm run use-branch <branch>` rewrites this',
+    '# block; `pnpm run use-released` restores it to this committed baseline.',
+    'overrides:',
+    ...entries.map(([name, version]) => `  '${name}': '${version}'`),
+    OVERRIDES_END,
+  ].join('\n');
+
+  let ws = readFileSync(wsPath, 'utf8');
+  const re = new RegExp(
+    `\\n*${escapeRe(OVERRIDES_BEGIN)}[\\s\\S]*?${escapeRe(OVERRIDES_END)}\\n*`,
+    'g',
+  );
+  ws = ws.replace(re, '\n');
+  ws = ws.replace(/\s*$/, '\n') + '\n' + block + '\n';
+  writeFileSync(wsPath, ws);
 }
 
 function collectLazyappsDeps(pkgJson, set) {
