@@ -49,6 +49,8 @@ services:
       DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
       # Short SSE idle grace so the e2e lifecycle spec can observe teardown
       SSE_IDLE_GRACE_MS: '3000'
+      # Fast browser-SSE heartbeat so the e2e spec can observe it on the wire
+      SSE_HEARTBEAT_MS: '1000'
 
   # Orchestrated stack
   mongo:
@@ -219,6 +221,8 @@ services:
       DEVELOPMENT_MODE: '${DEVELOPMENT_MODE:-false}'
       # Short SSE idle grace so the e2e lifecycle spec can observe teardown
       SSE_IDLE_GRACE_MS: '3000'
+      # Fast browser-SSE heartbeat so the e2e spec can observe it on the wire
+      SSE_HEARTBEAT_MS: '1000'
 
   frontend-react:
     build:

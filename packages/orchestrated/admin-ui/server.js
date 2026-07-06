@@ -8,6 +8,10 @@ const developmentMode = process.env.DEVELOPMENT_MODE === 'true';
 const sseIdleGraceMs = process.env.SSE_IDLE_GRACE_MS
   ? Number(process.env.SSE_IDLE_GRACE_MS)
   : undefined;
+// Interval between admin browser-SSE heartbeat writes (ms)
+const sseHeartbeatMs = process.env.SSE_HEARTBEAT_MS
+  ? Number(process.env.SSE_HEARTBEAT_MS)
+  : undefined;
 const readModelServiceUrl = process.env.ADMIN_READ_MODEL_SERVICES
   ? JSON.parse(process.env.ADMIN_READ_MODEL_SERVICES)
   : undefined;
@@ -28,5 +32,6 @@ start({
     autoActivate: true,
     developmentMode,
     sseIdleGraceMs,
+    sseHeartbeatMs,
   },
 });

@@ -34,6 +34,11 @@ const developmentMode = process.env.DEVELOPMENT_MODE === 'true';
 const sseIdleGraceMs = process.env.SSE_IDLE_GRACE_MS
   ? Number(process.env.SSE_IDLE_GRACE_MS)
   : undefined;
+// Interval between admin browser-SSE heartbeat writes (ms). E2E tests set
+// this low to observe heartbeats on the wire without the 15s default wait.
+const sseHeartbeatMs = process.env.SSE_HEARTBEAT_MS
+  ? Number(process.env.SSE_HEARTBEAT_MS)
+  : undefined;
 const secondaryTsPath = process.env.SECONDARY_TS_PATH || './secondary-timestamps';
 const svelteHost = process.env.SVELTE_HOST || 'localhost';
 const sveltePort = 5173;
@@ -144,5 +149,6 @@ start({
     autoActivate: true,
     developmentMode,
     sseIdleGraceMs,
+    sseHeartbeatMs,
   },
 });

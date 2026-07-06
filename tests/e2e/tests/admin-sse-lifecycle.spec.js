@@ -78,6 +78,53 @@ test.describe('Admin SSE on-demand lifecycle', () => {
     }
   });
 
+  test('emits browser-SSE heartbeats on the wire (#16)', async ({
+    request,
+    baseURL,
+  }) => {
+    const adminURL = getAdminURL(baseURL);
+    await waitForAdmin(request, adminURL);
+
+    // Heartbeats are SSE comments (":heartbeat"), invisible to EventSource,
+    // so read the raw /admin/events body and confirm one arrives. The e2e
+    // compose sets SSE_HEARTBEAT_MS=1000 so this is observable in ~1s rather
+    // than the 15s library default. A heartbeat write reaching the socket is
+    // exactly the mechanism that lets a dead browser connection release its
+    // refcount (#16).
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    let sawHeartbeat = false;
+    try {
+      const res = await fetch(`${adminURL}/admin/events`, {
+        signal: controller.signal,
+        headers: { Accept: 'text/event-stream' },
+      });
+      expect(res.ok).toBeTruthy();
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        if (buffer.includes(':heartbeat')) {
+          sawHeartbeat = true;
+          break;
+        }
+      }
+      reader.cancel().catch(() => {});
+    } catch (err) {
+      // A timeout aborts the read; fall through to a clean assertion below.
+      if (err.name !== 'AbortError') throw err;
+    } finally {
+      clearTimeout(timer);
+      controller.abort();
+    }
+
+    expect(sawHeartbeat).toBeTruthy();
+  });
+
   test('browser connect brings SSE up, disconnect tears down after grace', async ({
     browser,
     request,
