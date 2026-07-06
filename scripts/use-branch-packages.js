@@ -95,12 +95,23 @@ const overridesObj = Object.fromEntries(
   [...snapshotVersions].sort(([a], [b]) => a.localeCompare(b)),
 );
 
-// Update package.json files: direct dependency versions only. Transitive
-// @lazyapps/* resolution is pinned via pnpm `overrides` in pnpm-workspace.yaml
-// (below), not in package.json: pnpm >= 11 no longer reads the `pnpm` field
-// from package.json, and Docker builds resolve from the lockfile
-// (pnpm install --frozen-lockfile), so the previous npm-style `overrides` in
-// sub-packages were vestigial and are no longer written.
+// Update package.json files. Two pinning mechanisms are needed, one per
+// package manager in play:
+//
+// - pnpm (host installs + the monolith e2e image, which run
+//   `pnpm install` against the workspace): transitive @lazyapps/* pins live
+//   in the `overrides:` block of pnpm-workspace.yaml (written below) —
+//   pnpm >= 11 no longer reads the `pnpm` field from package.json.
+//
+// - npm (each orchestrated service Dockerfile copies ONLY its own
+//   package.json and runs a standalone `npm install`, no lockfile): those
+//   builds need npm-style `overrides` in the sub-package package.json.
+//   Without them, npm resolves transitive @lazyapps/* deps (e.g.
+//   @lazyapps/command-processor via @lazyapps/bootstrap) by semver range,
+//   and prerelease ordering can select another branch's snapshot
+//   (branch-feature-x sorts after branch-admin-y), silently installing
+//   incompatible cross-branch code. Do NOT remove these again without
+//   checking packages/orchestrated/*/Dockerfile.
 let totalUpdates = 0;
 for (const { path: pkgPath, content } of packageJsonData) {
   let modified = false;
@@ -116,6 +127,17 @@ for (const { path: pkgPath, content } of packageJsonData) {
         }
       }
     }
+  }
+
+  // Sub-packages with @lazyapps/* deps: npm overrides for ALL snapshot
+  // packages (required by the standalone npm-based Docker builds, see above)
+  const isRoot = pkgPath === 'package.json';
+  if (!isRoot && hasAnyLazyappsDep(content)) {
+    content.overrides = { ...overridesObj };
+    modified = true;
+    console.log(
+      `Set npm overrides in ${pkgPath} (${snapshotVersions.size} packages)`,
+    );
   }
 
   if (modified) {
@@ -180,6 +202,22 @@ function setWorkspaceOverrides(overridesObj) {
   ws = ws.replace(re, '\n');
   ws = ws.replace(/\s*$/, '\n') + '\n' + block + '\n';
   writeFileSync(wsPath, ws);
+}
+
+function hasAnyLazyappsDep(pkgJson) {
+  for (const depType of ['dependencies', 'devDependencies']) {
+    if (pkgJson[depType]) {
+      for (const name of Object.keys(pkgJson[depType])) {
+        if (
+          name.startsWith('@lazyapps/') &&
+          !name.startsWith('@lazyapps/demo')
+        ) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 function collectLazyappsDeps(pkgJson, set) {
