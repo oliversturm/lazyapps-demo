@@ -39,7 +39,8 @@ const sseIdleGraceMs = process.env.SSE_IDLE_GRACE_MS
 const sseHeartbeatMs = process.env.SSE_HEARTBEAT_MS
   ? Number(process.env.SSE_HEARTBEAT_MS)
   : undefined;
-const secondaryTsPath = process.env.SECONDARY_TS_PATH || './secondary-timestamps';
+const secondaryTsPath =
+  process.env.SECONDARY_TS_PATH || './secondary-timestamps';
 const svelteHost = process.env.SVELTE_HOST || 'localhost';
 const sveltePort = 5173;
 
@@ -146,6 +147,10 @@ start({
     port: adminPort,
     eventBus: commandProcessorEventBusMqEmitter({ mqName: 'events' }),
     readModelServiceUrl,
+    // The CP uses the in-process mqemitter receiver (no HTTP status server), so
+    // CP status is bridged through the same SvelteKit /api backend as RM status
+    // (issue #23). Point the admin's HTTP CP-status client at that bridge.
+    commandProcessorUrl: readModelServiceUrl,
     autoActivate: true,
     developmentMode,
     sseIdleGraceMs,
