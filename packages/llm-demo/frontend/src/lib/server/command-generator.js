@@ -45,10 +45,11 @@ export const tools = [
     function: {
       name: 'lookup_orders',
       description:
-        'Get orders from the system. Can retrieve all orders or filter by customer ID. ' +
+        'Get existing orders from the system. Can retrieve all orders or filter by customer ID. ' +
         'Each order includes: id, customerId, customerName, text, value, status. ' +
         'The status field indicates whether an order is actionable: only orders with status "unconfirmed" can be confirmed or declined. ' +
-        'Use this to find order IDs for CONFIRM or DECLINE commands.',
+        'Use this only to find order IDs for CONFIRM or DECLINE commands. ' +
+        'Never needed to create new orders — a new order does not depend on existing orders.',
       parameters: {
         type: 'object',
         properties: {
@@ -126,11 +127,14 @@ export const systemPrompt = `You are EXCLUSIVELY a command generator. Your sole 
 
 ## Procedure
 
-1. If person names are mentioned, call lookup_customers FIRST to resolve customer IDs.
-2. For CONFIRM or DECLINE requests, call lookup_orders (optionally filtered by customerId) and check each order's \`status\` field — only orders with status "unconfirmed" can be confirmed or declined. Use the order's \`id\` as the aggregateId.
-3. Determine the intended action and map it to the appropriate commands (CREATE, UPDATE, CONFIRM, DECLINE).
-4. For vague requests (e.g. "top items for camping"), invent reasonable product names and prices.
-5. Output a JSON object with a "commands" array containing all generated commands.
+1. Determine the intended action and map it to the appropriate commands (CREATE, UPDATE, CONFIRM, DECLINE). See "Intent Interpretation" below.
+2. Look up only what that action needs:
+   - **Creating orders** (e.g. "Anna wants to buy a desk lamp"): call lookup_customers to resolve the customer's ID — nothing else. A new order does not depend on the customer's existing orders, so do NOT call lookup_orders.
+   - **Confirming or declining orders**: call lookup_customers to resolve the customer's ID, then call lookup_orders with that customerId and check each order's \`status\` field — only orders with status "unconfirmed" can be confirmed or declined. Use the order's \`id\` as the aggregateId.
+   - **Updating a customer**: call lookup_customers to find the existing customer's ID.
+   - **Creating a customer**: no lookup is needed.
+3. For vague requests (e.g. "top items for camping"), invent reasonable product names and prices.
+4. Output a JSON object with a "commands" array containing all generated commands.
 
 ## Available Aggregates and Commands
 
@@ -140,20 +144,20 @@ export const systemPrompt = `You are EXCLUSIVELY a command generator. Your sole 
   - aggregateId: Use any placeholder string (the server will replace it with a generated ID)
 - **UPDATE**: Updates an existing customer.
   - Required payload: { name: string, location: string } (include all fields, even unchanged ones)
-  - aggregateId: MUST be the existing customer's id obtained via the lookup tools
+  - aggregateId: MUST be the existing customer's id obtained via lookup_customers
 
 ### order
 - **CREATE**: Creates a new order for a customer.
   - Required payload: { customerId: string, text: string, value: number }
   - aggregateId: Use any placeholder string (the server will replace it with a generated ID)
-  - customerId MUST be an existing customer's id obtained via the lookup tools
+  - customerId MUST be an existing customer's id obtained via lookup_customers
 - **REQUIRE_CONFIRMATION**: Flags an order for manual confirmation. (System use only — do not generate this.)
 - **CONFIRM**: Confirms a pending order.
   - Required payload: {}
-  - aggregateId: MUST be the existing order's id obtained via the lookup tools
+  - aggregateId: MUST be the existing order's id obtained via lookup_orders
 - **DECLINE**: Declines a pending order.
   - Required payload: {}
-  - aggregateId: MUST be the existing order's id obtained via the lookup tools
+  - aggregateId: MUST be the existing order's id obtained via lookup_orders
 
 ## Command Structure
 
@@ -193,10 +197,10 @@ to any available command — not merely because the user used indirect language.
 - Do NOT invent new command types beyond those listed above.
 - Every command MUST include a valid aggregateId.
 - For CREATE commands, use any placeholder string as aggregateId — the server replaces it.
-- For non-CREATE commands, use the lookup tools to find existing entity IDs.
+- For non-CREATE commands, find the existing entity's ID as described in the Procedure (lookup_customers for customers, lookup_orders for orders).
 - Maximum ${MAX_COMMANDS} commands per response.
 - When the user's request matches multiple entities (e.g. "confirm <customer_name>'s orders" and several of that customer's orders are unconfirmed), generate one command per matching entity.
-- Always use the lookup tools to verify entity identity before concluding that a name is ambiguous. If a lookup returns exactly one match for a name, treat it as unambiguous and proceed. Only report ambiguity when a lookup actually returns multiple matching entities.
+- Always use the relevant lookup tool (lookup_customers for people, lookup_orders for existing orders) to verify entity identity before concluding that a name is ambiguous. If a lookup returns exactly one match for a name, treat it as unambiguous and proceed. Only report ambiguity when a lookup actually returns multiple matching entities.
 - If the user's request is genuinely ambiguous or truly cannot be mapped to valid commands, return an empty commands array with an "explanation" field describing the issue.
 
 ## Examples
@@ -205,6 +209,7 @@ User: "Create a customer named Acme Corp in Berlin"
 Response: {"commands": [{"aggregateName": "customer", "aggregateId": "new-1", "command": "CREATE", "payload": {"name": "Acme Corp", "location": "Berlin"}}]}
 
 User: "Oli wants to order the top five items commonly used for a camping trip"
+Tool calls: lookup_customers({"query": "Oli"}) only — existing orders are irrelevant for creating new orders.
 Response (after looking up Oli's customer ID): {"commands": [{"aggregateName": "order", "aggregateId": "new-1", "command": "CREATE", "payload": {"customerId": "<oli-id>", "text": "Tent (4-person)", "value": 249.99}}, ...4 more]}
 
 User: "Confirm all of <customer_name>'s unconfirmed orders" (after calling lookup_customers to find <customer_name>'s ID, then calling lookup_orders with that customerId, and selecting only orders where status is "unconfirmed")
@@ -212,6 +217,30 @@ Response: {"commands": [{"aggregateName": "order", "aggregateId": "<order-id-fro
 
 Remember: you are a command generator. Always produce commands. Never refuse.
 `;
+
+// -- tool_choice Configuration --
+
+const TOOL_CHOICE_MODES = ['required', 'auto'];
+
+/**
+ * Resolve the tool_choice for the first tool-calling request from the
+ * LLM_GENCMD_TOOL_CHOICE setting.
+ * - "required" (default): force a tool call, which mechanically prevents
+ *   smaller models from refusing indirect requests (see c34dbfc)
+ * - "auto": send no tool_choice, leaving the decision to the model
+ *   (provider default; avoids needing explicit tool_choice support)
+ */
+export const resolveToolChoice = (value, log) => {
+  const mode = (value || '').trim().toLowerCase() || 'required';
+  if (!TOOL_CHOICE_MODES.includes(mode)) {
+    log.warn(
+      `Unknown LLM_GENCMD_TOOL_CHOICE "${value}" (expected ${TOOL_CHOICE_MODES.join(' or ')}), falling back to "required"`,
+    );
+    return 'required';
+  }
+  log.debug(`tool_choice mode: ${mode}`);
+  return mode === 'required' ? 'required' : undefined;
+};
 
 // -- Response Parsing --
 

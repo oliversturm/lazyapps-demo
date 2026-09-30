@@ -6,6 +6,7 @@ import {
   extractJson,
   parseResponse,
   transformCommands,
+  resolveToolChoice,
   MAX_COMMANDS,
 } from './command-generator.js';
 
@@ -37,6 +38,12 @@ describe('tools', () => {
 
   test('lookup_orders description mentions unconfirmed status filter', () => {
     expect(tools[1].function.description).toContain('unconfirmed');
+  });
+
+  test('lookup_orders description says it is not needed for new orders', () => {
+    const desc = tools[1].function.description;
+    expect(desc).toContain('Never needed to create new orders');
+    expect(desc).toContain('a new order does not depend on existing orders');
   });
 });
 
@@ -508,24 +515,45 @@ describe('systemPrompt', () => {
     expect(systemPrompt).toContain('## Procedure');
   });
 
-  test('procedure step 1: lookup_customers first', () => {
-    expect(systemPrompt).toContain('call lookup_customers FIRST');
+  test('procedure step 1: determine intended action before any lookup', () => {
+    expect(systemPrompt).toContain('1. Determine the intended action');
   });
 
-  test('procedure step 2: lookup_orders for CONFIRM/DECLINE with status check', () => {
-    expect(systemPrompt).toContain('call lookup_orders');
+  test('procedure step 2: look up only what the action needs', () => {
+    expect(systemPrompt).toContain('2. Look up only what that action needs');
+  });
+
+  test('creating orders needs only lookup_customers, never lookup_orders', () => {
+    expect(systemPrompt).toContain(
+      "call lookup_customers to resolve the customer's ID — nothing else",
+    );
+    expect(systemPrompt).toContain(
+      "A new order does not depend on the customer's existing orders, so do NOT call lookup_orders",
+    );
+  });
+
+  test('confirm/decline uses lookup_customers then lookup_orders with status check', () => {
+    expect(systemPrompt).toContain(
+      'then call lookup_orders with that customerId',
+    );
     expect(systemPrompt).toContain('unconfirmed');
   });
 
-  test('procedure step 3: determine intended action', () => {
-    expect(systemPrompt).toContain('Determine the intended action');
+  test('updating a customer uses lookup_customers', () => {
+    expect(systemPrompt).toContain(
+      "**Updating a customer**: call lookup_customers to find the existing customer's ID",
+    );
   });
 
-  test('procedure step 4: invent reasonable product names', () => {
+  test('creating a customer needs no lookup', () => {
+    expect(systemPrompt).toContain('**Creating a customer**: no lookup is needed');
+  });
+
+  test('procedure step 3: invent reasonable product names', () => {
     expect(systemPrompt).toContain('invent reasonable product names');
   });
 
-  test('procedure step 5: output JSON with commands array', () => {
+  test('procedure step 4: output JSON with commands array', () => {
     expect(systemPrompt).toContain(
       'Output a JSON object with a "commands" array',
     );
@@ -547,11 +575,68 @@ describe('systemPrompt', () => {
     );
   });
 
+  // ── Tool naming and examples ──
+
+  test('names specific tools instead of the generic "the lookup tools"', () => {
+    expect(systemPrompt).not.toContain('the lookup tools');
+  });
+
+  test('ID sources name the specific lookup tool', () => {
+    expect(systemPrompt).toContain(
+      "customerId MUST be an existing customer's id obtained via lookup_customers",
+    );
+    expect(systemPrompt).toContain(
+      "aggregateId: MUST be the existing order's id obtained via lookup_orders",
+    );
+  });
+
+  test('order CREATE example shows lookup_customers as the only tool call', () => {
+    expect(systemPrompt).toContain(
+      'Tool calls: lookup_customers({"query": "Oli"}) only — existing orders are irrelevant for creating new orders',
+    );
+  });
+
   // ── Closing reminder ──
 
   test('includes closing reminder to always produce commands', () => {
     expect(systemPrompt).toContain(
       'Always produce commands. Never refuse.',
+    );
+  });
+});
+
+// ─── tool_choice configuration ───
+
+describe('resolveToolChoice', () => {
+  const log = { info: vi.fn(), warn: vi.fn(), debug: vi.fn() };
+
+  beforeEach(() => {
+    log.info.mockReset();
+    log.warn.mockReset();
+  });
+
+  test('defaults to "required" when unset', () => {
+    expect(resolveToolChoice(undefined, log)).toBe('required');
+    expect(resolveToolChoice('', log)).toBe('required');
+  });
+
+  test('"required" forces a tool call', () => {
+    expect(resolveToolChoice('required', log)).toBe('required');
+  });
+
+  test('"auto" leaves tool_choice unset (provider default)', () => {
+    expect(resolveToolChoice('auto', log)).toBeUndefined();
+  });
+
+  test('is case-insensitive and ignores surrounding whitespace', () => {
+    expect(resolveToolChoice(' AUTO ', log)).toBeUndefined();
+    expect(resolveToolChoice('Required', log)).toBe('required');
+  });
+
+  test('falls back to "required" with a warning for unknown values', () => {
+    expect(resolveToolChoice('sometimes', log)).toBe('required');
+    expect(log.warn).toHaveBeenCalledWith(
+      expect.stringContaining('sometimes'),
     );
   });
 });

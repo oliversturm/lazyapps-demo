@@ -161,7 +161,7 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
       .map((t) => t.function?.name || t.name)
       .join(', ');
     log.debug(
-      `Tool request: model=${modelOverride || defaultModel}, messages=${messages.length}, tools=[${toolNames}], maxIterations=${maxIterations}`,
+      `Tool request: model=${modelOverride || defaultModel}, messages=${messages.length}, tools=[${toolNames}], maxIterations=${maxIterations}, toolChoice=${toolChoice || 'auto (not sent)'}`,
     );
 
     const fullMessages = systemPrompt

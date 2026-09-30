@@ -8,6 +8,7 @@ import {
   systemPrompt,
   parseResponse,
   transformCommands,
+  resolveToolChoice,
 } from '$lib/server/command-generator.js';
 
 export const POST = async ({ request }) => {
@@ -34,6 +35,11 @@ export const POST = async ({ request }) => {
     `Conversation history: ${(conversationHistory || []).length} messages`,
   );
 
+  const toolChoice = resolveToolChoice(process.env.LLM_GENCMD_TOOL_CHOICE, log);
+  log.info(
+    `tool_choice: ${toolChoice ? 'required (tool call forced on first request)' : 'auto (model decides)'} [LLM_GENCMD_TOOL_CHOICE=${process.env.LLM_GENCMD_TOOL_CHOICE || '<unset>'}]`,
+  );
+
   try {
     const result = await llmClient.toolCompletion(
       messages,
@@ -43,7 +49,7 @@ export const POST = async ({ request }) => {
       {
         systemPrompt,
         maxIterations: 5,
-        toolChoice: 'required',
+        toolChoice,
         correlationId,
       },
     );
@@ -73,6 +79,7 @@ export const POST = async ({ request }) => {
       commands,
       explanation: content.explanation || null,
       toolCalls: result.toolCalls,
+      toolChoice: toolChoice || 'auto',
       usage: result.usage,
       duration: result.duration,
     });

@@ -166,6 +166,7 @@ services:
       LLM_BASE_URL: '${LLM_BASE_URL:-}'
       LLM_MODEL: '${LLM_MODEL:-gpt-4o}'
       LLM_MOCK: '${LLM_MOCK:-true}'
+      LLM_GENCMD_TOOL_CHOICE: '${LLM_GENCMD_TOOL_CHOICE:-required}'
       RM_CUSTOMERS_URL: 'http://readmodel-customers'
       RM_ORDERS_URL: 'http://readmodel-orders'
       RM_EVENTS_URL: 'http://readmodel-events'
