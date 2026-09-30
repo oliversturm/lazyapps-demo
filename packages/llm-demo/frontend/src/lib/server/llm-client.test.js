@@ -283,6 +283,117 @@ describe('toolCompletion', () => {
   });
 });
 
+// ─── toolCompletion: transcript of the call (for multi-turn history) ───
+
+describe('toolCompletion transcript', () => {
+  const tools = [
+    {
+      type: 'function',
+      function: {
+        name: 'test_tool',
+        parameters: { type: 'object', properties: {} },
+      },
+    },
+  ];
+
+  beforeEach(() => {
+    mockCreate.mockReset();
+  });
+
+  test('returns tool calls, tool results and final answer as messages', () => {
+    mockCreate
+      .mockResolvedValueOnce(
+        makeToolCallResponse([{ name: 'test_tool', args: { q: 'x' } }]),
+      )
+      .mockResolvedValueOnce(makeTextResponse('The answer'));
+
+    const client = createLlmClient({ apiKey: 'test-key', model: 'm' });
+    return client
+      .toolCompletion(
+        [{ role: 'user', content: 'question' }],
+        tools,
+        () => ({ id: 'customer-03' }),
+        { systemPrompt: 'You are a bot.' },
+      )
+      .then((result) => {
+        expect(result.messages).toEqual([
+          {
+            role: 'assistant',
+            tool_calls: [
+              {
+                id: 'call_0',
+                type: 'function',
+                function: { name: 'test_tool', arguments: '{"q":"x"}' },
+              },
+            ],
+          },
+          {
+            role: 'tool',
+            tool_call_id: 'call_0',
+            content: '{"id":"customer-03"}',
+          },
+          { role: 'assistant', content: 'The answer' },
+        ]);
+      });
+  });
+
+  test('excludes system prompt and input messages from the transcript', () => {
+    mockCreate.mockResolvedValueOnce(makeTextResponse('Hi'));
+
+    const client = createLlmClient({ apiKey: 'test-key', model: 'm' });
+    return client
+      .toolCompletion(
+        [
+          { role: 'user', content: 'earlier' },
+          { role: 'assistant', content: 'earlier answer' },
+          { role: 'user', content: 'hello' },
+        ],
+        tools,
+        () => ({}),
+        { systemPrompt: 'You are a bot.' },
+      )
+      .then((result) => {
+        expect(result.messages).toEqual([
+          { role: 'assistant', content: 'Hi' },
+        ]);
+      });
+  });
+
+  test('ends with the sentinel assistant message when max iterations reached', () => {
+    mockCreate.mockResolvedValue(
+      makeToolCallResponse([{ name: 'test_tool', args: {} }]),
+    );
+
+    const client = createLlmClient({ apiKey: 'test-key', model: 'm' });
+    return client
+      .toolCompletion(
+        [{ role: 'user', content: 'loop' }],
+        tools,
+        () => ({}),
+        { maxIterations: 2 },
+      )
+      .then((result) => {
+        // 2 × (assistant tool_calls + tool result) + final sentinel
+        expect(result.messages).toHaveLength(5);
+        expect(result.messages[4]).toEqual({
+          role: 'assistant',
+          content: 'Max tool iterations reached',
+        });
+      });
+  });
+
+  test('stores empty string when final answer content is null', () => {
+    mockCreate.mockResolvedValueOnce(makeTextResponse(null));
+
+    const client = createLlmClient({ apiKey: 'test-key', model: 'm' });
+    return client
+      .toolCompletion([{ role: 'user', content: 'q' }], tools, () => ({}))
+      .then((result) => {
+        expect(result.messages).toEqual([{ role: 'assistant', content: '' }]);
+      });
+  });
+});
+
 // ─── Integration: generate-commands pipeline wiring ───
 
 describe('generate-commands pipeline wiring', () => {

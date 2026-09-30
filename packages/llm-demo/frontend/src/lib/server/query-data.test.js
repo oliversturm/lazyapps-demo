@@ -27,6 +27,18 @@ describe('tools', () => {
     expect(params.required).toEqual([]);
   });
 
+  test('query_orders customerId does not suggest an ID format like UUID', () => {
+    const desc = tools[1].function.parameters.properties.customerId.description;
+    expect(desc).not.toMatch(/uuid|guid/i);
+  });
+
+  test('query_orders customerId must be copied from tool results, never constructed', () => {
+    const desc = tools[1].function.parameters.properties.customerId.description;
+    expect(desc).toContain('copied exactly');
+    expect(desc).toContain('query_customers');
+    expect(desc).toContain('never construct, guess or reformat');
+  });
+
   test('query_orders description mentions item description and value', () => {
     const desc = tools[1].function.description;
     expect(desc).toContain('item description');
@@ -44,6 +56,12 @@ describe('tools', () => {
     expect(desc).toContain('total count');
     expect(desc).toContain('average');
     expect(desc).toContain('status');
+  });
+
+  test('query_order_stats description mentions top customers with customerId', () => {
+    const desc = tools[2].function.description;
+    expect(desc).toContain('top customers');
+    expect(desc).toContain('customerId');
   });
 });
 
@@ -112,14 +130,36 @@ describe('executeTool', () => {
       });
     });
 
+    // Routes mocked fetch calls by URL, so customer lookups and order
+    // queries can return different data within the same tool call.
+    const mockReadModels = ({ customers = [], orders = [] }) =>
+      mockFetch.mockImplementation((url) =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve(
+              url.includes('llm_lookup')
+                ? customers
+                : url.includes('overview')
+                  ? orders
+                  : [],
+            ),
+        }),
+      );
+
+    const customers = [
+      { id: 'c1', name: 'Alice', location: 'Berlin' },
+      { id: 'c2', name: 'Bob', location: 'London' },
+      { id: 'c3', name: 'Carol', location: 'Paris' },
+    ];
+
     test('filters by customerId when provided', () => {
-      const allOrders = [
-        { id: 'o1', customerId: 'c1', text: 'Widget', value: 100, status: 'confirmed' },
-        { id: 'o2', customerId: 'c2', text: 'Gadget', value: 200, status: 'new' },
-        { id: 'o3', customerId: 'c1', text: 'Gizmo', value: 50, status: 'confirmed' },
-      ];
-      mockFetch.mockResolvedValue({
-        json: () => Promise.resolve(allOrders),
+      mockReadModels({
+        customers,
+        orders: [
+          { id: 'o1', customerId: 'c1', text: 'Widget', value: 100, status: 'confirmed' },
+          { id: 'o2', customerId: 'c2', text: 'Gadget', value: 200, status: 'new' },
+          { id: 'o3', customerId: 'c1', text: 'Gizmo', value: 50, status: 'confirmed' },
+        ],
       });
       return executeTool('query_orders', { customerId: 'c1' }).then(
         (result) => {
@@ -129,13 +169,36 @@ describe('executeTool', () => {
       );
     });
 
-    test('returns empty for non-existent customerId', () => {
-      mockFetch.mockResolvedValue({
-        json: () => Promise.resolve([]),
+    test('returns empty array for a known customer without orders', () => {
+      mockReadModels({
+        customers,
+        orders: [
+          { id: 'o1', customerId: 'c1', text: 'Widget', value: 100, status: 'confirmed' },
+        ],
       });
-      return executeTool('query_orders', { customerId: 'nonexistent' }).then(
+      return executeTool('query_orders', { customerId: 'c3' }).then(
         (result) => {
           expect(result).toEqual([]);
+        },
+      );
+    });
+
+    test('returns an error (not an empty list) for an unknown customerId', () => {
+      // Regression: the model invented a UUID-shaped ID, got [] back and
+      // told the user the customer had no orders.
+      const madeUpId = '3f2b8c1e-9a4d-4e6f-8b2a-1c5d7e9f0a3b';
+      mockReadModels({
+        customers,
+        orders: [
+          { id: 'o1', customerId: 'c1', text: 'Widget', value: 100, status: 'confirmed' },
+        ],
+      });
+      return executeTool('query_orders', { customerId: madeUpId }).then(
+        (result) => {
+          expect(Array.isArray(result)).toBe(false);
+          expect(result.error).toContain(madeUpId);
+          expect(result.error).toContain('Unknown customerId');
+          expect(result.error).toContain('query_customers');
         },
       );
     });
@@ -156,6 +219,22 @@ describe('executeTool', () => {
         expect(result).toHaveProperty('averageValue', 150);
         expect(result).toHaveProperty('byStatus');
         expect(result).toHaveProperty('topCustomers');
+      });
+    });
+
+    test('topCustomers include the customerId', () => {
+      const orders = [
+        { value: 8500, status: 'confirmed', customerId: 'customer-03', customerName: 'Global Logistics AG' },
+        { value: 450, status: 'confirmed', customerId: 'customer-01', customerName: 'Alice' },
+      ];
+      mockFetch.mockResolvedValue({
+        json: () => Promise.resolve(orders),
+      });
+      return executeTool('query_order_stats', {}).then((result) => {
+        expect(result.topCustomers[0]).toMatchObject({
+          customerId: 'customer-03',
+          name: 'Global Logistics AG',
+        });
       });
     });
   });
@@ -235,5 +314,23 @@ describe('systemPrompt', () => {
 
   test('includes instruction for bullet points or tables', () => {
     expect(systemPrompt).toContain('bullet points or tables');
+  });
+
+  test('forbids constructing or guessing IDs', () => {
+    expect(systemPrompt).toContain('Never construct, guess or reformat an ID');
+  });
+
+  test('instructs to look up the ID again when only the name is known', () => {
+    expect(systemPrompt).toContain(
+      'call query_customers to look up their ID first',
+    );
+  });
+
+  test('does not mention UUIDs', () => {
+    expect(systemPrompt).not.toMatch(/uuid|guid/i);
+  });
+
+  test('points the most valuable customers example at topCustomers with IDs', () => {
+    expect(systemPrompt).toContain('topCustomers');
   });
 });

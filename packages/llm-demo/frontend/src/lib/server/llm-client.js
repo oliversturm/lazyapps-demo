@@ -171,6 +171,9 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
     let totalTokens = 0;
     const startTime = Date.now();
     const toolCalls = []; // track for transparency
+    // Messages produced by this call (tool calls, tool results, final
+    // answer) — returned so callers can keep them in conversation history
+    const transcript = [];
 
     for (let i = 0; i < maxIterations; i++) {
       log.debug(`Tool iteration ${i + 1}/${maxIterations}`);
@@ -197,12 +200,15 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
 
       if (finish_reason !== 'tool_calls' || !message.tool_calls) {
         const duration = Date.now() - startTime;
+        transcript.push({ role: 'assistant', content: message.content || '' });
         log.info(
           `Tool completion: ${i + 1} iterations, ${toolCalls.length} tool calls, ${totalTokens} tokens, ${duration}ms`,
         );
+        log.debug(`Tool completion transcript: ${transcript.length} messages`);
         return {
           content: message.content,
           toolCalls,
+          messages: transcript,
           usage: { total_tokens: totalTokens },
           duration,
         };
@@ -223,6 +229,7 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
       };
       if (message.content) assistantMessage.content = message.content;
       fullMessages.push(assistantMessage);
+      transcript.push(assistantMessage);
 
       log.info(
         `Tool calls: ${message.tool_calls.map((tc) => tc.function.name).join(', ')}`,
@@ -238,11 +245,13 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
           `Tool ${toolCall.function.name} result: ${JSON.stringify(result).substring(0, 200)}`,
         );
         toolCalls.push({ name: toolCall.function.name, args, result });
-        fullMessages.push({
+        const toolMessage = {
           role: 'tool',
           tool_call_id: toolCall.id,
           content: JSON.stringify(result),
-        });
+        };
+        fullMessages.push(toolMessage);
+        transcript.push(toolMessage);
       }
     }
 
@@ -251,9 +260,14 @@ export const createLlmClient = ({ apiKey, baseURL, model }) => {
       `Tool completion: max iterations (${maxIterations}) reached, ${toolCalls.length} tool calls, ${totalTokens} tokens, ${duration}ms`,
     );
 
+    const sentinel = 'Max tool iterations reached';
+    transcript.push({ role: 'assistant', content: sentinel });
+    log.debug(`Tool completion transcript: ${transcript.length} messages`);
+
     return {
-      content: 'Max tool iterations reached',
+      content: sentinel,
       toolCalls,
+      messages: transcript,
       usage: { total_tokens: totalTokens },
       duration,
     };

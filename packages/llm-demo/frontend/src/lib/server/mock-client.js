@@ -290,11 +290,35 @@ export const createMockClient = () => {
       )
       .join('; ');
 
+    const content = `[Mock] Based on the data (${summary}), here is a summary of the results.`;
+
+    // Same transcript shape as the real client, so multi-turn history
+    // behaves identically in mock mode
+    const toolCallIds = toolCalls.map((_, i) => `mock_call_${i}`);
+    const transcript = [
+      {
+        role: 'assistant',
+        tool_calls: toolCalls.map((tc, i) => ({
+          id: toolCallIds[i],
+          type: 'function',
+          function: { name: tc.name, arguments: JSON.stringify(tc.args) },
+        })),
+      },
+      ...toolCalls.map((tc, i) => ({
+        role: 'tool',
+        tool_call_id: toolCallIds[i],
+        content: JSON.stringify(tc.result),
+      })),
+      { role: 'assistant', content },
+    ];
+    log.debug(
+      `Mock tool: ${toolCalls.length} tool calls, transcript ${transcript.length} messages`,
+    );
+
     return {
-      ...mockResponse(
-        `[Mock] Based on the data (${summary}), here is a summary of the results.`,
-      ),
+      ...mockResponse(content),
       toolCalls,
+      messages: transcript,
     };
   };
 

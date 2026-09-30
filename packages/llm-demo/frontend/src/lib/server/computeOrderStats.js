@@ -10,16 +10,22 @@ const computeOrderStats = (orders) => {
       acc[o.status] = (acc[o.status] || 0) + 1;
       return acc;
     }, {}),
-    topCustomers: Object.entries(
+    // Grouped by customerId (not name) so each entry carries the ID the
+    // LLM needs for follow-up queries like query_orders({ customerId })
+    topCustomers: Object.values(
       orders.reduce((acc, o) => {
-        if (!acc[o.customerName])
-          acc[o.customerName] = { count: 0, value: 0 };
-        acc[o.customerName].count++;
-        acc[o.customerName].value += o.value;
+        if (!acc[o.customerId])
+          acc[o.customerId] = {
+            customerId: o.customerId,
+            name: o.customerName,
+            count: 0,
+            value: 0,
+          };
+        acc[o.customerId].count++;
+        acc[o.customerId].value += o.value;
         return acc;
       }, {}),
     )
-      .map(([name, stats]) => ({ name, ...stats }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5),
   };

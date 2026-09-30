@@ -58,8 +58,10 @@
 				];
 			}
 
-			// Update conversation history for multi-turn (R-7.5.3)
-			conversationHistory = [
+			// Update conversation history for multi-turn (R-7.5.3). The server
+			// returns the full history including tool calls and results, so IDs
+			// from earlier answers stay available for follow-up questions.
+			conversationHistory = data.conversationHistory ?? [
 				...conversationHistory,
 				{ role: 'user', content: text },
 				{ role: 'assistant', content: data.content || data.error }

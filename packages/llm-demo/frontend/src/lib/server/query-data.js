@@ -37,7 +37,11 @@ export const tools = [
           customerId: {
             type: 'string',
             description:
-              'Optional customer ID (UUID) to filter orders. ' +
+              'Optional customer ID to filter orders. Must be copied exactly ' +
+              'from the "id" field of a query_customers result (or the ' +
+              '"customerId" field of an order or topCustomers entry). IDs are ' +
+              'opaque strings — never construct, guess or reformat one. If you ' +
+              "only know the customer's name, call query_customers first. " +
               'If omitted, returns all orders.',
           },
         },
@@ -51,8 +55,10 @@ export const tools = [
       name: 'query_order_stats',
       description:
         'Get aggregated order statistics: total count, total value, ' +
-        'average value, and counts by status. Use this for summary ' +
-        'questions about order volume, revenue, or status distribution.',
+        'average value, counts by status, and the top customers by total ' +
+        'order value (each with customerId, name, order count and value). ' +
+        'Use this for summary questions about order volume, revenue, ' +
+        'status distribution, or best customers.',
       parameters: {
         type: 'object',
         properties: {},
@@ -93,15 +99,36 @@ export const executeTool = async (name, args, { correlationId } = {}) => {
         `Fetching ${RM_ORDERS_URL}/query/overview/all${args.customerId ? ' (filtering by ' + args.customerId + ')' : ''}`,
       );
       if (args.customerId) {
-        const allOrders = await fetchJson(
-          `${RM_ORDERS_URL}/query/overview/all`,
-          {},
-          correlationId,
+        // Validate the ID against the customer list: an unknown ID must not
+        // look like "customer has no orders" to the model
+        log.debug(
+          `Validating customerId ${args.customerId} against ${RM_CUSTOMERS_URL}/query/llm_lookup/all`,
         );
+        const [customers, allOrders] = await Promise.all([
+          fetchJson(
+            `${RM_CUSTOMERS_URL}/query/llm_lookup/all`,
+            {},
+            correlationId,
+          ),
+          fetchJson(`${RM_ORDERS_URL}/query/overview/all`, {}, correlationId),
+        ]);
+        if (!customers.some((c) => c.id === args.customerId)) {
+          log.warn(
+            `query_orders: unknown customerId "${args.customerId}" (${customers.length} customers known) — returning error to model`,
+          );
+          return {
+            error:
+              `Unknown customerId "${args.customerId}". No customer with this ID exists. ` +
+              'IDs must be copied exactly from tool results — never constructed or guessed. ' +
+              "Call query_customers to look up the customer's ID by name, then retry.",
+          };
+        }
         const filtered = allOrders.filter(
           (o) => o.customerId === args.customerId,
         );
-        log.debug(`query_orders: ${filtered.length} orders`);
+        log.debug(
+          `query_orders: ${filtered.length} orders for known customer ${args.customerId}`,
+        );
         return filtered;
       }
       return fetchJson(
@@ -141,11 +168,12 @@ You handle both direct data queries AND analytical/advisory questions.
 
 IMPORTANT RULES:
 - Always use the tools to retrieve real data before answering. Do NOT guess or make up data.
+- IDs (customer IDs, order IDs) are opaque values. Only use an ID that appears verbatim in a tool result in this conversation. Never construct, guess or reformat an ID. If you only know a customer's name (for example from an earlier answer), call query_customers to look up their ID first.
 - Only say you cannot answer if the tools return no relevant data at all. If you have ANY data that relates to the question, analyze it and provide your best answer.
 - You are authorized to ANALYZE data and provide business insights. When asked about trends, recommendations, or patterns, retrieve the relevant data and reason about it. Your analysis of real data IS a valid answer.
 - Use query_customers for customer information (returns id, name, and location).
-- Use query_orders for order details (filter by customerId optional). Each order has: customerName, text (product description), value (price), status.
-- Use query_order_stats for summary statistics about orders.
+- Use query_orders for order details (filter by customerId optional). Each order has: customerId, customerName, text (product description), value (price), status.
+- Use query_order_stats for summary statistics about orders, including topCustomers (customerId, name, order count, total value).
 - Call multiple tools if needed to answer a complex question.
 - Format your answers clearly. Use bullet points or tables where helpful.
 - When referring to monetary values, format them as currency (e.g., $1,234.56).
@@ -153,5 +181,5 @@ IMPORTANT RULES:
 
 EXAMPLES OF ANALYTICAL REASONING:
 - "What products should we sell?" → Call query_orders, analyze product descriptions in the text field, identify popular categories and price ranges, suggest complementary items based on patterns.
-- "Who are our most valuable customers?" → Call query_order_stats or query_orders, analyze spending patterns, rank customers by total order value.
+- "Who are our most valuable customers?" → Call query_order_stats and use topCustomers (which includes each customer's ID), or call query_orders and rank customers by total order value.
 - "What trends do you see?" → Call query_orders and query_order_stats, look for patterns in product types, order values, statuses, and customer activity.`;

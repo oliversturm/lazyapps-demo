@@ -135,22 +135,48 @@ describe('computeOrderStats', () => {
   describe('topCustomers', () => {
     test('aggregates count and value per customer', () => {
       const orders = [
-        { value: 100, status: 'new', customerName: 'Alice' },
-        { value: 200, status: 'new', customerName: 'Alice' },
-        { value: 50, status: 'new', customerName: 'Bob' },
+        { value: 100, status: 'new', customerId: 'id-Alice', customerName: 'Alice' },
+        { value: 200, status: 'new', customerId: 'id-Alice', customerName: 'Alice' },
+        { value: 50, status: 'new', customerId: 'id-Bob', customerName: 'Bob' },
       ];
       const stats = computeOrderStats(orders);
       expect(stats.topCustomers).toEqual([
-        { name: 'Alice', count: 2, value: 300 },
-        { name: 'Bob', count: 1, value: 50 },
+        { customerId: 'id-Alice', name: 'Alice', count: 2, value: 300 },
+        { customerId: 'id-Bob', name: 'Bob', count: 1, value: 50 },
+      ]);
+    });
+
+    test('includes the customerId of each customer', () => {
+      const orders = [
+        { value: 8500, status: 'confirmed', customerId: 'customer-03', customerName: 'Global Logistics AG' },
+        { value: 3200, status: 'confirmed', customerId: 'customer-03', customerName: 'Global Logistics AG' },
+      ];
+      const stats = computeOrderStats(orders);
+      expect(stats.topCustomers[0]).toEqual({
+        customerId: 'customer-03',
+        name: 'Global Logistics AG',
+        count: 2,
+        value: 11700,
+      });
+    });
+
+    test('groups by customerId, not by name', () => {
+      const orders = [
+        { value: 100, status: 'new', customerId: 'c1', customerName: 'Same Name' },
+        { value: 50, status: 'new', customerId: 'c2', customerName: 'Same Name' },
+      ];
+      const stats = computeOrderStats(orders);
+      expect(stats.topCustomers).toEqual([
+        { customerId: 'c1', name: 'Same Name', count: 1, value: 100 },
+        { customerId: 'c2', name: 'Same Name', count: 1, value: 50 },
       ]);
     });
 
     test('sorts customers by value descending', () => {
       const orders = [
-        { value: 10, status: 'new', customerName: 'LowSpender' },
-        { value: 500, status: 'new', customerName: 'HighSpender' },
-        { value: 200, status: 'new', customerName: 'MidSpender' },
+        { value: 10, status: 'new', customerId: 'id-LowSpender', customerName: 'LowSpender' },
+        { value: 500, status: 'new', customerId: 'id-HighSpender', customerName: 'HighSpender' },
+        { value: 200, status: 'new', customerId: 'id-MidSpender', customerName: 'MidSpender' },
       ];
       const stats = computeOrderStats(orders);
       expect(stats.topCustomers[0].name).toBe('HighSpender');
@@ -160,13 +186,13 @@ describe('computeOrderStats', () => {
 
     test('limits to top 5 customers', () => {
       const orders = [
-        { value: 100, status: 'new', customerName: 'A' },
-        { value: 90, status: 'new', customerName: 'B' },
-        { value: 80, status: 'new', customerName: 'C' },
-        { value: 70, status: 'new', customerName: 'D' },
-        { value: 60, status: 'new', customerName: 'E' },
-        { value: 50, status: 'new', customerName: 'F' },
-        { value: 40, status: 'new', customerName: 'G' },
+        { value: 100, status: 'new', customerId: 'id-A', customerName: 'A' },
+        { value: 90, status: 'new', customerId: 'id-B', customerName: 'B' },
+        { value: 80, status: 'new', customerId: 'id-C', customerName: 'C' },
+        { value: 70, status: 'new', customerId: 'id-D', customerName: 'D' },
+        { value: 60, status: 'new', customerId: 'id-E', customerName: 'E' },
+        { value: 50, status: 'new', customerId: 'id-F', customerName: 'F' },
+        { value: 40, status: 'new', customerId: 'id-G', customerName: 'G' },
       ];
       const stats = computeOrderStats(orders);
       expect(stats.topCustomers).toHaveLength(5);
@@ -176,8 +202,8 @@ describe('computeOrderStats', () => {
 
     test('sums decimal values per customer correctly', () => {
       const orders = [
-        { value: 13.99, status: 'new', customerName: 'Alice' },
-        { value: 3.99, status: 'new', customerName: 'Alice' },
+        { value: 13.99, status: 'new', customerId: 'id-Alice', customerName: 'Alice' },
+        { value: 3.99, status: 'new', customerId: 'id-Alice', customerName: 'Alice' },
       ];
       const stats = computeOrderStats(orders);
       expect(stats.topCustomers[0].value).toBeCloseTo(17.98);
